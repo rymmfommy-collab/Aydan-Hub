@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Aydan Hub | Central Command</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <style>
+        :root { --bg: #000; --panel: #050505; --neon: #00f3ff; --pink: #ff00ff; --red: #ff3e3e; }
+        body { margin: 0; background: var(--bg); color: #fff; font-family: 'Segoe UI', sans-serif; display: flex; }
+
+        /* Sidebar */
+        aside {
+            width: 80px; height: 100vh; background: var(--panel); border-right: 1px solid var(--neon);
+            display: flex; flex-direction: column; align-items: center; padding-top: 20px; position: sticky; top: 0;
+        }
+        .side-logo { width: 45px; height: 45px; border-radius: 50%; border: 2px solid var(--neon); background: url('profile.jpg') center/cover; margin-bottom: 40px; }
+
+        /* Main Panel */
+        main { flex: 1; padding: 40px; display: grid; grid-template-columns: 1fr 1fr; gap: 40px; max-width: 1200px; }
+        .card { background: var(--panel); border: 1px solid #1a1a1a; padding: 25px; border-radius: 8px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
+        h2 { font-size: 1rem; color: var(--neon); text-transform: uppercase; margin-top: 0; border-bottom: 1px solid #111; padding-bottom: 15px; }
+
+        /* Inputs & Buttons */
+        input, textarea, select { width: 100%; padding: 12px; margin: 10px 0; background: #000; border: 1px solid #333; color: #fff; border-radius: 4px; box-sizing: border-box; }
+        .btn { width: 100%; padding: 12px; border: none; border-radius: 4px; font-weight: bold; cursor: pointer; transition: 0.3s; margin-top: 10px; }
+        .btn-up { background: var(--neon); color: #000; }
+        .btn-up:hover { box-shadow: 0 0 15px var(--neon); }
+
+        /* File List Management */
+        .list-container { max-height: 400px; overflow-y: auto; margin-top: 10px; }
+        .item { display: flex; justify-content: space-between; align-items: center; padding: 12px; border-bottom: 1px solid #111; font-size: 0.85rem; }
+        .item:hover { background: #080808; }
+        .del-btn { background: none; border: 1px solid var(--red); color: var(--red); padding: 4px 8px; border-radius: 3px; cursor: pointer; font-size: 0.7rem; }
+        .del-btn:hover { background: var(--red); color: #fff; }
+
+        /* Login Overlay */
+        #auth { position: fixed; inset: 0; background: #000; z-index: 9999; display: flex; justify-content: center; align-items: center; }
+        .type-toggle { display: flex; gap: 10px; margin-bottom: 15px; }
+        .t-btn { flex: 1; background: #111; color: #555; border: 1px solid #222; padding: 8px; cursor: pointer; font-size: 0.7rem; }
+        .t-btn.active { color: var(--pink); border-color: var(--pink); }
+    </style>
+</head>
+<body>
+
+    <div id="auth">
+        <div class="card" style="width: 300px; text-align: center;">
+            <h2 style="color: var(--pink); border: none;">SECURITY CHECK</h2>
+            <input type="password" id="pass" placeholder="Enter Access Key">
+            <button class="btn btn-up" onclick="login()">AUTHORIZE</button>
+        </div>
+    </div>
+
+    <aside>
+        <div class="side-logo" onclick="location.href='index.html'" title="Back to Home"></div>
+        <div style="color: #222; font-size: 0.6rem;">ADM v2</div>
+    </aside>
+
+    <main>
+        <section class="card">
+            <h2>Add New Record</h2>
+            <div class="type-toggle">
+                <button id="mode-f" class="t-btn active" onclick="setMode('file')">FILE / APP</button>
+                <button id="mode-l" class="t-btn" onclick="setMode('link')">LINK / TEXT</button>
+            </div>
+            
+            <input type="text" id="title" placeholder="Display Title">
+            
+            <div id="f-area">
+                <input type="file" id="file-picker">
+            </div>
+            <div id="l-area" style="display:none;">
+                <textarea id="url-input" rows="4" placeholder="Paste URL or text content..."></textarea>
+            </div>
+
+            <button class="btn btn-up" id="up-btn" onclick="upload()">SYNC TO REPOSITORY</button>
+            <p id="msg" style="text-align: center; font-size: 0.8rem; color: var(--pink);"></p>
+        </section>
+
+        <section class="card">
+            <h2 style="color: var(--pink);">Live Repository Management</h2>
+            <div class="list-container" id="file-list">
+                <p style="text-align:center; color:#333;">Fetching records...</p>
+            </div>
+        </section>
+    </main>
+
+    <script>
+        const SUPABASE_URL = 'https://tvasdkfdizdwkroatgno.supabase.co';
+        const SUPABASE_KEY = 'sb_publishable_UQ0g7DJ4_Um1nrAEd6z4nA_LnMUIcSA';
+        const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+        let currentMode = 'file';
+
+        function login() {
+            if (document.getElementById('pass').value === 'Aydan@2077') {
+                document.getElementById('auth').style.display = 'none';
+                refreshList();
+            } else { alert("INVALID KEY"); }
+        }
+
+        function setMode(m) {
+            currentMode = m;
+            document.getElementById('mode-f').classList.toggle('active', m === 'file');
+            document.getElementById('mode-l').classList.toggle('active', m === 'link');
+            document.getElementById('f-area').style.display = m === 'file' ? 'block' : 'none';
+            document.getElementById('l-area').style.display = m === 'link' ? 'block' : 'none';
+        }
+
+        async function refreshList() {
+            const { data } = await supabaseClient.from('files').select('*').order('created_at', { ascending: false });
+            const list = document.getElementById('file-list');
+            if (data) {
+                list.innerHTML = data.map(i => `
+                    <div class="item">
+                        <span>${i.title} <small style="color:#444">(${i.category})</small></span>
+                        <button class="del-btn" onclick="removeRecord(${i.id})">DELETE</button>
+                    </div>
+                `).join('');
+            }
+        }
+
+        async function upload() {
+            const btn = document.getElementById('up-btn');
+            const status = document.getElementById('msg');
+            const title = document.getElementById('title').value;
+            if (!title) return alert("Title is required");
+
+            btn.disabled = true;
+            status.innerText = "Processing...";
+            let finalUrl = "";
+
+            if (currentMode === 'file') {
+                const file = document.getElementById('file-picker').files[0];
+                if (!file) return alert("Please select a file");
+                const path = `${Date.now()}_${file.name}`;
+                const { data, error } = await supabaseClient.storage.from('uploads').upload(path, file);
+                if (error) return alert(error.message);
+                const { data: { publicUrl } } = supabaseClient.storage.from('uploads').getPublicUrl(path);
+                finalUrl = publicUrl;
+            } else {
+                finalUrl = document.getElementById('url-input').value;
+            }
+
+            const { error: dbErr } = await supabaseClient.from('files').insert([{ title, url: finalUrl, category: currentMode.toUpperCase() }]);
+            
+            if (dbErr) alert(dbErr.message);
+            else {
+                status.innerText = "SUCCESSFULLY DEPLOYED";
+                document.getElementById('title').value = "";
+                refreshList();
+            }
+            btn.disabled = false;
+        }
+
+        async function removeRecord(id) {
+            if (confirm("Delete this entry permanently?")) {
+                const { error } = await supabaseClient.from('files').delete().eq('id', id);
+                if (error) alert(error.message);
+                else refreshList();
+            }
+        }
+    </script>
+</body>
+</html>
