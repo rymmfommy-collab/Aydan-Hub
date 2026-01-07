@@ -2,56 +2,39 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Aydan Admin | Control Panel</title>
+    <title>Aydan Admin | Neon Control</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap" rel="stylesheet">
     <style>
-        :root { --bg: #0f0a24; --accent: #7d5fff; --pink: #ff00de; --glass: rgba(255, 255, 255, 0.05); }
-        body { background: var(--bg); color: white; font-family: 'Inter', sans-serif; margin: 0; padding: 40px 20px; }
-        
+        body { background: #070512; color: white; font-family: 'Inter', sans-serif; padding: 40px 20px; }
         .container { max-width: 500px; margin: auto; }
-        .card { background: var(--glass); padding: 30px; border-radius: 20px; border: 1px solid rgba(255,255,255,0.1); margin-bottom: 30px; }
-        
-        h2 { text-align: center; letter-spacing: 2px; font-weight: 900; margin-top: 0; }
-        input, select, button { width: 100%; padding: 15px; margin: 10px 0; border-radius: 10px; border: none; box-sizing: border-box; font-size: 1rem; font-family: 'Inter'; }
-        input, select { background: rgba(0,0,0,0.3); color: white; border: 1px solid rgba(255,255,255,0.1); }
-        
-        .btn-upload { background: linear-gradient(45deg, #7d5fff, #ff00de); color: white; font-weight: 900; cursor: pointer; text-transform: uppercase; }
-        
-        /* Delete List Styling */
-        .manage-list { background: var(--glass); border-radius: 20px; border: 1px solid rgba(255,255,255,0.1); padding: 20px; }
-        .item-row { display: flex; justify-content: space-between; align-items: center; padding: 12px; border-bottom: 1px solid rgba(255,255,255,0.05); }
-        .item-row:last-child { border-bottom: none; }
-        .item-info { display: flex; flex-direction: column; }
-        .item-title { font-weight: 700; font-size: 0.9rem; }
-        .item-cat { font-size: 0.7rem; color: #00d2ff; font-weight: 900; }
-        
-        .btn-delete { width: auto; padding: 8px 15px; margin: 0; background: rgba(255, 50, 50, 0.2); color: #ff5252; border: 1px solid #ff5252; font-size: 0.7rem; cursor: pointer; }
-        .btn-delete:hover { background: #ff5252; color: white; }
+        .card { background: rgba(255,255,255,0.03); padding: 35px; border-radius: 28px; border: 1px solid rgba(255,255,255,0.1); backdrop-filter: blur(20px); }
+        h2 { font-weight: 900; letter-spacing: 2px; text-align: center; margin-bottom: 30px; }
+        input, select, button { width: 100%; padding: 16px; margin: 10px 0; border-radius: 12px; border: 1px solid rgba(255,255,255,0.1); background: rgba(0,0,0,0.4); color: white; box-sizing: border-box; font-family: 'Inter'; }
+        button { background: linear-gradient(45deg, #7d5fff, #ff00de); border: none; font-weight: 900; cursor: pointer; text-transform: uppercase; box-shadow: 0 10px 20px rgba(255,0,222,0.3); }
+        .item-row { display: flex; justify-content: space-between; align-items: center; padding: 15px; border-bottom: 1px solid rgba(255,255,255,0.05); }
+        .btn-delete { width: auto; background: none; color: #ff4d4d; border: 1px solid #ff4d4d; font-size: 0.7rem; padding: 6px 12px; }
     </style>
 </head>
 <body>
-
     <div class="container">
         <div class="card">
             <h2>UPLOAD</h2>
-            <input type="text" id="title" placeholder="Title (e.g., Temple Run)">
+            <input type="text" id="title" placeholder="Title (e.g. GTA VI)">
+            <input type="text" id="image_url" placeholder="Image URL (Direct link)">
             <select id="category">
-                <option value="GAMES">GAMES SECTION</option>
-                <option value="APPS">APPS SECTION</option>
-                <option value="LINK">LINKS SECTION</option>
-                <option value="FILES">FILES SECTION</option>
-                <option value="HOME">HOME SECTION</option>
+                <option value="GAMES">GAMES</option>
+                <option value="APPS">APPS</option>
+                <option value="LINK">LINKS</option>
+                <option value="FILES">FILES</option>
+                <option value="HOME">HOME</option>
             </select>
             <input type="text" id="url" placeholder="Download Link">
-            <button class="btn-upload" onclick="save()">Add to Hub</button>
-            <p style="text-align:center;"><a href="index.html" style="color: grey; text-decoration:none; font-size: 0.8rem;">← Exit to Website</a></p>
+            <button onclick="save()">Push to Hub</button>
+            <p style="text-align:center;"><a href="index.html" style="color: grey; text-decoration:none; font-size: 0.8rem;">← Back to Site</a></p>
         </div>
 
-        <div class="manage-list">
-            <h3 style="margin-top:0; font-size: 0.8rem; opacity: 0.6; text-transform: uppercase;">Manage Items</h3>
-            <div id="list-container">Loading items...</div>
-        </div>
+        <div style="margin-top: 30px;" id="list"></div>
     </div>
 
     <script>
@@ -59,54 +42,32 @@
         const SUPABASE_KEY = 'sb_publishable_UQ0g7DJ4_Um1nrAEd6z4nA_LnMUIcSA';
         const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-        // Fetch items to display in the list
-        async function fetchItems() {
+        async function fetch() {
             const { data } = await supabaseClient.from('files').select('*').order('created_at', { ascending: false });
-            const container = document.getElementById('list-container');
-            
-            if (data && data.length > 0) {
-                container.innerHTML = data.map(item => `
-                    <div class="item-row">
-                        <div class="item-info">
-                            <span class="item-title">${item.title}</span>
-                            <span class="item-cat">${item.category}</span>
-                        </div>
-                        <button class="btn-delete" onclick="deleteItem(${item.id})">DELETE</button>
-                    </div>
-                `).join('');
-            } else {
-                container.innerHTML = `<p style="font-size:0.8rem; opacity:0.5;">No items found.</p>`;
-            }
+            document.getElementById('list').innerHTML = data.map(i => `
+                <div class="item-row">
+                    <span>${i.title} <small style="color: #7d5fff">(${i.category})</small></span>
+                    <button class="btn-delete" onclick="del(${i.id})">DELETE</button>
+                </div>
+            `).join('');
         }
 
-        // Upload new item
         async function save() {
             const title = document.getElementById('title').value;
+            const image_url = document.getElementById('image_url').value;
             const category = document.getElementById('category').value;
             const url = document.getElementById('url').value;
-
-            if(!title || !url) return alert("Fill all fields!");
-
-            const { error } = await supabaseClient.from('files').insert([{ title, category, url }]);
-            if(error) alert("Error: " + error.message);
-            else {
-                alert("Uploaded!");
-                document.getElementById('title').value = '';
-                document.getElementById('url').value = '';
-                fetchItems(); // Refresh list
-            }
+            await supabaseClient.from('files').insert([{ title, image_url, category, url }]);
+            location.reload();
         }
 
-        // Delete item
-        async function deleteItem(id) {
-            if(confirm("Are you sure you want to delete this?")) {
-                const { error } = await supabaseClient.from('files').delete().eq('id', id);
-                if(error) alert("Could not delete: " + error.message);
-                else fetchItems(); // Refresh list
+        async function del(id) {
+            if(confirm("Delete?")) {
+                await supabaseClient.from('files').delete().eq('id', id);
+                fetch();
             }
         }
-
-        fetchItems();
+        fetch();
     </script>
 </body>
 </html>

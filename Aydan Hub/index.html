@@ -3,58 +3,84 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Aydan Hub | Metaverse</title>
+    <title>Aydan Hub | Neon Metaverse</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap" rel="stylesheet">
     <style>
-        :root { --bg: #0f0a24; --accent: #7d5fff; --pink: #ff00de; --blue: #00d2ff; --glass: rgba(255, 255, 255, 0.05); }
-        body { margin: 0; background: var(--bg); color: #fff; font-family: 'Inter', sans-serif; overflow-x: hidden; scroll-behavior: smooth; }
+        :root { 
+            --bg-dark: #070512; 
+            --accent-purple: #7d5fff; 
+            --accent-pink: #ff00de;
+            --accent-blue: #00d2ff;
+            --glass: rgba(255, 255, 255, 0.03);
+            --glass-border: rgba(255, 255, 255, 0.1);
+        }
+        
+        body { margin: 0; background-color: var(--bg-dark); color: #fff; font-family: 'Inter', sans-serif; overflow-x: hidden; scroll-behavior: smooth; }
 
-        header { display: flex; justify-content: space-between; align-items: center; padding: 15px 8%; position: fixed; width: 100%; box-sizing: border-box; z-index: 1000; background: rgba(15, 10, 36, 0.8); backdrop-filter: blur(15px); border-bottom: 1px solid rgba(255,255,255,0.1); }
+        /* --- Animated Neon Background --- */
+        .bg-flow { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -1; overflow: hidden; background: #070512; }
+        .blob { position: absolute; border-radius: 50%; filter: blur(100px); opacity: 0.6; animation: move 20s infinite alternate; }
+        .blob-1 { width: 600px; height: 600px; background: var(--accent-purple); top: -10%; right: -5%; }
+        .blob-2 { width: 500px; height: 500px; background: var(--accent-pink); bottom: -10%; left: -5%; animation-duration: 15s; }
+        
+        @keyframes move { from { transform: translate(0,0) scale(1); } to { transform: translate(100px, 100px) scale(1.2); } }
+
+        header { display: flex; justify-content: space-between; align-items: center; padding: 20px 8%; position: fixed; width: 100%; box-sizing: border-box; z-index: 1000; background: rgba(7, 5, 18, 0.7); backdrop-filter: blur(20px); border-bottom: 1px solid var(--glass-border); }
         .logo-container { display: flex; align-items: center; gap: 15px; }
-        .wolf-circle { width: 45px; height: 45px; background: linear-gradient(135deg, var(--accent), var(--pink)); border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: 0.3s; }
+        .wolf-circle { width: 45px; height: 45px; background: linear-gradient(135deg, var(--accent-purple), var(--accent-pink)); border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; box-shadow: 0 0 20px rgba(125, 95, 255, 0.5); }
         .wolf-circle svg { width: 28px; fill: white; }
 
-        nav { display: flex; gap: 20px; }
-        .nav-link { color: rgba(255,255,255,0.6); text-decoration: none; text-transform: uppercase; font-size: 0.75rem; font-weight: 700; cursor: pointer; transition: 0.3s; }
-        .nav-link:hover { color: #fff; }
+        nav { display: flex; gap: 25px; }
+        .nav-link { color: rgba(255,255,255,0.5); text-decoration: none; text-transform: uppercase; font-size: 0.7rem; font-weight: 900; cursor: pointer; transition: 0.3s; letter-spacing: 1px; }
+        .nav-link:hover { color: var(--accent-blue); text-shadow: 0 0 10px var(--accent-blue); }
 
-        #hero { height: 100vh; display: flex; flex-direction: column; justify-content: center; padding: 0 10%; background: radial-gradient(circle at top right, rgba(125, 95, 255, 0.15), transparent); }
-        .hero-title { font-size: clamp(3rem, 8vw, 6rem); font-weight: 900; line-height: 0.9; }
+        #hero { height: 100vh; display: flex; flex-direction: column; justify-content: center; padding: 0 10%; }
+        .hero-title { font-size: clamp(3.5rem, 10vw, 7rem); font-weight: 900; line-height: 0.85; letter-spacing: -4px; text-transform: uppercase; }
+        .hero-title span { color: transparent; -webkit-text-stroke: 1.5px rgba(255,255,255,0.3); }
 
-        #content-section { display: none; padding: 120px 10% 100px; min-height: 100vh; }
-        .view-title { font-size: clamp(2.5rem, 5vw, 4rem); font-weight: 900; text-transform: uppercase; margin-bottom: 50px; border-left: 5px solid var(--accent); padding-left: 20px; }
+        #content-section { display: none; padding: 140px 8% 100px; min-height: 100vh; }
+        .view-title { font-size: clamp(2.5rem, 6vw, 4.5rem); font-weight: 900; text-transform: uppercase; margin-bottom: 60px; line-height: 1; }
 
-        .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 25px; }
-        .tile { background: var(--glass); backdrop-filter: blur(20px); border: 1px solid rgba(255,255,255,0.1); border-radius: 24px; overflow: hidden; transition: 0.4s; }
-        .tile:hover { transform: translateY(-10px); border-color: #fff; }
+        .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 30px; }
+        .tile { background: var(--glass); backdrop-filter: blur(30px); border: 1px solid var(--glass-border); border-radius: 28px; overflow: hidden; transition: 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+        .tile:hover { transform: translateY(-15px) scale(1.02); border-color: var(--accent-blue); box-shadow: 0 20px 40px rgba(0,0,0,0.6); }
         
-        .tile-img { width: 100%; height: 160px; background-size: cover; background-position: center; background-color: #222; }
+        .tile-img { width: 100%; height: 180px; background-size: cover; background-position: center; border-bottom: 1px solid var(--glass-border); position: relative; }
+        .tile-img::after { content: ''; position: absolute; bottom: 0; left: 0; width: 100%; height: 50%; background: linear-gradient(to top, rgba(7,5,18,0.8), transparent); }
+        
         .tile-body { padding: 25px; }
+        .cat-tag { color: var(--accent-blue); font-weight: 900; font-size: 0.65rem; text-transform: uppercase; letter-spacing: 2px; margin-bottom: 10px; }
         
-        .btn-get { margin-top: 20px; background: linear-gradient(45deg, var(--accent), var(--pink)); color: #fff; text-decoration: none; display: block; text-align: center; padding: 12px; border-radius: 12px; font-weight: 900; }
+        .btn-get { margin-top: 20px; background: linear-gradient(45deg, var(--accent-purple), var(--accent-pink)); color: #fff; text-decoration: none; display: block; text-align: center; padding: 14px; border-radius: 14px; font-weight: 900; font-size: 0.8rem; letter-spacing: 1px; transition: 0.3s; }
+        .btn-get:hover { filter: brightness(1.2); box-shadow: 0 0 20px rgba(255, 0, 222, 0.4); }
     </style>
 </head>
-<body>
+<body id="body">
+
+    <div class="bg-flow">
+        <div class="blob blob-1"></div>
+        <div class="blob blob-2"></div>
+    </div>
 
     <header>
         <div class="logo-container">
             <div class="wolf-circle" ondblclick="adminLogin()">
                 <svg viewBox="0 0 24 24"><path d="M12 2s-1 2-2 4c-1.5 3-4 4.5-6 5 2 0 3.5.5 5 2 1.5 1.5 2 4 2 4s.5-2.5 2-4c1.5-1.5 3-2 5-2-2-.5-4.5-2-6-5-1-2-2-4-2-4z"/></svg>
             </div>
-            <div style="font-weight: 900; letter-spacing: 3px;">AYDAN</div>
+            <div style="font-weight: 900; letter-spacing: 4px; font-size: 1.2rem;">AYDAN</div>
         </div>
         <nav>
             <a class="nav-link" onclick="location.reload()">Home</a>
-            <a class="nav-link" onclick="openSection('GAMES', 'Games<br>Zone.')">Games</a>
-            <a class="nav-link" onclick="openSection('APPS', 'Apps<br>Lab.')">Apps</a>
-            <a class="nav-link" onclick="openSection('LINK', 'Quick<br>Links.')">Links</a>
-            <a class="nav-link" onclick="openSection('FILES', 'Home &<br>Files.')">Files</a>
+            <a class="nav-link" onclick="openSection('GAMES', 'NEON<br>GAMES.')">Games</a>
+            <a class="nav-link" onclick="openSection('APPS', 'POWER<br>APPS.')">Apps</a>
+            <a class="nav-link" onclick="openSection('LINK', 'QUICK<br>LINKS.')">Links</a>
+            <a class="nav-link" onclick="openSection('FILES', 'STORAGE<br>HUB.')">Files</a>
         </nav>
     </header>
 
     <section id="hero">
-        <h1 class="hero-title">Experience<br>The Hub.</h1>
+        <h1 class="hero-title">WELCOME<span>TO</span><br>THE HUB.</h1>
     </section>
 
     <section id="content-section">
@@ -74,7 +100,7 @@
         }
 
         function adminLogin() {
-            if (prompt("Admin Access:") === "aydan1234") window.location.href = 'admin.html';
+            if (prompt("Access Code:") === "aydan1234") window.location.href = 'admin.html';
         }
 
         function openSection(cat, title) {
@@ -90,17 +116,16 @@
             const g = document.getElementById('main-grid');
             g.innerHTML = filtered.map(i => `
                 <div class="tile">
-                    <div class="tile-img" style="background-image: url('${i.image_url || 'https://via.placeholder.com/400x200?text=No+Image'}')"></div>
+                    <div class="tile-img" style="background-image: url('${i.image_url || 'https://images.unsplash.com/photo-1614850523296-d8c1af93d400?auto=format&fit=crop&w=800&q=60'}')"></div>
                     <div class="tile-body">
-                        <div style="color:var(--blue); font-weight:900; font-size:0.7rem; margin-bottom:5px; text-transform:uppercase;">${i.category}</div>
-                        <h3 style="margin:0; font-size:1.4rem;">${i.title}</h3>
+                        <div class="cat-tag">${i.category}</div>
+                        <h3 style="margin:0; font-size:1.5rem; letter-spacing:-0.5px; font-weight:900;">${i.title}</h3>
                         <a href="${i.url}" target="_blank" class="btn-get">ACCESS NOW</a>
                     </div>
                 </div>
             `).join('');
             window.scrollTo(0,0);
         }
-
         load();
     </script>
 </body>
