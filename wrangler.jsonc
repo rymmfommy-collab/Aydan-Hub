@@ -1,7 +1,7 @@
 {
   "name": "aydan-hub-site",
   "assets": {
-    "directory": "./Aydan-Hub"
+    "directory": "Aydan Hub"
   },
   "compatibility_date": "2026-01-07"
 }
