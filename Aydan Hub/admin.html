@@ -2,163 +2,247 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Aydan Hub | Central Command</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Aydan Admin | Control Panel</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap" rel="stylesheet">
     <style>
-        :root { --bg: #000; --panel: #050505; --neon: #00f3ff; --pink: #ff00ff; --red: #ff3e3e; }
-        body { margin: 0; background: var(--bg); color: #fff; font-family: 'Segoe UI', sans-serif; display: flex; }
-
-        /* Sidebar */
-        aside {
-            width: 80px; height: 100vh; background: var(--panel); border-right: 1px solid var(--neon);
-            display: flex; flex-direction: column; align-items: center; padding-top: 20px; position: sticky; top: 0;
+        :root { 
+            --bg-dark: #0f0a24; 
+            --accent-purple: #7d5fff; 
+            --accent-pink: #ff00de;
+            --accent-blue: #00d2ff;
+            --glass: rgba(255, 255, 255, 0.05);
+            --glass-border: rgba(255, 255, 255, 0.1);
         }
-        .side-logo { width: 45px; height: 45px; border-radius: 50%; border: 2px solid var(--neon); background: url('profile.jpg') center/cover; margin-bottom: 40px; }
+        
+        body { 
+            margin: 0; 
+            background-color: var(--bg-dark);
+            color: #ffffff; 
+            font-family: 'Inter', sans-serif; 
+            min-height: 100vh;
+        }
 
-        /* Main Panel */
-        main { flex: 1; padding: 40px; display: grid; grid-template-columns: 1fr 1fr; gap: 40px; max-width: 1200px; }
-        .card { background: var(--panel); border: 1px solid #1a1a1a; padding: 25px; border-radius: 8px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
-        h2 { font-size: 1rem; color: var(--neon); text-transform: uppercase; margin-top: 0; border-bottom: 1px solid #111; padding-bottom: 15px; }
+        /* --- Background --- */
+        .bg-flow {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            z-index: -1;
+            overflow: hidden;
+        }
+        .blob {
+            position: absolute;
+            border-radius: 50%;
+            filter: blur(80px);
+            opacity: 0.4;
+        }
+        .blob-1 { width: 400px; height: 400px; background: var(--accent-pink); top: -10%; right: 10%; }
+        .blob-2 { width: 500px; height: 500px; background: var(--accent-purple); bottom: -10%; left: 5%; }
 
-        /* Inputs & Buttons */
-        input, textarea, select { width: 100%; padding: 12px; margin: 10px 0; background: #000; border: 1px solid #333; color: #fff; border-radius: 4px; box-sizing: border-box; }
-        .btn { width: 100%; padding: 12px; border: none; border-radius: 4px; font-weight: bold; cursor: pointer; transition: 0.3s; margin-top: 10px; }
-        .btn-up { background: var(--neon); color: #000; }
-        .btn-up:hover { box-shadow: 0 0 15px var(--neon); }
+        header {
+            padding: 30px 8%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
 
-        /* File List Management */
-        .list-container { max-height: 400px; overflow-y: auto; margin-top: 10px; }
-        .item { display: flex; justify-content: space-between; align-items: center; padding: 12px; border-bottom: 1px solid #111; font-size: 0.85rem; }
-        .item:hover { background: #080808; }
-        .del-btn { background: none; border: 1px solid var(--red); color: var(--red); padding: 4px 8px; border-radius: 3px; cursor: pointer; font-size: 0.7rem; }
-        .del-btn:hover { background: var(--red); color: #fff; }
+        .btn-back {
+            text-decoration: none;
+            color: #fff;
+            font-weight: 700;
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            padding: 10px 20px;
+            border: 1px solid var(--glass-border);
+            border-radius: 10px;
+            background: var(--glass);
+            transition: 0.3s;
+        }
+        .btn-back:hover { background: rgba(255,255,255,0.1); }
 
-        /* Login Overlay */
-        #auth { position: fixed; inset: 0; background: #000; z-index: 9999; display: flex; justify-content: center; align-items: center; }
-        .type-toggle { display: flex; gap: 10px; margin-bottom: 15px; }
-        .t-btn { flex: 1; background: #111; color: #555; border: 1px solid #222; padding: 8px; cursor: pointer; font-size: 0.7rem; }
-        .t-btn.active { color: var(--pink); border-color: var(--pink); }
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        h1 { font-weight: 900; font-size: 2.5rem; margin-bottom: 40px; }
+
+        /* --- Form Styling --- */
+        .admin-card {
+            background: var(--glass);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border);
+            padding: 40px;
+            border-radius: 24px;
+            margin-bottom: 40px;
+        }
+
+        .form-group { margin-bottom: 20px; }
+        label { display: block; font-size: 0.75rem; font-weight: 900; color: var(--accent-blue); margin-bottom: 8px; text-transform: uppercase; }
+        
+        input, select {
+            width: 100%;
+            padding: 15px;
+            background: rgba(0,0,0,0.2);
+            border: 1px solid var(--glass-border);
+            border-radius: 12px;
+            color: #white;
+            font-family: 'Inter';
+            font-size: 1rem;
+            box-sizing: border-box;
+        }
+        input:focus { outline: none; border-color: var(--accent-purple); }
+
+        .btn-save {
+            width: 100%;
+            padding: 16px;
+            background: linear-gradient(45deg, var(--accent-purple), var(--accent-pink));
+            border: none;
+            border-radius: 12px;
+            color: white;
+            font-weight: 900;
+            font-size: 1rem;
+            cursor: pointer;
+            text-transform: uppercase;
+            margin-top: 10px;
+            box-shadow: 0 10px 20px rgba(125, 95, 255, 0.3);
+        }
+
+        /* --- Table Styling --- */
+        .list-section {
+            background: var(--glass);
+            border-radius: 24px;
+            padding: 20px;
+            border: 1px solid var(--glass-border);
+        }
+
+        .item-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 20px;
+            border-bottom: 1px solid var(--glass-border);
+        }
+        .item-row:last-child { border-bottom: none; }
+        
+        .info h4 { margin: 0; font-size: 1rem; }
+        .info span { font-size: 0.7rem; color: var(--accent-blue); font-weight: 700; }
+
+        .btn-delete {
+            background: rgba(255, 60, 60, 0.1);
+            color: #ff4d4d;
+            border: 1px solid rgba(255, 60, 60, 0.3);
+            padding: 8px 15px;
+            border-radius: 8px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+        .btn-delete:hover { background: #ff4d4d; color: white; }
+
     </style>
 </head>
 <body>
 
-    <div id="auth">
-        <div class="card" style="width: 300px; text-align: center;">
-            <h2 style="color: var(--pink); border: none;">SECURITY CHECK</h2>
-            <input type="password" id="pass" placeholder="Enter Access Key">
-            <button class="btn btn-up" onclick="login()">AUTHORIZE</button>
-        </div>
+    <div class="bg-flow">
+        <div class="blob blob-1"></div>
+        <div class="blob blob-2"></div>
     </div>
 
-    <aside>
-        <div class="side-logo" onclick="location.href='index.html'" title="Back to Home"></div>
-        <div style="color: #222; font-size: 0.6rem;">ADM v2</div>
-    </aside>
+    <header>
+        <div style="font-weight: 900; letter-spacing: 2px;">AYDAN ADMIN</div>
+        <a href="index.html" class="btn-back">← Back to Hub</a>
+    </header>
 
-    <main>
-        <section class="card">
-            <h2>Add New Record</h2>
-            <div class="type-toggle">
-                <button id="mode-f" class="t-btn active" onclick="setMode('file')">FILE / APP</button>
-                <button id="mode-l" class="t-btn" onclick="setMode('link')">LINK / TEXT</button>
-            </div>
-            
-            <input type="text" id="title" placeholder="Display Title">
-            
-            <div id="f-area">
-                <input type="file" id="file-picker">
-            </div>
-            <div id="l-area" style="display:none;">
-                <textarea id="url-input" rows="4" placeholder="Paste URL or text content..."></textarea>
-            </div>
+    <div class="container">
+        <h1>Control Panel</h1>
 
-            <button class="btn btn-up" id="up-btn" onclick="upload()">SYNC TO REPOSITORY</button>
-            <p id="msg" style="text-align: center; font-size: 0.8rem; color: var(--pink);"></p>
-        </section>
-
-        <section class="card">
-            <h2 style="color: var(--pink);">Live Repository Management</h2>
-            <div class="list-container" id="file-list">
-                <p style="text-align:center; color:#333;">Fetching records...</p>
+        <div class="admin-card">
+            <label>Add New Content</label>
+            <div class="form-group">
+                <label>Title</label>
+                <input type="text" id="title" placeholder="e.g. GTA VI Mobile">
             </div>
-        </section>
-    </main>
+            <div class="form-group">
+                <label>Category</label>
+                <select id="category">
+                    <option value="FILE">APP (File)</option>
+                    <option value="LINK">LINK (Website)</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>URL (Download Link)</label>
+                <input type="text" id="url" placeholder="https://...">
+            </div>
+            <button class="btn-save" onclick="saveItem()">Add to Hub</button>
+        </div>
+
+        <div class="list-section">
+            <label style="padding: 10px 20px;">Current Files</label>
+            <div id="admin-list">
+                </div>
+        </div>
+    </div>
 
     <script>
         const SUPABASE_URL = 'https://tvasdkfdizdwkroatgno.supabase.co';
         const SUPABASE_KEY = 'sb_publishable_UQ0g7DJ4_Um1nrAEd6z4nA_LnMUIcSA';
         const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-        let currentMode = 'file';
+        async function loadItems() {
+            const { data, error } = await supabaseClient
+                .from('files')
+                .select('*')
+                .order('created_at', { ascending: false });
 
-        function login() {
-            if (document.getElementById('pass').value === 'Aydan@2077') {
-                document.getElementById('auth').style.display = 'none';
-                refreshList();
-            } else { alert("INVALID KEY"); }
-        }
-
-        function setMode(m) {
-            currentMode = m;
-            document.getElementById('mode-f').classList.toggle('active', m === 'file');
-            document.getElementById('mode-l').classList.toggle('active', m === 'link');
-            document.getElementById('f-area').style.display = m === 'file' ? 'block' : 'none';
-            document.getElementById('l-area').style.display = m === 'link' ? 'block' : 'none';
-        }
-
-        async function refreshList() {
-            const { data } = await supabaseClient.from('files').select('*').order('created_at', { ascending: false });
-            const list = document.getElementById('file-list');
+            const listDiv = document.getElementById('admin-list');
             if (data) {
-                list.innerHTML = data.map(i => `
-                    <div class="item">
-                        <span>${i.title} <small style="color:#444">(${i.category})</small></span>
-                        <button class="del-btn" onclick="removeRecord(${i.id})">DELETE</button>
+                listDiv.innerHTML = data.map(item => `
+                    <div class="item-row">
+                        <div class="info">
+                            <h4>${item.title}</h4>
+                            <span>${item.category}</span>
+                        </div>
+                        <button class="btn-delete" onclick="deleteItem(${item.id})">Delete</button>
                     </div>
                 `).join('');
             }
         }
 
-        async function upload() {
-            const btn = document.getElementById('up-btn');
-            const status = document.getElementById('msg');
+        async function saveItem() {
             const title = document.getElementById('title').value;
-            if (!title) return alert("Title is required");
+            const category = document.getElementById('category').value;
+            const url = document.getElementById('url').value;
 
-            btn.disabled = true;
-            status.innerText = "Processing...";
-            let finalUrl = "";
+            if (!title || !url) return alert("Please fill all fields");
 
-            if (currentMode === 'file') {
-                const file = document.getElementById('file-picker').files[0];
-                if (!file) return alert("Please select a file");
-                const path = `${Date.now()}_${file.name}`;
-                const { data, error } = await supabaseClient.storage.from('uploads').upload(path, file);
-                if (error) return alert(error.message);
-                const { data: { publicUrl } } = supabaseClient.storage.from('uploads').getPublicUrl(path);
-                finalUrl = publicUrl;
+            const { error } = await supabaseClient.from('files').insert([{ title, category, url }]);
+
+            if (error) {
+                alert("Error saving: " + error.message);
             } else {
-                finalUrl = document.getElementById('url-input').value;
-            }
-
-            const { error: dbErr } = await supabaseClient.from('files').insert([{ title, url: finalUrl, category: currentMode.toUpperCase() }]);
-            
-            if (dbErr) alert(dbErr.message);
-            else {
-                status.innerText = "SUCCESSFULLY DEPLOYED";
-                document.getElementById('title').value = "";
-                refreshList();
-            }
-            btn.disabled = false;
-        }
-
-        async function removeRecord(id) {
-            if (confirm("Delete this entry permanently?")) {
-                const { error } = await supabaseClient.from('files').delete().eq('id', id);
-                if (error) alert(error.message);
-                else refreshList();
+                document.getElementById('title').value = '';
+                document.getElementById('url').value = '';
+                loadItems();
+                alert("Saved successfully!");
             }
         }
+
+        async function deleteItem(id) {
+            if (!confirm("Are you sure you want to delete this?")) return;
+
+            const { error } = await supabaseClient.from('files').delete().eq('id', id);
+
+            if (error) {
+                alert("Error deleting: " + error.message);
+            } else {
+                loadItems();
+            }
+        }
+
+        loadItems();
     </script>
 </body>
 </html>
