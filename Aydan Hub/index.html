@@ -4,16 +4,16 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     
+    <!-- GOOGLE VERIFICATION -->
     <meta name="google-site-verification" content="pguMl4tskDKely2U8fS1zJ-V4GZD-fVGwDvB8wbOeVo" />
     
+    <!-- PWA & MOBILE LOGIC -->
     <link rel="manifest" href="manifest.json">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="theme-color" content="#7d5fff">
 
     <title>Aydan Hub | Neon Metaverse</title>
-    <meta name="description" content="Aydan Hub - The ultimate metaverse for free games, power apps, and quick links.">
-    <meta name="keywords" content="Aydan Hub, Free Games, Metaverse, App Lab, Gaming Hub">
     
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap" rel="stylesheet">
@@ -24,62 +24,167 @@
             --accent-purple: #7d5fff; 
             --accent-pink: #ff00de;
             --accent-blue: #00d2ff;
-            --glass: rgba(255, 255, 255, 0.03);
-            --glass-border: rgba(255, 255, 255, 0.1);
+            --glass: rgba(255, 255, 255, 0.05);
+            --glass-border: rgba(255, 255, 255, 0.15);
         }
         
-        body { margin: 0; background-color: var(--bg-dark); color: #fff; font-family: 'Inter', sans-serif; overflow-x: hidden; scroll-behavior: smooth; }
+        body { margin: 0; background-color: var(--bg-dark); color: #fff; font-family: 'Inter', sans-serif; overflow-x: hidden; }
 
-        .bg-flow { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -1; overflow: hidden; background: #070512; }
-        .blob { position: absolute; border-radius: 50%; filter: blur(100px); opacity: 0.6; animation: move 20s infinite alternate; }
+        /* --- Animated Neon Background --- */
+        .bg-flow { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -1; background: #070512; }
+        .blob { position: absolute; border-radius: 50%; filter: blur(100px); opacity: 0.5; animation: move 20s infinite alternate; }
         .blob-1 { width: 600px; height: 600px; background: var(--accent-purple); top: -10%; right: -5%; }
-        .blob-2 { width: 500px; height: 500px; background: var(--accent-pink); bottom: -10%; left: -5%; animation-duration: 15s; }
-        @keyframes move { from { transform: translate(0,0) scale(1); } to { transform: translate(100px, 100px) scale(1.2); } }
+        .blob-2 { width: 500px; height: 500px; background: var(--accent-pink); bottom: -10%; left: -5%; }
+        @keyframes move { from { transform: translate(0,0); } to { transform: translate(50px, 50px); } }
 
+        /* --- FIXED HEADER (The Fix) --- */
         header { 
-            display: flex; justify-content: space-between; align-items: center; 
-            padding: 20px 8%; position: fixed; width: 100%; box-sizing: border-box; 
-            z-index: 1000; background: rgba(7, 5, 18, 0.85); backdrop-filter: blur(20px); 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center; 
+            padding: 15px 5%; 
+            position: fixed; 
+            top: 0;
+            left: 0;
+            width: 100%; 
+            box-sizing: border-box; 
+            z-index: 9999; /* Higher z-index to stay on top */
+            background: rgba(7, 5, 18, 0.95); /* More solid background so links are visible */
             border-bottom: 1px solid var(--glass-border); 
         }
 
-        .logo-container { display: flex; align-items: center; gap: 15px; }
-        .wolf-circle { width: 45px; height: 45px; background: linear-gradient(135deg, var(--accent-purple), var(--accent-pink)); border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; box-shadow: 0 0 20px rgba(125, 95, 255, 0.5); }
-        .logo-text { font-weight: 900; letter-spacing: 4px; font-size: 1.2rem; }
+        .logo-container { display: flex; align-items: center; gap: 10px; }
+        .wolf-circle { width: 40px; height: 40px; background: linear-gradient(135deg, var(--accent-purple), var(--accent-pink)); border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; flex-shrink: 0; }
+        .wolf-circle svg { width: 24px; fill: white; }
+        .logo-text { font-weight: 900; letter-spacing: 2px; font-size: 1.1rem; }
 
-        nav { display: flex; gap: 20px; }
-        .nav-link { color: rgba(255,255,255,0.6); text-decoration: none; text-transform: uppercase; font-size: 0.7rem; font-weight: 900; cursor: pointer; transition: 0.3s; letter-spacing: 1px; }
-        .nav-link:hover { color: var(--accent-blue); text-shadow: 0 0 10px var(--accent-blue); }
+        nav { display: flex; gap: 15px; }
+        .nav-link { 
+            color: #fff; /* Solid white color for visibility */
+            text-decoration: none; 
+            text-transform: uppercase; 
+            font-size: 0.75rem; 
+            font-weight: 800; 
+            cursor: pointer; 
+            transition: 0.3s;
+            padding: 5px 8px;
+        }
+        .nav-link:hover { color: var(--accent-blue); }
 
-        #hero { height: 100vh; display: flex; flex-direction: column; justify-content: center; padding: 0 10%; }
-        .hero-title { font-size: clamp(3rem, 10vw, 7rem); font-weight: 900; line-height: 0.9; text-transform: uppercase; }
-        .hero-title span { color: transparent; -webkit-text-stroke: 1px rgba(255,255,255,0.3); }
+        /* --- CONTENT SECTIONS --- */
+        #hero { height: 100vh; display: flex; flex-direction: column; justify-content: center; padding: 0 10%; text-align: center; }
+        .hero-title { font-size: clamp(3rem, 12vw, 6rem); font-weight: 900; line-height: 1; text-transform: uppercase; }
 
-        #content-section { display: none; padding: 140px 8% 100px; min-height: 100vh; }
-        .view-title { font-size: clamp(2.5rem, 6vw, 4rem); font-weight: 900; text-transform: uppercase; margin-bottom: 40px; }
+        #content-section { display: none; padding: 120px 5% 50px; min-height: 100vh; }
+        .view-title { font-size: 2.5rem; font-weight: 900; text-transform: uppercase; margin-bottom: 30px; color: var(--accent-blue); }
 
-        .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 25px; }
-        .tile { background: var(--glass); backdrop-filter: blur(30px); border: 1px solid var(--glass-border); border-radius: 24px; overflow: hidden; transition: 0.4s; }
-        .tile-img { width: 100%; height: 160px; background-size: cover; background-position: center; border-bottom: 1px solid var(--glass-border); }
-        .tile-body { padding: 25px; }
+        .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 20px; }
+        .tile { background: var(--glass); border: 1px solid var(--glass-border); border-radius: 20px; overflow: hidden; }
+        .tile-img { width: 100%; height: 160px; background-size: cover; background-position: center; }
+        .tile-body { padding: 20px; }
+        
+        .btn-group { display: flex; gap: 10px; margin-top: 15px; }
+        .btn-get { flex: 2; background: linear-gradient(45deg, var(--accent-purple), var(--accent-pink)); color: #fff; text-decoration: none; text-align: center; padding: 12px; border-radius: 10px; font-weight: 900; font-size: 0.8rem; }
+        .btn-share { flex: 1; background: rgba(255,255,255,0.1); border: 1px solid var(--glass-border); border-radius: 10px; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+        .btn-share svg { width: 18px; fill: white; }
 
-        .btn-group { display: flex; gap: 10px; margin-top: 20px; }
-        .btn-get { flex: 2; background: linear-gradient(45deg, var(--accent-purple), var(--accent-pink)); color: #fff; text-decoration: none; text-align: center; padding: 14px; border-radius: 12px; font-weight: 900; font-size: 0.8rem; }
-        .btn-share { flex: 1; background: rgba(255,255,255,0.1); border: 1px solid var(--glass-border); color: #fff; border-radius: 12px; cursor: pointer; display: flex; align-items: center; justify-content: center; }
-
-        @media (max-width: 768px) {
-            header { flex-direction: column; padding: 15px; gap: 15px; }
-            nav { width: 100%; justify-content: center; flex-wrap: wrap; gap: 8px; }
-            .nav-link { background: rgba(255,255,255,0.05); padding: 6px 12px; border-radius: 15px; }
-            #content-section { padding: 180px 5% 50px; } 
+        /* --- MOBILE SPECIFIC OVERRIDE --- */
+        @media (max-width: 600px) {
+            header { 
+                flex-direction: row; /* Keep it as a row so it doesn't get too tall */
+                padding: 10px 3%; 
+            }
+            .logo-text { font-size: 0.9rem; }
+            nav { gap: 5px; }
+            .nav-link { font-size: 0.6rem; padding: 4px; }
+            #content-section { padding-top: 100px; }
         }
     </style>
 </head>
 <body>
 
-<section id="hero">
-<h1 class="hero-title">WELCOME<span>TO</span><br>THE HUB.</h1>
-</section>
+    <div class="bg-flow">
+        <div class="blob blob-1"></div>
+        <div class="blob blob-2"></div>
+    </div>
 
+    <header>
+        <div class="logo-container">
+            <div class="wolf-circle" onclick="adminLogin()">
+                <svg viewBox="0 0 24 24"><path d="M12 2s-1 2-2 4c-1.5 3-4 4.5-6 5 2 0 3.5.5 5 2 1.5 1.5 2 4 2 4s.5-2.5 2-4c1.5-1.5 3-2 5-2-2-.5-4.5-2-6-5-1-2-2-4-2-4z"/></svg>
+            </div>
+            <div class="logo-text">AYDAN</div>
+        </div>
+        <nav>
+            <a class="nav-link" onclick="location.reload()">Home</a>
+            <a class="nav-link" onclick="openSection('GAMES', 'GAMES')">Games</a>
+            <a class="nav-link" onclick="openSection('APPS', 'APPS')">Apps</a>
+            <a class="nav-link" onclick="openSection('LINK', 'LINKS')">Links</a>
+            <a class="nav-link" onclick="openSection('FILES', 'FILES')">Files</a>
+        </nav>
+    </header>
+
+    <section id="hero">
+        <h1 class="hero-title">AYDAN<br><span style="color:transparent; -webkit-text-stroke: 1px #fff;">HUB</span></h1>
+    </section>
+
+    <section id="content-section">
+        <div id="view-title" class="view-title"></div>
+        <div class="grid" id="main-grid"></div>
+    </section>
+
+    <script>
+        if ('serviceWorker' in navigator) { navigator.serviceWorker.register('sw.js'); }
+
+        const SUPABASE_URL = 'https://tvasdkfdizdwkroatgno.supabase.co';
+        const SUPABASE_KEY = 'sb_publishable_UQ0g7DJ4_Um1nrAEd6z4nA_LnMUIcSA';
+        const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+        let items = [];
+
+        async function load() {
+            const { data } = await supabaseClient.from('files').select('*').order('created_at', { ascending: false });
+            items = data || [];
+        }
+
+        function adminLogin() {
+            const entry = prompt("Access Code:");
+            if (entry === "aydan1234") {
+                window.location.href = "admin.html?v=" + new Date().getTime();
+            }
+        }
+
+        async function shareItem(title, url) {
+            if (navigator.share) {
+                try { await navigator.share({ title: title, url: url }); } catch (err) {}
+            } else {
+                navigator.clipboard.writeText(url);
+                alert("Copied!");
+            }
+        }
+
+        function openSection(cat, title) {
+            document.getElementById('hero').style.display = 'none';
+            document.getElementById('content-section').style.display = 'block';
+            document.getElementById('view-title').innerText = title;
+            const filtered = items.filter(i => cat === 'FILES' ? (i.category === 'FILES' || i.category === 'HOME') : i.category === cat);
+            const g = document.getElementById('main-grid');
+            g.innerHTML = filtered.length ? filtered.map(i => `
+                <div class="tile">
+                    <div class="tile-img" style="background-image: url('${i.image_url || 'https://via.placeholder.com/400x200'}')"></div>
+                    <div class="tile-body">
+                        <h3 style="margin:0; font-size:1.2rem;">${i.title}</h3>
+                        <div class="btn-group">
+                            <a href="${i.url}" target="_blank" class="btn-get">ACCESS</a>
+                            <button class="btn-share" onclick="shareItem('${i.title}', '${i.url}')">
+                                <svg viewBox="0 0 24 24"><path d="M18 16.08c-.76 0-1.44.3-1.96.77L8.91 12.7c.05-.23.09-.46.09-.7s-.04-.47-.09-.7l7.05-4.11c.54.5 1.25.81 2.04.81 1.66 0 3-1.34 3-3s-1.34-3-3-3-3 1.34-3 3c0 .24.04.47.09.7L8.04 9.81C7.5 9.31 6.79 9 6 9c-1.66 0-3 1.34-3 3s1.34 3 3 3c.79 0 1.5-.31 2.04-.81l7.12 4.16c-.05.21-.08.43-.08.65 0 1.61 1.31 2.92 2.92 2.92s2.92-1.31 2.92-2.92c0-1.61-1.31-2.92-2.92-2.92z"/></svg>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            `).join('') : `<p style="text-align:center; width:100%;">No items yet.</p>`;
+            window.scrollTo(0,0);
+        }
+        load();
+    </script>
 </body>
 </html>
