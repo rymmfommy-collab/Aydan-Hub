@@ -21,7 +21,23 @@
         .msg { text-align: center; font-size: 0.85rem; min-height: 1.2em; margin: 8px 0 0; }
         .msg.err { color: #ff4d4d; }
         .msg.ok { color: #4dffa6; }
-        #preview { width: 100%; height: 160px; border-radius: 12px; background: rgba(0,0,0,0.4) center / cover no-repeat; margin: 10px 0; display: none; }
+        #preview { width: 100%; aspect-ratio: 1 / 1; max-height: 320px; border-radius: 12px; background: rgba(0,0,0,0.4) center / cover no-repeat; margin: 10px 0; display: none; }
+        .manage { margin-top: 24px; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.1); border-radius: 16px; padding: 0 16px; }
+        .manage > summary { list-style: none; cursor: pointer; padding: 16px 0; font-weight: 900; letter-spacing: 1px; text-transform: uppercase; display: flex; justify-content: space-between; align-items: center; }
+        .manage > summary::-webkit-details-marker { display: none; }
+        .manage > summary::after { content: '▾'; color: #7d5fff; font-size: 1.1rem; transition: transform 0.2s; }
+        .manage[open] > summary::after { transform: rotate(180deg); }
+        .manage[open] > summary { border-bottom: 1px solid rgba(255,255,255,0.08); margin-bottom: 12px; }
+        .manage .count { margin-left: auto; margin-right: 12px; background: rgba(125,95,255,0.25); color: #cfc4ff; border-radius: 999px; padding: 2px 10px; font-size: 0.75rem; }
+        .group { background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.1); border-radius: 16px; margin-bottom: 12px; padding: 0 16px; }
+        .group summary { list-style: none; cursor: pointer; padding: 16px 0; font-weight: 900; letter-spacing: 1px; text-transform: uppercase; display: flex; justify-content: space-between; align-items: center; }
+        .group summary::-webkit-details-marker { display: none; }
+        .group summary::after { content: '▾'; color: #7d5fff; font-size: 1.1rem; transition: transform 0.2s; }
+        .group[open] summary::after { transform: rotate(180deg); }
+        .group .count { margin-left: auto; margin-right: 12px; background: rgba(125,95,255,0.25); color: #cfc4ff; border-radius: 999px; padding: 2px 10px; font-size: 0.75rem; }
+        .group[open] summary { border-bottom: 1px solid rgba(255,255,255,0.08); }
+        #list { padding: 6px 0 12px; }
+        #list .group { background: rgba(255,255,255,0.02); margin: 10px 0 0; }
         .item-row { display: flex; justify-content: space-between; align-items: center; gap: 12px; padding: 12px 4px; border-bottom: 1px solid rgba(255,255,255,0.05); }
         .item-info { display: flex; align-items: center; gap: 12px; min-width: 0; }
         .thumb { width: 44px; height: 44px; border-radius: 8px; background: rgba(255,255,255,0.08) center / cover no-repeat; flex-shrink: 0; }
@@ -79,7 +95,10 @@
                 <p class="links"><a href="index.html">← Back to Site</a></p>
             </div>
 
-            <div style="margin-top: 30px;" id="list"></div>
+            <details class="manage" id="manage">
+                <summary>Manage uploads <span class="count" id="total-count">0</span></summary>
+                <div id="list"></div>
+            </details>
         </div>
     </div>
 
@@ -87,7 +106,7 @@
         const SUPABASE_URL = 'https://tvasdkfdizdwkroatgno.supabase.co';
         const SUPABASE_KEY = 'sb_publishable_UQ0g7DJ4_Um1nrAEd6z4nA_LnMUIcSA';
         const BUCKET = 'photos';
-        const MAX_BYTES = 5 * 1024 * 1024; // 5 MB
+        const MAX_BYTES = 15 * 1024 * 1024; // 15 MB in; photos are shrunk before upload
         const ALLOWED_TYPES = ['image/jpeg', 'image/png', 'image/webp', 'image/gif'];
 
         const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
@@ -140,17 +159,61 @@
         async function loadList() {
             const { data, error } = await supabaseClient.from('files').select('*').order('created_at', { ascending: false });
             if (error) { $('list').innerHTML = '<p class="msg err">Could not load items: ' + esc(error.message) + '</p>'; return; }
-            $('list').innerHTML = (data || []).map(i => {
+            const items = data || [];
+            $('total-count').textContent = items.length;
+            if (!items.length) { $('list').innerHTML = '<p class="msg">Nothing uploaded yet.</p>'; return; }
+
+            // remember which drop-downs are open so they stay open after a delete or upload
+            const wasOpen = new Set([...document.querySelectorAll('#list details[open]')].map(d => d.dataset.cat));
+
+            const SECTIONS = [
+                ['GAMES', 'Games'], ['APPS', 'Apps'], ['LINK', 'Links'], ['FILES', 'Files'], ['HOME', 'Home']
+            ];
+            const known = SECTIONS.map(s => s[0]);
+            const other = items.filter(i => !known.includes(i.category));
+            const groups = SECTIONS.map(([key, label]) => [key, label, items.filter(i => i.category === key)]);
+            if (other.length) groups.push(['OTHER', 'Other', other]);
+
+            const row = i => {
                 const img = webUrl(i.image_url);
                 return `
                 <div class="item-row">
                     <div class="item-info">
                         <div class="thumb" style="${img ? `background-image:url('${esc(img)}')` : ''}"></div>
-                        <span class="item-title">${esc(i.title)} <small style="color:#7d5fff">(${esc(i.category)})</small></span>
+                        <span class="item-title">${esc(i.title)}</span>
                     </div>
                     <button class="btn-delete" data-id="${esc(i.id)}">DELETE</button>
                 </div>`;
-            }).join('') || '<p class="msg">Nothing uploaded yet.</p>';
+            };
+
+            $('list').innerHTML = groups.filter(g => g[2].length).map(([key, label, rows]) => `
+                <details class="group" data-cat="${esc(key)}" ${wasOpen.has(key) ? 'open' : ''}>
+                    <summary>${esc(label)} <span class="count">${rows.length}</span></summary>
+                    ${rows.map(row).join('')}
+                </details>`).join('');
+        }
+
+        // ---------- Make every photo the same square tile ----------
+        const TILE = 800; // final size in pixels (800 x 800)
+
+        async function toTile(file) {
+            // GIFs are left alone so they keep animating
+            if (file.type === 'image/gif') return { blob: file, type: file.type, ext: 'gif' };
+
+            const bmp = await createImageBitmap(file, { imageOrientation: 'from-image' });
+            const side = Math.min(bmp.width, bmp.height);          // biggest centered square
+            const sx = (bmp.width - side) / 2;
+            const sy = (bmp.height - side) / 2;
+            const out = Math.min(TILE, side);                      // never blow small photos up
+            const canvas = document.createElement('canvas');
+            canvas.width = canvas.height = out;
+            canvas.getContext('2d').drawImage(bmp, sx, sy, side, side, 0, 0, out, out);
+            bmp.close && bmp.close();
+
+            let blob = await new Promise(r => canvas.toBlob(r, 'image/webp', 0.85));
+            if (blob && blob.type === 'image/webp') return { blob, type: 'image/webp', ext: 'webp' };
+            blob = await new Promise(r => canvas.toBlob(r, 'image/jpeg', 0.88));
+            return { blob, type: 'image/jpeg', ext: 'jpg' };
         }
 
         // ---------- Save ----------
@@ -166,7 +229,7 @@
             if (!file && !webUrl(image_url)) return say('save-msg', 'Pick a photo or paste an image link', 'err');
             if (file) {
                 if (!ALLOWED_TYPES.includes(file.type)) return say('save-msg', 'Photo must be JPG, PNG, WEBP or GIF', 'err');
-                if (file.size > MAX_BYTES) return say('save-msg', 'Photo is too big (max 5 MB)', 'err');
+                if (file.size > MAX_BYTES) return say('save-msg', 'Photo is too big (max 15 MB)', 'err');
             }
 
             $('save-btn').disabled = true;
@@ -174,9 +237,11 @@
 
             try {
                 if (file) {
-                    const ext = (file.name.split('.').pop() || 'jpg').toLowerCase().replace(/[^a-z0-9]/g, '');
-                    const path = Date.now() + '-' + Math.random().toString(36).slice(2, 8) + '.' + ext;
-                    const { error: upErr } = await supabaseClient.storage.from(BUCKET).upload(path, file, { contentType: file.type });
+                    say('save-msg', 'Resizing photo...');
+                    const tile = await toTile(file);
+                    say('save-msg', 'Uploading photo...');
+                    const path = Date.now() + '-' + Math.random().toString(36).slice(2, 8) + '.' + tile.ext;
+                    const { error: upErr } = await supabaseClient.storage.from(BUCKET).upload(path, tile.blob, { contentType: tile.type });
                     if (upErr) throw upErr;
                     image_url = supabaseClient.storage.from(BUCKET).getPublicUrl(path).data.publicUrl;
                 }
