@@ -34,17 +34,17 @@
         .hero-title { font-size: clamp(3rem, 15vw, 6rem); font-weight: 900; letter-spacing: -2px; }
 
         #content { display: none; padding: 100px 5% 50px; min-height: 100vh; }
-        .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 20px; }
+        .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); gap: 10px; }
+        @media (min-width: 700px) { .grid { grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 14px; } }
         
         /* CARD STYLE */
-        .card { background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 20px; padding: 15px; transition: 0.3s; }
+        .card { background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 14px; padding: 8px; transition: 0.3s; }
+        .card-title { margin: 0; font-size: 0.75rem; font-weight: 700; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
         .card:hover { transform: translateY(-5px); border-color: var(--p); }
-        .card-img { width: 100%; height: 160px; border-radius: 12px; background-size: cover; background-position: center; margin-bottom: 15px; }
+        .card-img { width: 100%; aspect-ratio: 1 / 1; border-radius: 10px; background-size: cover; background-position: center; background-color: rgba(255,255,255,0.05); margin-bottom: 8px; }
         
-        .btn-row { display: flex; gap: 10px; margin-top: 15px; }
-        .btn-main { flex: 2; background: linear-gradient(45deg, var(--p), var(--s)); color: #fff; text-decoration: none; text-align: center; padding: 12px; border-radius: 10px; font-weight: 900; font-size: 0.8rem; }
-        .btn-sh { flex: 1; background: rgba(255,255,255,0.1); border-radius: 10px; border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; }
-        .btn-sh svg { width: 18px; fill: white; }
+        .btn-row { display: flex; margin-top: 8px; }
+        .btn-main { flex: 1; background: linear-gradient(45deg, var(--p), var(--s)); color: #fff; text-decoration: none; text-align: center; padding: 7px; border-radius: 8px; font-weight: 900; font-size: 0.7rem; }
 
         @media (max-width: 600px) {
             header { padding: 10px 3%; }
@@ -104,14 +104,6 @@
             } catch (e) { return '#'; }
         }
 
-        function shareItem(id) {
-            const i = items.find(x => String(x.id) === String(id));
-            if (!i) return;
-            const u = safeUrl(i.url);
-            if (navigator.share) { navigator.share({ title: i.title, url: u }); }
-            else { navigator.clipboard.writeText(u); alert("Copied!"); }
-        }
-
         function openCat(cat, label) {
             document.getElementById('hero').style.display = 'none';
             document.getElementById('content').style.display = 'block';
@@ -121,12 +113,9 @@
             g.innerHTML = filtered.length ? filtered.map(i => `
                 <div class="card">
                     <div class="card-img" style="background-image: url('${esc(safeUrl(i.image_url || 'https://via.placeholder.com/400x200'))}')"></div>
-                    <h3 style="margin:0; font-size:1.1rem;">${esc(i.title)}</h3>
+                    <h3 class="card-title">${esc(i.title)}</h3>
                     <div class="btn-row">
                         <a href="${esc(safeUrl(i.url))}" target="_blank" rel="noopener noreferrer" class="btn-main">GET</a>
-                        <button class="btn-sh" onclick="shareItem('${esc(i.id)}')">
-                            <svg viewBox="0 0 24 24"><path d="M18 16.08c-.76 0-1.44.3-1.96.77L8.91 12.7c.05-.23.09-.46.09-.7s-.04-.47-.09-.7l7.05-4.11c.54.5 1.25.81 2.04.81 1.66 0 3-1.34 3-3s-1.34-3-3-3-3 1.34-3 3c0 .24.04.47.09.7L8.04 9.81C7.5 9.31 6.79 9 6 9c-1.66 0-3 1.34-3 3s1.34 3 3 3c.79 0 1.5-.31 2.04-.81l7.12 4.16c-.05.21-.08.43-.08.65 0 1.61 1.31 2.92 2.92 2.92s2.92-1.31 2.92-2.92c0-1.61-1.31-2.92-2.92-2.92z"/></svg>
-                        </button>
                     </div>
                 </div>
             `).join('') : `<p>No content in this section.</p>`;
