@@ -5,7 +5,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="google-site-verification" content="pguMl4tskDKely2U8fS1zJ-V4GZD-fVGwDvB8wbOeVo" />
     <title>Aydan Hub | Metaverse</title>
-    
+    <meta name="theme-color" content="#070512">
+    <link rel="icon" type="image/png" href="favicon.png">
+    <link rel="apple-touch-icon" href="apple-touch-icon.png">
+    <link rel="manifest" href="manifest.json">
+
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap" rel="stylesheet">
     
@@ -21,8 +25,7 @@
             border-bottom: 1px solid rgba(255,255,255,0.1); backdrop-filter: blur(15px);
         }
         .logo-box { display: flex; align-items: center; gap: 10px; cursor: pointer; }
-        .wolf-icon { width: 40px; height: 40px; background: linear-gradient(135deg, var(--p), var(--s)); border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: 0 0 15px rgba(125,95,255,0.4); }
-        .wolf-icon svg { width: 22px; fill: white; }
+        .logo-img { width: 40px; height: 40px; display: block; filter: drop-shadow(0 0 8px rgba(125,95,255,0.45)); }
         .logo-name { font-weight: 900; letter-spacing: 2px; font-size: 1.1rem; }
 
         nav { display: flex; gap: 12px; }
@@ -57,9 +60,7 @@
 
     <header>
         <div class="logo-box" onclick="location.reload()">
-            <div class="wolf-icon">
-                <svg viewBox="0 0 24 24"><path d="M12 2s-1 2-2 4c-1.5 3-4 4.5-6 5 2 0 3.5.5 5 2 1.5 1.5 2 4 2 4s.5-2.5 2-4c1.5-1.5 3-2 5-2-2-.5-4.5-2-6-5-1-2-2-4-2-4z"/></svg>
-            </div>
+            <img class="logo-img" src="logo.png" alt="Aydan Hub logo">
             <div class="logo-name">AYDAN</div>
         </div>
         <nav>
