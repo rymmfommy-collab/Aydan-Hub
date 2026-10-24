@@ -1,4 +1,5 @@
-name": "x",
+{
+  "name": "x",
   "main": "src/worker.js",
   "assets": {
     "directory": "Aydan Hub",
