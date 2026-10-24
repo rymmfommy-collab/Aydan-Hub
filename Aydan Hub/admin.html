@@ -13,15 +13,19 @@
         .container { max-width: 500px; margin: auto; }
         .card { background: rgba(255,255,255,0.03); padding: 35px; border-radius: 28px; border: 1px solid rgba(255,255,255,0.1); backdrop-filter: blur(20px); }
         h2 { font-weight: 900; letter-spacing: 2px; text-align: center; margin: 0 0 30px; }
-        input, select, button { width: 100%; padding: 16px; margin: 10px 0; border-radius: 12px; border: 1px solid rgba(255,255,255,0.1); background: rgba(0,0,0,0.4); color: white; box-sizing: border-box; font-family: 'Inter', sans-serif; font-size: 1rem; }
+        input, select, textarea, button { width: 100%; padding: 16px; margin: 10px 0; border-radius: 12px; border: 1px solid rgba(255,255,255,0.1); background: rgba(0,0,0,0.4); color: white; box-sizing: border-box; font-family: 'Inter', sans-serif; font-size: 1rem; }
+        textarea { resize: vertical; min-height: 110px; }
         input[type="file"] { padding: 12px; }
         button { background: linear-gradient(45deg, #7d5fff, #ff00de); border: none; font-weight: 900; cursor: pointer; text-transform: uppercase; box-shadow: 0 10px 20px rgba(255,0,222,0.3); }
         button:disabled { opacity: 0.5; cursor: not-allowed; }
         label { font-size: 0.75rem; color: #9a93c4; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; }
+        .hint { font-size: 0.72rem; color: #7f78a8; margin: 0 0 4px; }
+        .section-label { margin: 22px 0 4px; padding-top: 14px; border-top: 1px solid rgba(255,255,255,0.08); color: #cfc4ff; font-size: 0.8rem; font-weight: 900; letter-spacing: 1px; text-transform: uppercase; }
         .hidden { display: none; }
         .msg { text-align: center; font-size: 0.85rem; min-height: 1.2em; margin: 8px 0 0; }
         .msg.err { color: #ff4d4d; }
         .msg.ok { color: #4dffa6; }
+        .edit-banner { background: rgba(125,95,255,0.18); border: 1px solid rgba(125,95,255,0.5); color: #cfc4ff; border-radius: 12px; padding: 10px 14px; font-size: 0.8rem; margin: 0 0 14px; }
         #preview { width: 100%; aspect-ratio: 1 / 1; max-height: 320px; border-radius: 12px; background: rgba(0,0,0,0.4) center / cover no-repeat; margin: 10px 0; display: none; }
         .manage { margin-top: 24px; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.1); border-radius: 16px; padding: 0 16px; }
         .manage > summary { list-style: none; cursor: pointer; padding: 16px 0; font-weight: 900; letter-spacing: 1px; text-transform: uppercase; display: flex; justify-content: space-between; align-items: center; }
@@ -43,7 +47,10 @@
         .item-info { display: flex; align-items: center; gap: 12px; min-width: 0; }
         .thumb { width: 44px; height: 44px; border-radius: 8px; background: rgba(255,255,255,0.08) center / cover no-repeat; flex-shrink: 0; }
         .item-title { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-        .btn-delete { width: auto; margin: 0; background: none; color: #ff4d4d; border: 1px solid #ff4d4d; box-shadow: none; font-size: 0.7rem; padding: 6px 12px; flex-shrink: 0; }
+        .row-actions { display: flex; gap: 8px; flex-shrink: 0; }
+        .btn-delete, .btn-edit { width: auto; margin: 0; background: none; box-shadow: none; font-size: 0.7rem; padding: 6px 12px; flex-shrink: 0; }
+        .btn-delete { color: #ff4d4d; border: 1px solid #ff4d4d; }
+        .btn-edit { color: #cfc4ff; border: 1px solid #7d5fff; }
         .btn-ghost { background: none; box-shadow: none; border: 1px solid rgba(255,255,255,0.2); font-size: 0.75rem; padding: 10px; }
         .links { text-align: center; margin-top: 16px; }
         .links a { color: grey; text-decoration: none; font-size: 0.8rem; }
@@ -65,7 +72,8 @@
         <!-- UPLOAD -->
         <div id="admin-view" class="hidden">
             <div class="card">
-                <h2>UPLOAD</h2>
+                <h2 id="form-title">UPLOAD</h2>
+                <div class="edit-banner hidden" id="edit-banner">Editing an existing item. Leave the photo empty to keep the current one.</div>
 
                 <label for="title">Title</label>
                 <input type="text" id="title" placeholder="Title (e.g. GTA VI)" maxlength="120">
@@ -86,12 +94,34 @@
                     <option value="HOME">HOME</option>
                 </select>
 
-                <label for="url">Link (where the photo takes people)</label>
+                <label for="url">Link (official download or source)</label>
                 <input type="url" id="url" placeholder="https://...">
+
+                <div class="section-label">Page details (shown before download)</div>
+
+                <label for="slug">Page address (optional)</label>
+                <p class="hint">Made from the title if left empty. Changing it later changes the page link.</p>
+                <input type="text" id="slug" placeholder="e.g. miru" maxlength="80" autocapitalize="none">
+
+                <label for="description">Description</label>
+                <textarea id="description" placeholder="What is it, what does it do, who is it for?" maxlength="1500"></textarea>
+
+                <label for="version">Version</label>
+                <input type="text" id="version" placeholder="e.g. 1.8.1" maxlength="40">
+
+                <label for="developer">Developer</label>
+                <input type="text" id="developer" placeholder="Developer or publisher" maxlength="120">
+
+                <label for="license">License</label>
+                <input type="text" id="license" placeholder="e.g. AGPL-3.0, Free, Proprietary" maxlength="60">
+
+                <label for="size">Size</label>
+                <input type="text" id="size" placeholder="e.g. 17 MB" maxlength="30">
 
                 <button id="save-btn">Push to Hub</button>
                 <p class="msg" id="save-msg"></p>
 
+                <button class="btn-ghost hidden" id="cancel-btn">Cancel editing</button>
                 <button class="btn-ghost" id="logout-btn">Log out</button>
                 <p class="links"><a href="index.html">← Back to Site</a></p>
             </div>
@@ -113,6 +143,9 @@
         const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
         const $ = id => document.getElementById(id);
 
+        let editingId = null;   // id of the item being edited, or null when adding
+        let itemsById = {};     // latest list from the database, used to fill the form
+
         function esc(s) {
             return String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
         }
@@ -122,6 +155,10 @@
                 const x = new URL(u);
                 return (x.protocol === 'https:' || x.protocol === 'http:') ? x.href.replace(/'/g, '%27') : null;
             } catch (e) { return null; }
+        }
+
+        function slugify(s) {
+            return String(s || '').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '').slice(0, 80);
         }
 
         function say(id, text, kind) {
@@ -153,7 +190,45 @@
 
         async function logout() {
             await supabaseClient.auth.signOut();
+            resetForm();
             showView(false);
+        }
+
+        // ---------- Form helpers ----------
+        const TEXT_FIELDS = ['title', 'image_url', 'url', 'slug', 'description', 'version', 'developer', 'license', 'size'];
+
+        function resetForm() {
+            editingId = null;
+            TEXT_FIELDS.forEach(f => { $(f).value = ''; });
+            $('category').value = 'GAMES';
+            $('photo').value = '';
+            $('preview').style.display = 'none';
+            $('form-title').textContent = 'UPLOAD';
+            $('save-btn').textContent = 'Push to Hub';
+            $('edit-banner').classList.add('hidden');
+            $('cancel-btn').classList.add('hidden');
+        }
+
+        function startEdit(id) {
+            const i = itemsById[String(id)];
+            if (!i) return;
+            editingId = i.id;
+            TEXT_FIELDS.forEach(f => { $(f).value = i[f] ?? ''; });
+            $('category').value = i.category || 'GAMES';
+            $('photo').value = '';
+            const img = webUrl(i.image_url);
+            if (img) {
+                $('preview').style.backgroundImage = "url('" + img + "')";
+                $('preview').style.display = 'block';
+            } else {
+                $('preview').style.display = 'none';
+            }
+            $('form-title').textContent = 'EDIT ITEM';
+            $('save-btn').textContent = 'Save changes';
+            $('edit-banner').classList.remove('hidden');
+            $('cancel-btn').classList.remove('hidden');
+            say('save-msg', '');
+            window.scrollTo({ top: 0, behavior: 'smooth' });
         }
 
         // ---------- List ----------
@@ -161,6 +236,7 @@
             const { data, error } = await supabaseClient.from('files').select('*').order('created_at', { ascending: false });
             if (error) { $('list').innerHTML = '<p class="msg err">Could not load items: ' + esc(error.message) + '</p>'; return; }
             const items = data || [];
+            itemsById = Object.fromEntries(items.map(i => [String(i.id), i]));
             $('total-count').textContent = items.length;
             if (!items.length) { $('list').innerHTML = '<p class="msg">Nothing uploaded yet.</p>'; return; }
 
@@ -183,7 +259,10 @@
                         <div class="thumb" style="${img ? `background-image:url('${esc(img)}')` : ''}"></div>
                         <span class="item-title">${esc(i.title)}</span>
                     </div>
-                    <button class="btn-delete" data-id="${esc(i.id)}">DELETE</button>
+                    <div class="row-actions">
+                        <button class="btn-edit" data-id="${esc(i.id)}">EDIT</button>
+                        <button class="btn-delete" data-id="${esc(i.id)}">DELETE</button>
+                    </div>
                 </div>`;
             };
 
@@ -217,7 +296,9 @@
             return { blob, type: 'image/jpeg', ext: 'jpg' };
         }
 
-        // ---------- Save ----------
+        // ---------- Save (add or update) ----------
+        function orNull(id) { return $(id).value.trim() || null; }
+
         async function save() {
             const title = $('title').value.trim();
             const category = $('category').value;
@@ -233,6 +314,9 @@
                 if (file.size > MAX_BYTES) return say('save-msg', 'Photo is too big (max 15 MB)', 'err');
             }
 
+            let slug = slugify($('slug').value.trim() || title);
+            if (!slug) slug = 'item-' + Math.random().toString(36).slice(2, 8);
+
             $('save-btn').disabled = true;
             say('save-msg', file ? 'Uploading photo...' : 'Saving...');
 
@@ -247,15 +331,29 @@
                     image_url = supabaseClient.storage.from(BUCKET).getPublicUrl(path).data.publicUrl;
                 }
 
-                const { error } = await supabaseClient.from('files').insert([{ title, image_url, category, url: link }]);
+                const build = s => ({
+                    title, image_url, category, url: link, slug: s,
+                    description: orNull('description'),
+                    version: orNull('version'),
+                    developer: orNull('developer'),
+                    license: orNull('license'),
+                    size: orNull('size')
+                });
+                const write = s => editingId
+                    ? supabaseClient.from('files').update(build(s)).eq('id', editingId)
+                    : supabaseClient.from('files').insert([build(s)]);
+
+                let { error } = await write(slug);
+                // 23505 = that page address is already taken: add a short suffix and try once more
+                if (error && error.code === '23505') {
+                    slug = slug + '-' + Math.random().toString(36).slice(2, 6);
+                    ({ error } = await write(slug));
+                }
                 if (error) throw error;
 
-                $('title').value = '';
-                $('url').value = '';
-                $('image_url').value = '';
-                $('photo').value = '';
-                $('preview').style.display = 'none';
-                say('save-msg', 'Saved. It is live on the site.', 'ok');
+                const wasEditing = !!editingId;
+                resetForm();
+                say('save-msg', wasEditing ? 'Changes saved.' : 'Saved. It is live on the site.', 'ok');
                 loadList();
             } catch (e) {
                 say('save-msg', 'Failed: ' + (e.message || e), 'err');
@@ -277,6 +375,7 @@
                 const path = decodeURIComponent(row.image_url.split(marker)[1].split('?')[0]);
                 await supabaseClient.storage.from(BUCKET).remove([path]);
             }
+            if (String(editingId) === String(id)) resetForm();
             loadList();
         }
 
@@ -285,9 +384,12 @@
         $('password').addEventListener('keydown', e => { if (e.key === 'Enter') login(); });
         $('logout-btn').addEventListener('click', logout);
         $('save-btn').addEventListener('click', save);
+        $('cancel-btn').addEventListener('click', () => { resetForm(); say('save-msg', ''); });
         $('list').addEventListener('click', e => {
-            const b = e.target.closest('.btn-delete');
-            if (b) del(b.dataset.id);
+            const d = e.target.closest('.btn-delete');
+            if (d) return del(d.dataset.id);
+            const ed = e.target.closest('.btn-edit');
+            if (ed) startEdit(ed.dataset.id);
         });
         $('photo').addEventListener('change', () => {
             const f = $('photo').files[0];
