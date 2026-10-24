@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="google-site-verification" content="pguMl4tskDKely2U8fS1zJ-V4GZD-fVGwDvB8wbOeVo" />
     <title>Aydan Hub | Metaverse</title>
+    <meta name="description" content="Aydan Hub: apps, games, links and files, each with details and an official download link.">
     <meta name="theme-color" content="#070512">
     <link rel="icon" type="image/png" href="favicon.png">
     <link rel="apple-touch-icon" href="apple-touch-icon.png">
@@ -12,15 +13,15 @@
 
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap" rel="stylesheet">
-    
+
     <style>
         :root { --p: #7d5fff; --s: #ff00de; --bg: #070512; }
         body { margin: 0; background: var(--bg); color: #fff; font-family: 'Inter', sans-serif; overflow-x: hidden; }
 
         /* HEADER - FIXED & VISIBLE */
-        header { 
-            display: flex; justify-content: space-between; align-items: center; 
-            padding: 10px 5%; position: fixed; top: 0; width: 100%; 
+        header {
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 10px 5%; position: fixed; top: 0; width: 100%;
             box-sizing: border-box; z-index: 10000; background: rgba(7, 5, 18, 0.95);
             border-bottom: 1px solid rgba(255,255,255,0.1); backdrop-filter: blur(15px);
         }
@@ -39,13 +40,14 @@
         #content { display: none; padding: 100px 5% 50px; min-height: 100vh; }
         .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); gap: 10px; }
         @media (min-width: 700px) { .grid { grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 14px; } }
-        
+
         /* CARD STYLE */
         .card { background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 14px; padding: 8px; transition: 0.3s; }
         .card-title { margin: 0; font-size: 0.75rem; font-weight: 700; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
         .card:hover { transform: translateY(-5px); border-color: var(--p); }
         .card-img { width: 100%; aspect-ratio: 1 / 1; border-radius: 10px; background-size: cover; background-position: center; background-color: rgba(255,255,255,0.05); margin-bottom: 8px; }
-        
+        .card-link { display: block; color: inherit; text-decoration: none; }
+
         .btn-row { display: flex; margin-top: 8px; }
         .btn-main { flex: 1; background: linear-gradient(45deg, var(--p), var(--s)); color: #fff; text-decoration: none; text-align: center; padding: 7px; border-radius: 8px; font-weight: 900; font-size: 0.7rem; }
 
@@ -111,15 +113,20 @@
             document.getElementById('view-title').innerText = label;
             const filtered = items.filter(i => cat === 'FILES' ? (i.category === 'FILES' || i.category === 'HOME') : i.category === cat);
             const g = document.getElementById('main-grid');
-            g.innerHTML = filtered.length ? filtered.map(i => `
-                <div class="card">
+            g.innerHTML = filtered.length ? filtered.map(i => {
+                // Items with a slug get their own details page; the picture and title link to it
+                const page = i.slug ? '/app/' + encodeURIComponent(i.slug) : '';
+                const top = `
                     <div class="card-img" style="background-image: url('${esc(safeUrl(i.image_url || 'https://via.placeholder.com/400x200'))}')"></div>
-                    <h3 class="card-title">${esc(i.title)}</h3>
+                    <h3 class="card-title">${esc(i.title)}</h3>`;
+                return `
+                <div class="card">
+                    ${page ? `<a class="card-link" href="${esc(page)}">${top}</a>` : top}
                     <div class="btn-row">
                         <a href="${esc(safeUrl(i.url))}" target="_blank" rel="noopener noreferrer" class="btn-main">GET</a>
                     </div>
-                </div>
-            `).join('') : `<p>No content in this section.</p>`;
+                </div>`;
+            }).join('') : `<p>No content in this section.</p>`;
             window.scrollTo(0,0);
         }
         load();
