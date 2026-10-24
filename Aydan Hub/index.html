@@ -68,7 +68,7 @@
         <nav>
             <a class="nav-btn" onclick="location.reload()">Home</a>
             <a class="nav-btn" onclick="openCat('GAMES', 'NEON GAMES')">Games</a>
-            <a class="nav-btn" onclick="openCat('APPS', 'POWER APPS')">Apps</a>
+            <a class="nav-btn" onclick="openCat('APPS', 'APPS')">Apps</a>
             <a class="nav-btn" onclick="openCat('LINK', 'LINKS')">Links</a>
             <a class="nav-btn" onclick="openCat('FILES', 'STORAGE')">Files</a>
         </nav>
@@ -122,9 +122,9 @@
                 return `
                 <div class="card">
                     ${page ? `<a class="card-link" href="${esc(page)}">${top}</a>` : top}
-                    <div class="btn-row">
+                    ${(i.category === 'APPS' && page) ? '' : `<div class="btn-row">
                         <a href="${esc(safeUrl(i.url))}" target="_blank" rel="noopener noreferrer" class="btn-main">GET</a>
-                    </div>
+                    </div>`}
                 </div>`;
             }).join('') : `<p>No content in this section.</p>`;
             window.scrollTo(0,0);
