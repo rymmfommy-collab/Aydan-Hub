@@ -1,7 +1,9 @@
-{
-  "name": "x",
+name": "x",
+  "main": "src/worker.js",
   "assets": {
-    "directory": "Aydan Hub"
+    "directory": "Aydan Hub",
+    "binding": "ASSETS",
+    "run_worker_first": ["/app/*", "/sitemap.xml", "/robots.txt"]
   },
   "compatibility_date": "2026-01-07"
 }
