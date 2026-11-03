@@ -13,7 +13,13 @@ const CACHE_SECONDS = 120;
 // IndexNow (Bing, Yandex and others). The key is public by design: the same
 // text is served at /<key>.txt so search engines can confirm you own the site.
 const INDEXNOW_KEY = 'c2f08c072e75993255f893bafcf1877d';
-const INDEXNOW_ENDPOINT = 'https://api.indexnow.org/IndexNow';
+// Tried in order. IndexNow shares submissions between participating search engines,
+// so the first one that accepts is enough. If one is throttling (429), try the next.
+const INDEXNOW_ENDPOINTS = [
+  'https://api.indexnow.org/IndexNow',
+  'https://www.bing.com/indexnow',
+  'https://yandex.com/indexnow',
+];
 // Only this account may trigger notifications.
 const ADMIN_EMAIL = 'rymmfommy@gmail.com';
 
@@ -117,15 +123,26 @@ ${body}
 </html>`;
 }
 
+// Search engines show roughly 25-160 characters. Trim long text at a word boundary.
+function metaDescription(text, fallback) {
+  const clean = String(text || '').replace(/\s+/g, ' ').trim();
+  if (clean.length < 25) return fallback;
+  if (clean.length <= 155) return clean;
+  const cut = clean.slice(0, 155);
+  const lastSpace = cut.lastIndexOf(' ');
+  return (lastSpace > 100 ? cut.slice(0, lastSpace) : cut).replace(/[\s,;:.\-]+$/, '') + '…';
+}
+
 function renderAppPage(item, origin) {
   const canonical = `${origin}/app/${item.slug}`;
   const label = CATEGORY_LABELS[item.category] || 'Item';
   const image = safeHttp(item.image_url);
   const download = safeHttp(item.url);
 
-  const description =
-    (item.description && item.description.trim().slice(0, 300)) ||
-    `${item.title}: details and official download link on ${SITE_NAME}.`;
+  const description = metaDescription(
+    item.description,
+    `${item.title}: details and official download link on ${SITE_NAME}.`
+  );
 
   const title = `${item.title} Download & Details | ${SITE_NAME}`;
 
@@ -270,23 +287,34 @@ async function handleIndexNow(request, url) {
   slugs.forEach((s) => { if (/^[a-z0-9-]{1,100}$/.test(String(s))) urls.add(`${origin}/app/${s}`); });
 
   const urlList = [...urls];
-  let res;
-  try {
-    res = await fetch(INDEXNOW_ENDPOINT, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json; charset=utf-8' },
-      body: JSON.stringify({
-        host: url.hostname,
-        key: INDEXNOW_KEY,
-        keyLocation: `${origin}/${INDEXNOW_KEY}.txt`,
-        urlList,
-      }),
-    });
-  } catch (e) {
-    return json({ ok: false, error: 'Could not reach IndexNow' }, 502);
-  }
+  const payload = JSON.stringify({
+    host: url.hostname,
+    key: INDEXNOW_KEY,
+    keyLocation: `${origin}/${INDEXNOW_KEY}.txt`,
+    urlList,
+  });
+
   // IndexNow answers 200 or 202 when the submission is accepted.
-  return json({ ok: res.status === 200 || res.status === 202, status: res.status, submitted: urlList.length });
+  const tried = [];
+  for (const endpoint of INDEXNOW_ENDPOINTS) {
+    const name = new URL(endpoint).hostname;
+    try {
+      const res = await fetch(endpoint, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json; charset=utf-8' },
+        body: payload,
+      });
+      tried.push({ endpoint: name, status: res.status });
+      if (res.status === 200 || res.status === 202) {
+        return json({ ok: true, status: res.status, via: name, submitted: urlList.length, tried });
+      }
+    } catch (e) {
+      tried.push({ endpoint: name, status: 0 });
+    }
+  }
+  // Report the last real status so the admin page can show a useful code.
+  const last = [...tried].reverse().find((t) => t.status) || { status: 0 };
+  return json({ ok: false, status: last.status || undefined, error: last.status ? undefined : 'Could not reach IndexNow', tried }, last.status ? 200 : 502);
 }
 
 function handleRobots(origin) {
