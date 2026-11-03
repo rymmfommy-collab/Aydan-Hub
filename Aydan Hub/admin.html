@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -97,6 +96,12 @@
                     <option value="FILES">FILES</option>
                     <option value="HOME">HOME (big tile on the front page)</option>
                 </select>
+
+                <div id="home-dest" class="hidden">
+                    <label for="dest">Where should this tile open?</label>
+                    <p class="hint">Pick a page inside your site. If you leave it as the first choice, the tile opens this item's own page.</p>
+                    <select id="dest"></select>
+                </div>
 
                 <label for="url">Link (official download or source)</label>
                 <input type="url" id="url" placeholder="https://...">
@@ -241,6 +246,37 @@
             }
         }
 
+        // ---------- HOME tiles: choose a page inside the site ----------
+        const SECTION_DESTS = [['/?s=games', 'Games section'], ['/?s=apps', 'Apps section'], ['/?s=links', 'Links section'], ['/?s=files', 'Files section']];
+
+        function buildDestOptions(selected) {
+            const own = [['', "This item's own page (default)"]];
+            const pages = Object.values(itemsById)
+                .filter(i => i.slug && String(i.id) !== String(editingId))
+                .map(i => ['/app/' + i.slug, i.title + ' (' + (i.category || '').toLowerCase() + ')']);
+            const groups = [
+                ['', own],
+                ['Sections', SECTION_DESTS],
+                ['Pages', pages]
+            ];
+            let html = '';
+            for (const [label, opts] of groups) {
+                if (!opts.length) continue;
+                const inner = opts.map(([v, t]) => `<option value="${esc(v)}">${esc(t)}</option>`).join('');
+                html += label ? `<optgroup label="${esc(label)}">${inner}</optgroup>` : inner;
+            }
+            $('dest').innerHTML = html;
+            // keep a saved destination even if its page is no longer in the list
+            if (selected && ![...$('dest').options].some(o => o.value === selected)) {
+                $('dest').insertAdjacentHTML('beforeend', `<option value="${esc(selected)}">${esc(selected)}</option>`);
+            }
+            $('dest').value = selected || '';
+        }
+
+        function toggleHomeDest() {
+            $('home-dest').classList.toggle('hidden', $('category').value !== 'HOME');
+        }
+
         // ---------- Game links (up to 3, only for the GAMES section) ----------
         const GL = [1, 2, 3];
 
@@ -282,6 +318,8 @@
             $('category').value = 'GAMES';
             fillGameLinks([]);
             toggleGameLinks();
+            buildDestOptions('');
+            toggleHomeDest();
             $('photo').value = '';
             $('preview').style.display = 'none';
             $('form-title').textContent = 'UPLOAD';
@@ -298,6 +336,10 @@
             $('category').value = i.category || 'GAMES';
             fillGameLinks(i.links);
             toggleGameLinks();
+            const savedDest = (i.category === 'HOME' && String(i.url || '').startsWith('/')) ? i.url : '';
+            if (savedDest) $('url').value = '';
+            buildDestOptions(savedDest);
+            toggleHomeDest();
             $('photo').value = '';
             const img = webUrl(i.image_url);
             if (img) {
@@ -321,6 +363,7 @@
             const items = data || [];
             itemsById = Object.fromEntries(items.map(i => [String(i.id), i]));
             $('total-count').textContent = items.length;
+            buildDestOptions($('dest').value);
             if (!items.length) { $('list').innerHTML = '<p class="msg">Nothing uploaded yet.</p>'; return; }
 
             // remember which drop-downs are open so they stay open after a delete or upload
@@ -386,7 +429,8 @@
             const title = $('title').value.trim();
             const category = $('category').value;
             const gl = readGameLinks();
-            const link = webUrl($('url').value.trim()) || (gl.links[0] && gl.links[0].url) || null;
+            const dest = $('category').value === 'HOME' ? $('dest').value : '';
+            const link = dest || webUrl($('url').value.trim()) || (gl.links[0] && gl.links[0].url) || null;
             const file = $('photo').files[0];
             let image_url = $('image_url').value.trim();
 
@@ -473,7 +517,7 @@
         $('password').addEventListener('keydown', e => { if (e.key === 'Enter') login(); });
         $('logout-btn').addEventListener('click', logout);
         $('save-btn').addEventListener('click', save);
-        $('category').addEventListener('change', toggleGameLinks);
+        $('category').addEventListener('change', () => { toggleGameLinks(); toggleHomeDest(); });
         $('cancel-btn').addEventListener('click', () => { resetForm(); say('save-msg', ''); });
         $('ping-btn').addEventListener('click', async () => {
             $('ping-btn').disabled = true;
@@ -498,6 +542,8 @@
         });
 
         toggleGameLinks();
+        buildDestOptions('');
+        toggleHomeDest();
         supabaseClient.auth.getSession().then(({ data }) => showView(!!data.session));
     </script>
 </body>
