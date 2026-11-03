@@ -4,7 +4,8 @@
   "assets": {
     "directory": "Aydan Hub",
     "binding": "ASSETS",
-    "run_worker_first": ["/app/*", "/sitemap.xml", "/robots.txt"]
+    "run_worker_first": ["/app/*", "/api/*", "/sitemap.xml", "/robots.txt", "/c2f08c072e75993255f893bafcf1877d.txt"]
   },
   "compatibility_date": "2026-01-07"
 }
+
