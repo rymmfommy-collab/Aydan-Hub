@@ -115,7 +115,6 @@
     </section>
 
     <section id="content">
-        <h2 id="view-title" style="margin-bottom:30px; text-transform:uppercase; color:var(--p);"></h2>
         <div class="grid" id="main-grid"></div>
     </section>
 
@@ -172,7 +171,6 @@
             document.getElementById('hero').style.display = 'none';
             document.getElementById('featured').style.display = 'none';
             document.getElementById('content').style.display = 'block';
-            document.getElementById('view-title').innerText = label;
             const filtered = items.filter(i => i.category === cat);
             const g = document.getElementById('main-grid');
             const isGames = cat === 'GAMES';
