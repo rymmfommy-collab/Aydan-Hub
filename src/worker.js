@@ -10,6 +10,13 @@ const SUPABASE_KEY = 'sb_publishable_UQ0g7DJ4_Um1nrAEd6z4nA_LnMUIcSA';
 const SITE_NAME = 'Aydan Hub';
 const CACHE_SECONDS = 120;
 
+// IndexNow (Bing, Yandex and others). The key is public by design: the same
+// text is served at /<key>.txt so search engines can confirm you own the site.
+const INDEXNOW_KEY = 'c2f08c072e75993255f893bafcf1877d';
+const INDEXNOW_ENDPOINT = 'https://api.indexnow.org/IndexNow';
+// Only this account may trigger notifications.
+const ADMIN_EMAIL = 'rymmfommy@gmail.com';
+
 const CATEGORY_LABELS = {
   GAMES: 'Game',
   APPS: 'App',
@@ -34,10 +41,10 @@ function safeHttp(u) {
   }
 }
 
-async function supabase(path) {
+async function supabase(path, fresh = false) {
   const res = await fetch(`${SUPABASE_URL}/rest/v1/${path}`, {
     headers: { apikey: SUPABASE_KEY, Accept: 'application/json' },
-    cf: { cacheTtl: CACHE_SECONDS, cacheEverything: true },
+    ...(fresh ? {} : { cf: { cacheTtl: CACHE_SECONDS, cacheEverything: true } }),
   });
   if (!res.ok) throw new Error(`Supabase responded ${res.status}`);
   return res.json();
@@ -217,6 +224,71 @@ async function handleSitemap(origin) {
   });
 }
 
+function json(data, status = 200) {
+  return new Response(JSON.stringify(data), {
+    status,
+    headers: { 'Content-Type': 'application/json; charset=utf-8', 'Cache-Control': 'no-store' },
+  });
+}
+
+// Confirms the caller is logged in to Supabase as the admin account.
+async function isAdmin(request) {
+  const auth = request.headers.get('Authorization') || '';
+  if (!/^Bearer [\w-]+\.[\w-]+\.[\w-]+$/.test(auth)) return false;
+  try {
+    const res = await fetch(`${SUPABASE_URL}/auth/v1/user`, {
+      headers: { apikey: SUPABASE_KEY, Authorization: auth },
+    });
+    if (!res.ok) return false;
+    const user = await res.json();
+    return String(user.email || '').toLowerCase() === ADMIN_EMAIL;
+  } catch (e) {
+    return false;
+  }
+}
+
+// POST /api/indexnow  body: { "slugs": ["moviebox"], "all": false }
+// The Worker builds the URL list itself, so a caller can never submit other sites.
+async function handleIndexNow(request, url) {
+  if (!(await isAdmin(request))) return json({ ok: false, error: 'Not allowed' }, 401);
+
+  let body = {};
+  try { body = await request.json(); } catch (e) { /* empty body is fine */ }
+
+  const origin = url.origin;
+  const urls = new Set([`${origin}/`]);
+
+  if (body && body.all === true) {
+    try {
+      const rows = await supabase('files?select=slug&slug=not.is.null&limit=1000', true);
+      rows.forEach((r) => { if (/^[a-z0-9-]{1,100}$/.test(r.slug || '')) urls.add(`${origin}/app/${r.slug}`); });
+    } catch (e) {
+      return json({ ok: false, error: 'Could not read the list of pages' }, 502);
+    }
+  }
+  const slugs = Array.isArray(body && body.slugs) ? body.slugs.slice(0, 50) : [];
+  slugs.forEach((s) => { if (/^[a-z0-9-]{1,100}$/.test(String(s))) urls.add(`${origin}/app/${s}`); });
+
+  const urlList = [...urls];
+  let res;
+  try {
+    res = await fetch(INDEXNOW_ENDPOINT, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json; charset=utf-8' },
+      body: JSON.stringify({
+        host: url.hostname,
+        key: INDEXNOW_KEY,
+        keyLocation: `${origin}/${INDEXNOW_KEY}.txt`,
+        urlList,
+      }),
+    });
+  } catch (e) {
+    return json({ ok: false, error: 'Could not reach IndexNow' }, 502);
+  }
+  // IndexNow answers 200 or 202 when the submission is accepted.
+  return json({ ok: res.status === 200 || res.status === 202, status: res.status, submitted: urlList.length });
+}
+
 function handleRobots(origin) {
   return new Response(`User-agent: *\nAllow: /\n\nSitemap: ${origin}/sitemap.xml\n`, {
     headers: { 'Content-Type': 'text/plain; charset=utf-8' },
@@ -228,6 +300,16 @@ export default {
     const url = new URL(request.url);
     const path = url.pathname;
     const isRead = request.method === 'GET' || request.method === 'HEAD';
+
+    if (path === '/api/indexnow') {
+      if (request.method !== 'POST') return new Response('Method not allowed', { status: 405, headers: { Allow: 'POST' } });
+      return handleIndexNow(request, url);
+    }
+
+    if (path === `/${INDEXNOW_KEY}.txt`) {
+      if (!isRead) return new Response('Method not allowed', { status: 405, headers: { Allow: 'GET, HEAD' } });
+      return new Response(INDEXNOW_KEY, { headers: { 'Content-Type': 'text/plain; charset=utf-8' } });
+    }
 
     if (path === '/robots.txt' || path === '/sitemap.xml' || path.startsWith('/app/')) {
       if (!isRead) return new Response('Method not allowed', { status: 405, headers: { Allow: 'GET, HEAD' } });
