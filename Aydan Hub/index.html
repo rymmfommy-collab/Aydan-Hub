@@ -77,18 +77,9 @@
         .card-img { width: 100%; aspect-ratio: 1 / 1; border-radius: 10px; background-size: cover; background-position: center; background-color: rgba(255,255,255,0.05); margin-bottom: 8px; }
         .card-link { display: block; color: inherit; text-decoration: none; }
 
-        /* GAMES: bigger cards that list up to 3 links, each with a short description */
-        .grid.games { grid-template-columns: repeat(auto-fill, minmax(min(100%, 300px), 1fr)); gap: 16px; }
-        .games .card { padding: 12px; border-radius: 20px; }
-        .games .card-img { aspect-ratio: 16 / 10; }
-        .games .card-title { font-size: 1.05rem; white-space: normal; margin: 2px 0 10px; }
-        .game-links { display: flex; flex-direction: column; gap: 8px; }
-        .game-link { display: flex; align-items: center; gap: 10px; padding: 10px 12px; border-radius: 12px; color: #fff; text-decoration: none; background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.12); transition: 0.2s; }
-        .game-link:hover { border-color: var(--p); background: rgba(125,95,255,0.14); }
-        .gl-text { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px; }
-        .gl-name { font-size: 0.85rem; font-weight: 900; }
-        .gl-desc { font-size: 0.75rem; line-height: 1.35; color: rgba(255,255,255,0.7); }
-        .gl-go { flex-shrink: 0; background: linear-gradient(45deg, var(--p), var(--s)); border-radius: 8px; padding: 6px 12px; font-size: 0.7rem; font-weight: 900; }
+        /* GAMES: compact tiles (a little larger than the default). The links are inside each game's page. */
+        .grid.games { grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 12px; }
+        @media (min-width: 700px) { .grid.games { grid-template-columns: repeat(auto-fill, minmax(170px, 1fr)); gap: 14px; } }
         .btn-row { display: flex; margin-top: 8px; }
         .btn-main { flex: 1; background: linear-gradient(45deg, var(--p), var(--s)); color: #fff; text-decoration: none; text-align: center; padding: 7px; border-radius: 8px; font-weight: 900; font-size: 0.7rem; }
 
@@ -187,33 +178,18 @@
             const isGames = cat === 'GAMES';
             g.className = 'grid' + (isGames ? ' games' : '');
             g.innerHTML = filtered.length ? filtered.map(i => {
-                // Up to 3 extra links per game, each with its own short description
+                // Up to 3 extra links per game (listed on the game's own page)
                 const links = (Array.isArray(i.links) ? i.links : []).filter(l => l && safeUrl(l.url) !== '#').slice(0, 3);
                 // Items with a slug get their own details page; the picture and title link to it
                 const page = i.slug ? '/app/' + encodeURIComponent(i.slug) : '';
                 const top = `
                     <div class="card-img" style="background-image: url('${esc(safeUrl(i.image_url || 'https://via.placeholder.com/400x200'))}')"></div>
                     <h3 class="card-title">${esc(i.title)}</h3>`;
-                if (isGames && links.length) {
-                    return `
-                <div class="card">
-                    ${page ? `<a class="card-link" href="${esc(page)}">${top}</a>` : top}
-                    <div class="game-links">
-                        ${links.map(l => `
-                        <a class="game-link" href="${esc(safeUrl(l.url))}" target="_blank" rel="noopener noreferrer">
-                            <span class="gl-text">
-                                <span class="gl-name">${esc(l.label || 'Link')}</span>
-                                ${l.description ? `<span class="gl-desc">${esc(l.description)}</span>` : ''}
-                            </span>
-                            <span class="gl-go">GET</span>
-                        </a>`).join('')}
-                    </div>
-                </div>`;
-                }
+                // Games with links open their own page (where the links are listed), so no GET button on the tile
                 return `
                 <div class="card">
                     ${page ? `<a class="card-link" href="${esc(page)}">${top}</a>` : top}
-                    ${(i.category === 'APPS' && page) ? '' : `<div class="btn-row">
+                    ${(page && (i.category === 'APPS' || links.length)) ? '' : `<div class="btn-row">
                         <a href="${esc(safeUrl(i.url))}" target="_blank" rel="noopener noreferrer" class="btn-main">GET</a>
                     </div>`}
                 </div>`;
