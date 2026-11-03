@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -52,6 +53,9 @@
         .btn-delete { color: #ff4d4d; border: 1px solid #ff4d4d; }
         .btn-edit { color: #cfc4ff; border: 1px solid #7d5fff; }
         .btn-ghost { background: none; box-shadow: none; border: 1px solid rgba(255,255,255,0.2); font-size: 0.75rem; padding: 10px; }
+        .gl-box { margin: 14px 0 6px; padding: 12px 14px 6px; border: 1px solid rgba(125,95,255,0.4); border-radius: 16px; background: rgba(125,95,255,0.07); }
+        .gl-box .gl-n { color: #cfc4ff; font-size: 0.75rem; font-weight: 900; letter-spacing: 1px; text-transform: uppercase; margin: 4px 0 0; }
+        .gl-box input { margin: 6px 0; padding: 12px; font-size: 0.95rem; }
         .links { text-align: center; margin-top: 16px; }
         .links a { color: grey; text-decoration: none; font-size: 0.8rem; }
     </style>
@@ -96,6 +100,29 @@
 
                 <label for="url">Link (official download or source)</label>
                 <input type="url" id="url" placeholder="https://...">
+
+                <div id="game-links" class="hidden">
+                    <div class="section-label">Game links (up to 3)</div>
+                    <p class="hint">Each link gets a name and a short description. Leave unused rows empty. The first link is used as the main link if the one above is empty.</p>
+                    <div class="gl-box">
+                        <p class="gl-n">Link 1</p>
+                        <input type="text" id="gl1-label" placeholder="Name (e.g. Official download)" maxlength="40">
+                        <input type="url" id="gl1-url" placeholder="https://...">
+                        <input type="text" id="gl1-desc" placeholder="Short description (optional)" maxlength="140">
+                    </div>
+                    <div class="gl-box">
+                        <p class="gl-n">Link 2</p>
+                        <input type="text" id="gl2-label" placeholder="Name (e.g. Official download)" maxlength="40">
+                        <input type="url" id="gl2-url" placeholder="https://...">
+                        <input type="text" id="gl2-desc" placeholder="Short description (optional)" maxlength="140">
+                    </div>
+                    <div class="gl-box">
+                        <p class="gl-n">Link 3</p>
+                        <input type="text" id="gl3-label" placeholder="Name (e.g. Official download)" maxlength="40">
+                        <input type="url" id="gl3-url" placeholder="https://...">
+                        <input type="text" id="gl3-desc" placeholder="Short description (optional)" maxlength="140">
+                    </div>
+                </div>
 
                 <div class="section-label">Page details (shown before download)</div>
 
@@ -214,6 +241,38 @@
             }
         }
 
+        // ---------- Game links (up to 3, only for the GAMES section) ----------
+        const GL = [1, 2, 3];
+
+        function toggleGameLinks() {
+            $('game-links').classList.toggle('hidden', $('category').value !== 'GAMES');
+        }
+
+        function readGameLinks() {
+            if ($('category').value !== 'GAMES') return { links: [], error: null };
+            const links = [];
+            for (const n of GL) {
+                const label = $('gl' + n + '-label').value.trim();
+                const raw = $('gl' + n + '-url').value.trim();
+                const description = $('gl' + n + '-desc').value.trim();
+                if (!label && !raw && !description) continue;
+                const url = webUrl(raw);
+                if (!url) return { links: [], error: 'Link ' + n + ' must start with https://' };
+                links.push({ label: label || 'Link ' + (links.length + 1), url, description });
+            }
+            return { links, error: null };
+        }
+
+        function fillGameLinks(links) {
+            const list = Array.isArray(links) ? links : [];
+            for (const n of GL) {
+                const l = list[n - 1] || {};
+                $('gl' + n + '-label').value = l.label || '';
+                $('gl' + n + '-url').value = l.url || '';
+                $('gl' + n + '-desc').value = l.description || '';
+            }
+        }
+
         // ---------- Form helpers ----------
         const TEXT_FIELDS = ['title', 'image_url', 'url', 'slug', 'description', 'version', 'developer', 'license', 'size'];
 
@@ -221,6 +280,8 @@
             editingId = null;
             TEXT_FIELDS.forEach(f => { $(f).value = ''; });
             $('category').value = 'GAMES';
+            fillGameLinks([]);
+            toggleGameLinks();
             $('photo').value = '';
             $('preview').style.display = 'none';
             $('form-title').textContent = 'UPLOAD';
@@ -235,6 +296,8 @@
             editingId = i.id;
             TEXT_FIELDS.forEach(f => { $(f).value = i[f] ?? ''; });
             $('category').value = i.category || 'GAMES';
+            fillGameLinks(i.links);
+            toggleGameLinks();
             $('photo').value = '';
             const img = webUrl(i.image_url);
             if (img) {
@@ -322,11 +385,13 @@
         async function save() {
             const title = $('title').value.trim();
             const category = $('category').value;
-            const link = webUrl($('url').value.trim());
+            const gl = readGameLinks();
+            const link = webUrl($('url').value.trim()) || (gl.links[0] && gl.links[0].url) || null;
             const file = $('photo').files[0];
             let image_url = $('image_url').value.trim();
 
             if (!title) return say('save-msg', 'Add a title', 'err');
+            if (gl.error) return say('save-msg', gl.error, 'err');
             if (!link) return say('save-msg', 'The link must start with https://', 'err');
             if (!file && !webUrl(image_url)) return say('save-msg', 'Pick a photo or paste an image link', 'err');
             if (file) {
@@ -352,7 +417,7 @@
                 }
 
                 const build = s => ({
-                    title, image_url, category, url: link, slug: s,
+                    title, image_url, category, url: link, slug: s, links: gl.links,
                     description: orNull('description'),
                     version: orNull('version'),
                     developer: orNull('developer'),
@@ -408,6 +473,7 @@
         $('password').addEventListener('keydown', e => { if (e.key === 'Enter') login(); });
         $('logout-btn').addEventListener('click', logout);
         $('save-btn').addEventListener('click', save);
+        $('category').addEventListener('change', toggleGameLinks);
         $('cancel-btn').addEventListener('click', () => { resetForm(); say('save-msg', ''); });
         $('ping-btn').addEventListener('click', async () => {
             $('ping-btn').disabled = true;
@@ -431,6 +497,7 @@
             p.style.display = 'block';
         });
 
+        toggleGameLinks();
         supabaseClient.auth.getSession().then(({ data }) => showView(!!data.session));
     </script>
 </body>
