@@ -122,6 +122,8 @@
                 <p class="msg" id="save-msg"></p>
 
                 <button class="btn-ghost hidden" id="cancel-btn">Cancel editing</button>
+                <button class="btn-ghost" id="ping-btn">Notify search engines (all pages)</button>
+                <p class="msg" id="ping-msg"></p>
                 <button class="btn-ghost" id="logout-btn">Log out</button>
                 <p class="links"><a href="index.html">← Back to Site</a></p>
             </div>
@@ -192,6 +194,24 @@
             await supabaseClient.auth.signOut();
             resetForm();
             showView(false);
+        }
+
+        // ---------- Tell Bing and other search engines (IndexNow) ----------
+        // Asks the Worker to notify them. Only the logged-in admin is accepted.
+        async function pingSearch({ slugs = [], all = false } = {}) {
+            try {
+                const { data } = await supabaseClient.auth.getSession();
+                const token = data && data.session && data.session.access_token;
+                if (!token) return { ok: false, error: 'Not logged in' };
+                const res = await fetch('/api/indexnow', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
+                    body: JSON.stringify({ slugs, all })
+                });
+                return await res.json();
+            } catch (e) {
+                return { ok: false, error: String(e.message || e) };
+            }
         }
 
         // ---------- Form helpers ----------
@@ -355,6 +375,8 @@
                 resetForm();
                 say('save-msg', wasEditing ? 'Changes saved.' : 'Saved. It is live on the site.', 'ok');
                 loadList();
+                // Quietly tell search engines about the new or changed page
+                pingSearch({ slugs: [slug] });
             } catch (e) {
                 say('save-msg', 'Failed: ' + (e.message || e), 'err');
             } finally {
@@ -365,7 +387,7 @@
         // ---------- Delete ----------
         async function del(id) {
             if (!confirm('Delete this item?')) return;
-            const { data: row } = await supabaseClient.from('files').select('image_url').eq('id', id).maybeSingle();
+            const { data: row } = await supabaseClient.from('files').select('image_url, slug').eq('id', id).maybeSingle();
             const { error } = await supabaseClient.from('files').delete().eq('id', id);
             if (error) return alert('Delete failed: ' + error.message);
 
@@ -377,6 +399,8 @@
             }
             if (String(editingId) === String(id)) resetForm();
             loadList();
+            // Tell search engines the page is gone so they stop listing it
+            if (row && row.slug) pingSearch({ slugs: [row.slug] });
         }
 
         // ---------- Wiring ----------
@@ -385,6 +409,14 @@
         $('logout-btn').addEventListener('click', logout);
         $('save-btn').addEventListener('click', save);
         $('cancel-btn').addEventListener('click', () => { resetForm(); say('save-msg', ''); });
+        $('ping-btn').addEventListener('click', async () => {
+            $('ping-btn').disabled = true;
+            say('ping-msg', 'Notifying search engines...');
+            const r = await pingSearch({ all: true });
+            $('ping-btn').disabled = false;
+            if (r.ok) say('ping-msg', 'Sent ' + r.submitted + ' page link(s) to search engines.', 'ok');
+            else say('ping-msg', 'Could not send' + (r.status ? ' (code ' + r.status + ')' : r.error ? ': ' + r.error : '') + '. Try again later.', 'err');
+        });
         $('list').addEventListener('click', e => {
             const d = e.target.closest('.btn-delete');
             if (d) return del(d.dataset.id);
