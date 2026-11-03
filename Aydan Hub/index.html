@@ -128,6 +128,21 @@
             const { data } = await supabaseClient.from('files').select('*').order('created_at', { ascending: false });
             items = data || [];
             renderFeatured();
+            openFromQuery();
+        }
+
+        // Addresses inside this website, e.g. /app/moviebox or /?s=games. Anything else is not accepted here.
+        function internalPath(u) {
+            const s = String(u || '');
+            return /^\/(?!\/)[A-Za-z0-9\-._~\/?=&%#]*$/.test(s) ? s : '';
+        }
+
+        // /?s=games opens the Games section (and apps, links, files)
+        const SECTION_LINKS = { games: ['GAMES', 'GAMES'], apps: ['APPS', 'APPS'], links: ['LINK', 'LINKS'], files: ['FILES', 'FILES'] };
+        function openFromQuery() {
+            const s = new URLSearchParams(location.search).get('s');
+            const sec = s && SECTION_LINKS[s.toLowerCase()];
+            if (sec) openCat(sec[0], sec[1]);
         }
 
         // Items uploaded to the HOME section show on the front page as glass tiles
@@ -137,8 +152,10 @@
             if (!home.length) { section.style.display = 'none'; return; }
             document.getElementById('tiles').innerHTML = home.map(i => {
                 // Open the item's own page when it has one, otherwise its link
-                const internal = !!i.slug;
-                const href = internal ? '/app/' + encodeURIComponent(i.slug) : safeUrl(i.url);
+                // A chosen page inside the site wins, then the item's own page, then an outside link
+                const dest = internalPath(i.url);
+                const internal = !!dest || !!i.slug;
+                const href = dest || (i.slug ? '/app/' + encodeURIComponent(i.slug) : safeUrl(i.url));
                 const img = safeUrl(i.image_url || '');
                 const bg = (img !== '#' ? `url('${img}'), ` : '') + 'linear-gradient(135deg, #3a7bff, #1c4fd8)';
                 const desc = (i.description || '').trim();
