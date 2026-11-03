@@ -87,6 +87,13 @@ const BASE_CSS = `
   dl { display:grid; grid-template-columns:max-content 1fr; gap:8px 18px; margin:0; background:rgba(255,255,255,.03); border:1px solid rgba(255,255,255,.08); border-radius:14px; padding:16px 18px; }
   dt { color:#9a93c4; font-size:.8rem; text-transform:uppercase; letter-spacing:1px; font-weight:700; }
   dd { margin:0; overflow-wrap:anywhere; }
+  ul.links { list-style:none; margin:0; padding:0; display:flex; flex-direction:column; gap:10px; }
+  ul.links a { display:flex; align-items:center; gap:12px; padding:12px 14px; border-radius:14px; color:#fff; text-decoration:none; background:rgba(255,255,255,.05); border:1px solid rgba(255,255,255,.12); }
+  ul.links a:hover { border-color:var(--p); }
+  ul.links .t { flex:1; min-width:0; display:flex; flex-direction:column; gap:2px; }
+  ul.links .n { font-weight:900; }
+  ul.links .d { font-size:.85rem; color:#b9b3dd; }
+  ul.links .go { flex-shrink:0; background:linear-gradient(45deg,var(--p),var(--s)); border-radius:8px; padding:6px 12px; font-size:.75rem; font-weight:900; text-transform:uppercase; }
   .note { margin-top:26px; font-size:.8rem; color:#9a93c4; }
 `;
 
@@ -138,6 +145,11 @@ function renderAppPage(item, origin) {
   const label = CATEGORY_LABELS[item.category] || 'Item';
   const image = safeHttp(item.image_url);
   const download = safeHttp(item.url);
+  // Up to 3 extra links, each with a short description (used for games)
+  const links = (Array.isArray(item.links) ? item.links : [])
+    .map((l) => ({ label: String((l && l.label) || '').slice(0, 40), url: safeHttp(l && l.url), description: String((l && l.description) || '').slice(0, 140) }))
+    .filter((l) => l.url)
+    .slice(0, 3);
 
   const description = metaDescription(
     item.description,
@@ -176,10 +188,11 @@ function renderAppPage(item, origin) {
   <div>
     <span class="tag">${esc(label)}</span>
     <h1>${esc(item.title)}</h1>
-    ${download ? `<a class="btn" href="${esc(download)}" target="_blank" rel="noopener noreferrer nofollow">Get ${esc(item.title)}</a>` : ''}
+    ${download && !links.length ? `<a class="btn" href="${esc(download)}" target="_blank" rel="noopener noreferrer nofollow">Get ${esc(item.title)}</a>` : ''}
   </div>
 </div>
 ${item.description ? `<h2>About</h2><p class="desc">${esc(item.description)}</p>` : ''}
+${links.length ? `<h2>Links</h2><ul class="links">${links.map((l) => `<li><a href="${esc(l.url)}" target="_blank" rel="noopener noreferrer nofollow"><span class="t"><span class="n">${esc(l.label || 'Link')}</span>${l.description ? `<span class="d">${esc(l.description)}</span>` : ''}</span><span class="go">Get</span></a></li>`).join('')}</ul>` : ''}
 ${rows.length ? `<h2>Details</h2><dl>${rows.map(([k, v]) => `<dt>${esc(k)}</dt><dd>${esc(v)}</dd>`).join('')}</dl>` : ''}
 <p class="note">${SITE_NAME} links to the official source where possible. Check the permissions, license and terms of any app before you install it.</p>`;
 
