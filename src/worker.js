@@ -196,7 +196,9 @@ ${links.length ? `<h2>Links</h2><ul class="links">${links.map((l) => `<li><a hre
 ${rows.length ? `<h2>Details</h2><dl>${rows.map(([k, v]) => `<dt>${esc(k)}</dt><dd>${esc(v)}</dd>`).join('')}</dl>` : ''}
 <p class="note">${SITE_NAME} links to the official source where possible. Check the permissions, license and terms of any app before you install it.</p>`;
 
-  return layout({ title, description, canonical, image, jsonLd, body });
+  // A front-page tile that just points to another page of the site has no content of its own
+  const robots = String(item.url || '').startsWith('/') ? 'noindex' : undefined;
+  return layout({ title, description, canonical, image, robots, jsonLd, body });
 }
 
 function renderNotFound() {
@@ -233,13 +235,13 @@ async function handleApp(slug, origin) {
 async function handleSitemap(origin) {
   let rows;
   try {
-    rows = await supabase('files?select=slug,created_at&slug=not.is.null&order=created_at.desc&limit=1000');
+    rows = await supabase('files?select=slug,url,created_at&slug=not.is.null&order=created_at.desc&limit=1000');
   } catch (e) {
     return new Response('Sitemap temporarily unavailable', { status: 503, headers: { 'Retry-After': '60' } });
   }
   const urls = [`<url><loc>${esc(origin)}/</loc></url>`].concat(
     rows
-      .filter((r) => /^[a-z0-9-]+$/.test(r.slug || ''))
+      .filter((r) => /^[a-z0-9-]+$/.test(r.slug || '') && !String(r.url || '').startsWith('/'))
       .map((r) => {
         const lastmod = r.created_at ? `<lastmod>${esc(String(r.created_at).slice(0, 10))}</lastmod>` : '';
         return `<url><loc>${esc(origin)}/app/${esc(r.slug)}</loc>${lastmod}</url>`;
