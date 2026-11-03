@@ -34,7 +34,36 @@
         .nav-btn:hover { color: var(--s); text-shadow: 0 0 10px var(--s); }
 
         /* SECTIONS */
-        #hero { height: 100vh; display: flex; align-items: center; justify-content: center; text-align: center; background: radial-gradient(circle at center, #1a103d 0%, #070512 70%); }
+        #hero { height: 100vh; display: flex; align-items: center; justify-content: center; text-align: center; background: radial-gradient(circle at 18% 28%, rgba(125,95,255,0.40) 0%, transparent 42%), radial-gradient(circle at 82% 72%, rgba(255,0,222,0.28) 0%, transparent 42%), radial-gradient(circle at center, #1a103d 0%, #070512 70%); }
+
+        /* FEATURED GLASS TILES (items uploaded to the HOME section).
+           They float over the AYDAN HUB title; the name shows blurred through the glass. */
+        #featured { display: none; position: relative; z-index: 2; margin-top: -62vh; padding: 0 5% 70px; }
+        .tiles { max-width: 1100px; margin: 0 auto; display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 300px), 1fr)); gap: 16px; }
+        .tile {
+            position: relative; z-index: 1; display: flex; flex-direction: column; padding: 10px;
+            border-radius: 28px; color: #fff; text-decoration: none;
+            background: rgba(255,255,255,0.10);
+            border: 1px solid rgba(255,255,255,0.28);
+            box-shadow: 0 18px 40px rgba(0,0,0,0.30), inset 0 1px 0 rgba(255,255,255,0.45);
+            -webkit-backdrop-filter: blur(9px) saturate(170%); backdrop-filter: blur(9px) saturate(170%);
+            transition: transform 0.25s ease, box-shadow 0.25s ease;
+        }
+        .tile-img {
+            width: 100%; aspect-ratio: 16 / 10; border-radius: 20px;
+            background-size: cover; background-position: center;
+            border: 1px solid rgba(255,255,255,0.22);
+            opacity: 0.62; /* see-through, so the AYDAN HUB name glows through the glass */
+        }
+        .tile-body { padding: 14px 10px 10px; }
+        .tile-title { margin: 0 0 6px; font-size: 1.35rem; font-weight: 900; line-height: 1.15; text-shadow: 0 1px 8px rgba(0,0,0,0.3); }
+        .tile-desc { margin: 0; font-size: 0.88rem; line-height: 1.45; color: rgba(255,255,255,0.92); display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
+        @media (hover: hover) { .tile:hover { transform: translateY(-4px); box-shadow: 0 24px 48px rgba(125,95,255,0.35), inset 0 1px 0 rgba(255,255,255,0.5); } }
+        @media (prefers-reduced-motion: reduce) { .tile { transition: none; } }
+        /* browsers without blur support get a darker panel so text is still readable */
+        @supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+            .tile { background: rgba(20,16,50,0.78); }
+        }
         .hero-title { font-size: clamp(3rem, 15vw, 6rem); font-weight: 900; letter-spacing: -2px; }
 
         #content { display: none; padding: 100px 5% 50px; min-height: 100vh; }
@@ -78,6 +107,10 @@
         <h1 class="hero-title">AYDAN<br><span style="color:transparent; -webkit-text-stroke: 1px #fff;">HUB</span></h1>
     </section>
 
+    <section id="featured" aria-label="Highlights">
+        <div class="tiles" id="tiles"></div>
+    </section>
+
     <section id="content">
         <h2 id="view-title" style="margin-bottom:30px; text-transform:uppercase; color:var(--p);"></h2>
         <div class="grid" id="main-grid"></div>
@@ -92,6 +125,31 @@
         async function load() {
             const { data } = await supabaseClient.from('files').select('*').order('created_at', { ascending: false });
             items = data || [];
+            renderFeatured();
+        }
+
+        // Items uploaded to the HOME section show on the front page as glass tiles
+        function renderFeatured() {
+            const home = items.filter(i => i.category === 'HOME');
+            const section = document.getElementById('featured');
+            if (!home.length) { section.style.display = 'none'; return; }
+            document.getElementById('tiles').innerHTML = home.map(i => {
+                // Open the item's own page when it has one, otherwise its link
+                const internal = !!i.slug;
+                const href = internal ? '/app/' + encodeURIComponent(i.slug) : safeUrl(i.url);
+                const img = safeUrl(i.image_url || '');
+                const bg = (img !== '#' ? `url('${img}'), ` : '') + 'linear-gradient(135deg, #3a7bff, #1c4fd8)';
+                const desc = (i.description || '').trim();
+                return `
+                <a class="tile" href="${esc(href)}" ${internal ? '' : 'target="_blank" rel="noopener noreferrer"'}>
+                    <div class="tile-img" style="background-image: ${esc(bg)}"></div>
+                    <div class="tile-body">
+                        <h3 class="tile-title">${esc(i.title)}</h3>
+                        ${desc ? `<p class="tile-desc">${esc(desc)}</p>` : ''}
+                    </div>
+                </a>`;
+            }).join('');
+            section.style.display = 'block';
         }
 
         // Escape text so titles can never inject HTML or scripts
@@ -109,9 +167,10 @@
 
         function openCat(cat, label) {
             document.getElementById('hero').style.display = 'none';
+            document.getElementById('featured').style.display = 'none';
             document.getElementById('content').style.display = 'block';
             document.getElementById('view-title').innerText = label;
-            const filtered = items.filter(i => cat === 'FILES' ? (i.category === 'FILES' || i.category === 'HOME') : i.category === cat);
+            const filtered = items.filter(i => i.category === cat);
             const g = document.getElementById('main-grid');
             g.innerHTML = filtered.length ? filtered.map(i => {
                 // Items with a slug get their own details page; the picture and title link to it
