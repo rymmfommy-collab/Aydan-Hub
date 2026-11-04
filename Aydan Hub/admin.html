@@ -402,11 +402,26 @@
         // ---------- Make every photo the same square tile ----------
         const TILE = 800; // final size in pixels (800 x 800)
 
-        async function toTile(file) {
+        // keepShape = true (HOME tiles): keep the whole picture, only shrink it. Nothing is cut off.
+        // keepShape = false (other sections): crop to the usual centered square.
+        const MAX_SIDE = 1280;
+        async function toTile(file, keepShape = false) {
             // GIFs are left alone so they keep animating
             if (file.type === 'image/gif') return { blob: file, type: file.type, ext: 'gif' };
 
             const bmp = await createImageBitmap(file, { imageOrientation: 'from-image' });
+            if (keepShape) {
+                const scale = Math.min(1, MAX_SIDE / Math.max(bmp.width, bmp.height));   // never blow small photos up
+                const w = Math.round(bmp.width * scale), hgt = Math.round(bmp.height * scale);
+                const c = document.createElement('canvas');
+                c.width = w; c.height = hgt;
+                c.getContext('2d').drawImage(bmp, 0, 0, w, hgt);
+                bmp.close && bmp.close();
+                let b = await new Promise(r => c.toBlob(r, 'image/webp', 0.88));
+                if (b && b.type === 'image/webp') return { blob: b, type: 'image/webp', ext: 'webp' };
+                b = await new Promise(r => c.toBlob(r, 'image/jpeg', 0.9));
+                return { blob: b, type: 'image/jpeg', ext: 'jpg' };
+            }
             const side = Math.min(bmp.width, bmp.height);          // biggest centered square
             const sx = (bmp.width - side) / 2;
             const sy = (bmp.height - side) / 2;
@@ -452,7 +467,7 @@
             try {
                 if (file) {
                     say('save-msg', 'Resizing photo...');
-                    const tile = await toTile(file);
+                    const tile = await toTile(file, category === 'HOME');
                     say('save-msg', 'Uploading photo...');
                     const path = Date.now() + '-' + Math.random().toString(36).slice(2, 8) + '.' + tile.ext;
                     const { error: upErr } = await supabaseClient.storage.from(BUCKET).upload(path, tile.blob, { contentType: tile.type });
@@ -539,7 +554,13 @@
             if (!f) { p.style.display = 'none'; return; }
             p.style.backgroundImage = "url('" + URL.createObjectURL(f) + "')";
             p.style.display = 'block';
+            fitPreview();
         });
+        function fitPreview() {
+            // HOME keeps the whole picture, so show it uncropped; the others are cropped to a square
+            $('preview').style.backgroundSize = $('category').value === 'HOME' ? 'contain' : 'cover';
+        }
+        $('category').addEventListener('change', fitPreview);
 
         toggleGameLinks();
         buildDestOptions('');
