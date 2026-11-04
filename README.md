@@ -4,6 +4,10 @@ A neon-styled hub for games, apps, links and files. Each item is a card with a p
 
 **Live site:** https://x.aydanhub.workers.dev
 
+## Follow me
+
+- [TikTok: @xcab521](https://www.tiktok.com/@xcab521)
+
 ## Features
 
 - Sections for Games, Apps, Links and Files
