@@ -39,7 +39,8 @@
         /* FEATURED GLASS TILES (items uploaded to the HOME section).
            They float over the AYDAN HUB title; the name shows blurred through the glass. */
         #featured { display: none; position: relative; z-index: 2; margin-top: -62vh; padding: 0 5% 70px; }
-        .tiles { max-width: 1100px; margin: 0 auto; display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 300px), 1fr)); gap: 16px; }
+        .tiles { max-width: 1100px; margin: 0 auto; align-items: start; display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 260px), 1fr)); gap: 14px; }
+        @media (max-width: 600px) { .tiles { max-width: 310px; } }
         .tile {
             position: relative; z-index: 1; display: flex; flex-direction: column; padding: 10px;
             border-radius: 28px; color: #fff; text-decoration: none;
@@ -50,13 +51,13 @@
             transition: transform 0.25s ease, box-shadow 0.25s ease;
         }
         .tile-img {
-            width: 100%; aspect-ratio: 16 / 10; border-radius: 20px;
-            background-size: cover; background-position: center;
+            display: block; width: 100%; height: auto; max-height: 360px; object-fit: contain; border-radius: 20px;   /* the whole picture, nothing cropped; very tall ones are scaled down to fit */
             border: 1px solid rgba(255,255,255,0.22);
-            opacity: 0.62; /* see-through, so the AYDAN HUB name glows through the glass */
+            opacity: 0.86; /* slightly see-through: the photo stays clear and the AYDAN HUB name still glows faintly through */
         }
-        .tile-body { padding: 14px 10px 10px; }
-        .tile-title { margin: 0 0 6px; font-size: 1.35rem; font-weight: 900; line-height: 1.15; text-shadow: 0 1px 8px rgba(0,0,0,0.3); }
+        .tile-img.ph { aspect-ratio: 16 / 9; background: linear-gradient(135deg, #3a7bff, #1c4fd8); }
+        .tile-body { padding: 12px 8px 8px; }
+        .tile-title { margin: 0 0 6px; font-size: 1.2rem; font-weight: 900; line-height: 1.15; text-shadow: 0 1px 8px rgba(0,0,0,0.3); }
         .tile-desc { margin: 0; font-size: 0.88rem; line-height: 1.45; color: rgba(255,255,255,0.92); display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
         @media (hover: hover) { .tile:hover { transform: translateY(-4px); box-shadow: 0 24px 48px rgba(125,95,255,0.35), inset 0 1px 0 rgba(255,255,255,0.5); } }
         @media (prefers-reduced-motion: reduce) { .tile { transition: none; } }
@@ -157,11 +158,12 @@
                 const internal = !!dest || !!i.slug;
                 const href = dest || (i.slug ? '/app/' + encodeURIComponent(i.slug) : safeUrl(i.url));
                 const img = safeUrl(i.image_url || '');
-                const bg = (img !== '#' ? `url('${img}'), ` : '') + 'linear-gradient(135deg, #3a7bff, #1c4fd8)';
                 const desc = (i.description || '').trim();
                 return `
                 <a class="tile" href="${esc(href)}" ${internal ? '' : 'target="_blank" rel="noopener noreferrer"'}>
-                    <div class="tile-img" style="background-image: ${esc(bg)}"></div>
+                    ${img !== '#'
+                        ? `<img class="tile-img" src="${esc(img)}" alt="${esc(i.title)}" loading="lazy" decoding="async" onerror="this.outerHTML='<div class=\\'tile-img ph\\'></div>'">`
+                        : `<div class="tile-img ph"></div>`}
                     <div class="tile-body">
                         <h3 class="tile-title">${esc(i.title)}</h3>
                         ${desc ? `<p class="tile-desc">${esc(desc)}</p>` : ''}
