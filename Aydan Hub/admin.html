@@ -55,6 +55,17 @@
         .gl-box { margin: 14px 0 6px; padding: 12px 14px 6px; border: 1px solid rgba(125,95,255,0.4); border-radius: 16px; background: rgba(125,95,255,0.07); }
         .gl-box .gl-n { color: #cfc4ff; font-size: 0.75rem; font-weight: 900; letter-spacing: 1px; text-transform: uppercase; margin: 4px 0 0; }
         .gl-box input { margin: 6px 0; padding: 12px; font-size: 0.95rem; }
+        .cm-item { padding: 12px 4px; border-bottom: 1px solid rgba(255,255,255,0.06); }
+        .cm-head { font-size: 0.8rem; color: #9a93c4; margin-bottom: 4px; }
+        .cm-head b { color: #fff; }
+        .cm-tag { display: inline-block; font-size: 0.65rem; font-weight: 900; border-radius: 999px; padding: 1px 8px; margin-left: 6px; text-transform: uppercase; }
+        .cm-tag.pending { background: rgba(255,200,0,0.2); color: #ffd966; }
+        .cm-tag.approved { background: rgba(77,255,166,0.15); color: #4dffa6; }
+        .cm-tag.q { background: rgba(255,0,222,0.2); color: #ffb3f3; }
+        .cm-body { white-space: pre-wrap; overflow-wrap: anywhere; margin: 4px 0; }
+        .cm-reply { border-left: 3px solid #7d5fff; background: rgba(125,95,255,0.12); padding: 6px 10px; margin: 6px 0; border-radius: 0 8px 8px 0; font-size: 0.9rem; overflow-wrap: anywhere; }
+        .cm-actions { display: flex; gap: 8px; margin-top: 8px; flex-wrap: wrap; }
+        .btn-ok { width: auto; margin: 0; background: none; box-shadow: none; font-size: 0.7rem; padding: 6px 12px; color: #4dffa6; border: 1px solid #4dffa6; }
         .links { text-align: center; margin-top: 16px; }
         .links a { color: grey; text-decoration: none; font-size: 0.8rem; }
     </style>
@@ -164,6 +175,11 @@
                 <summary>Manage uploads <span class="count" id="total-count">0</span></summary>
                 <div id="list"></div>
             </details>
+
+            <details class="manage" id="cm-manage">
+                <summary>Comments &amp; questions <span class="count" id="cm-count">0</span></summary>
+                <div id="cm-list"><p class="msg">Loading...</p></div>
+            </details>
         </div>
     </div>
 
@@ -205,7 +221,7 @@
         function showView(loggedIn) {
             $('login-view').classList.toggle('hidden', loggedIn);
             $('admin-view').classList.toggle('hidden', !loggedIn);
-            if (loggedIn) loadList();
+            if (loggedIn) { loadList(); loadComments(); }
         }
 
         async function login() {
@@ -355,6 +371,56 @@
             say('save-msg', '');
             window.scrollTo({ top: 0, behavior: 'smooth' });
         }
+
+        // ---------- Comments ----------
+        async function loadComments() {
+            const box = $('cm-list');
+            const { data, error } = await supabaseClient.from('comments')
+                .select('id,item_slug,kind,name,body,status,reply,created_at')
+                .order('created_at', { ascending: false }).limit(200);
+            if (error) { box.innerHTML = '<p class="msg err">Could not load comments: ' + esc(error.message) + '</p>'; return; }
+            const list = data || [];
+            // newest first; comments are published as soon as they are posted
+            const unanswered = list.filter(c => c.kind === 'question' && !c.reply).length;
+            $('cm-count').textContent = unanswered ? unanswered + ' unanswered' : list.length;
+            $('cm-count').style.background = unanswered ? 'rgba(255,200,0,0.25)' : '';
+            if (!list.length) { box.innerHTML = '<p class="msg">No comments yet.</p>'; return; }
+            box.innerHTML = list.map(c => `
+                <div class="cm-item" data-id="${esc(c.id)}">
+                    <div class="cm-head"><b>${esc(c.name)}</b> on <a href="/app/${esc(c.item_slug)}" target="_blank" rel="noopener" style="color:#cfc4ff">${esc(c.item_slug)}</a>
+                        <span class="cm-tag ${esc(c.status)}">${esc(c.status)}</span>${c.kind === 'question' ? '<span class="cm-tag q">question</span>' : ''}
+                        · ${esc(String(c.created_at).slice(0, 10))}</div>
+                    <div class="cm-body">${esc(c.body)}</div>
+                    ${c.reply ? `<div class="cm-reply"><b>Your reply:</b> ${esc(c.reply)}</div>` : ''}
+                    <div class="cm-actions">
+                        ${c.status === 'pending' ? '<button class="btn-ok" data-act="approve">APPROVE</button>' : ''}
+                        <button class="btn-edit" data-act="reply">${c.reply ? 'EDIT REPLY' : 'REPLY'}</button>
+                        <button class="btn-delete" data-act="del">DELETE</button>
+                    </div>
+                </div>`).join('');
+        }
+
+        $('cm-list').addEventListener('click', async (e) => {
+            const btn = e.target.closest('button[data-act]');
+            if (!btn) return;
+            const id = btn.closest('.cm-item').dataset.id;
+            const act = btn.dataset.act;
+            btn.disabled = true;
+            let error;
+            if (act === 'approve') {
+                ({ error } = await supabaseClient.from('comments').update({ status: 'approved' }).eq('id', id));
+            } else if (act === 'del') {
+                if (!confirm('Delete this comment?')) { btn.disabled = false; return; }
+                ({ error } = await supabaseClient.from('comments').delete().eq('id', id));
+            } else if (act === 'reply') {
+                const text = prompt('Your reply (shown under the comment):');
+                if (text === null) { btn.disabled = false; return; }
+                const reply = text.trim().slice(0, 1000) || null;
+                ({ error } = await supabaseClient.from('comments').update(reply ? { reply, status: 'approved' } : { reply: null }).eq('id', id));
+            }
+            if (error) { alert('Failed: ' + error.message); btn.disabled = false; return; }
+            loadComments();
+        });
 
         // ---------- List ----------
         async function loadList() {
