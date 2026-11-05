@@ -3,6 +3,7 @@
 //   /app/<slug>   one indexable page per item in the Supabase `files` table
 //   /sitemap.xml  lists the home page and every item page
 //   /robots.txt   points crawlers to the sitemap
+//   /api/comments accepts new comments/questions (shown right away; admin can delete)
 
 const SUPABASE_URL = 'https://tvasdkfdizdwkroatgno.supabase.co';
 // Publishable key: safe to be public. Access is limited by row-level security.
@@ -94,6 +95,22 @@ const BASE_CSS = `
   ul.links .n { font-weight:900; }
   ul.links .d { font-size:.85rem; color:#b9b3dd; }
   ul.links .go { flex-shrink:0; background:linear-gradient(45deg,var(--p),var(--s)); border-radius:8px; padding:6px 12px; font-size:.75rem; font-weight:900; text-transform:uppercase; }
+  .cm { list-style:none; margin:0 0 18px; padding:0; display:flex; flex-direction:column; gap:10px; }
+  .cm li { background:rgba(255,255,255,.04); border:1px solid rgba(255,255,255,.1); border-radius:14px; padding:12px 14px; }
+  .cm .who { font-weight:900; }
+  .cm .q { margin-left:8px; font-size:.65rem; background:rgba(255,0,222,.2); color:#ffb3f3; border-radius:999px; padding:1px 8px; text-transform:uppercase; letter-spacing:1px; }
+  .cm .when { color:#9a93c4; font-size:.75rem; margin-left:8px; }
+  .cm p { margin:6px 0 0; white-space:pre-line; overflow-wrap:anywhere; color:#e6e2ff; }
+  .cm .rep { margin-top:8px; padding:8px 12px; border-left:3px solid var(--p); background:rgba(125,95,255,.12); border-radius:0 10px 10px 0; font-size:.92rem; }
+  .cm .rep b { color:#cfc4ff; }
+  form.cf { display:flex; flex-direction:column; gap:10px; background:rgba(255,255,255,.03); border:1px solid rgba(255,255,255,.08); border-radius:14px; padding:16px; }
+  form.cf input, form.cf textarea, form.cf select { font:inherit; color:#fff; background:rgba(255,255,255,.07); border:1px solid rgba(255,255,255,.15); border-radius:10px; padding:10px 12px; width:100%; }
+  form.cf textarea { min-height:90px; resize:vertical; }
+  form.cf .row { display:flex; gap:10px; } form.cf .row > * { flex:1; min-width:0; }
+  form.cf button { font:inherit; border:0; cursor:pointer; color:#fff; background:linear-gradient(45deg,var(--p),var(--s)); border-radius:12px; padding:12px; font-weight:900; text-transform:uppercase; letter-spacing:1px; }
+  form.cf button:disabled { opacity:.6; }
+  form.cf .hp { position:absolute; left:-9999px; height:0; overflow:hidden; }
+  #cmsg { font-size:.9rem; min-height:1.2em; margin:0; }
   .note { margin-top:26px; font-size:.8rem; color:#9a93c4; }
 `;
 
@@ -140,7 +157,46 @@ function metaDescription(text, fallback) {
   return (lastSpace > 100 ? cut.slice(0, lastSpace) : cut).replace(/[\s,;:.\-]+$/, '') + '…';
 }
 
-function renderAppPage(item, origin) {
+function fmtDate(d) {
+  const t = String(d || '').slice(0, 10);
+  return /^\d{4}-\d{2}-\d{2}$/.test(t) ? t : '';
+}
+
+function renderComments(item, comments) {
+  const list = (comments || []).map((c) => `<li><span class="who">${esc(c.name)}</span>${c.kind === 'question' ? '<span class="q">Question</span>' : ''}<span class="when">${esc(fmtDate(c.created_at))}</span><p>${esc(c.body)}</p>${c.reply ? `<div class="rep"><b>${SITE_NAME}:</b> ${esc(c.reply)}</div>` : ''}</li>`).join('');
+  return `<h2>Comments &amp; questions</h2>
+${list ? `<ul class="cm">${list}</ul>` : '<p class="desc">No comments yet. Be the first to ask or comment.</p>'}
+<form class="cf" id="cform" data-slug="${esc(item.slug)}">
+  <div class="row">
+    <input name="name" placeholder="Your name" maxlength="40" required autocomplete="nickname">
+    <select name="kind" aria-label="Type"><option value="comment">Comment</option><option value="question">Question</option></select>
+  </div>
+  <textarea name="body" placeholder="Write your comment or question (no links)" maxlength="1000" required></textarea>
+  <div class="hp" aria-hidden="true"><input name="website" tabindex="-1" autocomplete="off"></div>
+  <button type="submit">Post</button>
+  <p id="cmsg" role="status"></p>
+</form>
+<script>
+(function(){
+  var f=document.getElementById('cform'); if(!f) return;
+  var m=document.getElementById('cmsg'), b=f.querySelector('button');
+  var T={bad_name:'Please enter your name.',bad_body:'Please write at least 2 characters.',links:'Links are not allowed in comments.',rate:'You are posting too fast. Try again in a few minutes.',busy:'Too many comments waiting right now. Try again later.',bad_item:'This item no longer exists.'};
+  f.addEventListener('submit',function(e){
+    e.preventDefault(); b.disabled=true; m.textContent='Sending...';
+    var d=new FormData(f);
+    fetch('/api/comments',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({slug:f.dataset.slug,name:d.get('name'),kind:d.get('kind'),body:d.get('body'),website:d.get('website')})})
+    .then(function(r){return r.json();})
+    .then(function(j){
+      if(j&&j.ok){f.reset();m.textContent='Thank you! Your message is posted. It will show on this page within a couple of minutes.';}
+      else{m.textContent=T[j&&j.error]||'Could not send. Please try again.';}
+      b.disabled=false;
+    }).catch(function(){m.textContent='Could not send. Please try again.';b.disabled=false;});
+  });
+})();
+</script>`;
+}
+
+function renderAppPage(item, origin, comments) {
   const canonical = `${origin}/app/${item.slug}`;
   const label = CATEGORY_LABELS[item.category] || 'Item';
   const image = safeHttp(item.image_url);
@@ -193,6 +249,7 @@ function renderAppPage(item, origin) {
 </div>
 ${item.description ? `<h2>About</h2><p class="desc">${esc(item.description)}</p>` : ''}
 ${links.length ? `<h2>Links</h2><ul class="links">${links.map((l) => `<li><a href="${esc(l.url)}" target="_blank" rel="noopener noreferrer nofollow"><span class="t"><span class="n">${esc(l.label || 'Link')}</span>${l.description ? `<span class="d">${esc(l.description)}</span>` : ''}</span><span class="go">Get</span></a></li>`).join('')}</ul>` : ''}
+${renderComments(item, comments)}
 ${rows.length ? `<h2>Details</h2><dl>${rows.map(([k, v]) => `<dt>${esc(k)}</dt><dd>${esc(v)}</dd>`).join('')}</dl>` : ''}
 <p class="note">${SITE_NAME} links to the official source where possible. Check the permissions, license and terms of any app before you install it.</p>`;
 
@@ -229,7 +286,12 @@ async function handleApp(slug, origin) {
     return htmlResponse(renderUnavailable(), 503, { 'Retry-After': '60' });
   }
   if (!rows.length) return htmlResponse(renderNotFound(), 404);
-  return htmlResponse(renderAppPage(rows[0], origin));
+  // Comments are optional: if they fail to load, the page still works.
+  let comments = [];
+  try {
+    comments = await supabase(`comments?item_slug=eq.${encodeURIComponent(slug)}&status=eq.approved&select=name,body,kind,reply,created_at&order=created_at.asc&limit=100`);
+  } catch (e) { /* show the page without comments */ }
+  return htmlResponse(renderAppPage(rows[0], origin, comments));
 }
 
 async function handleSitemap(origin) {
@@ -332,6 +394,50 @@ async function handleIndexNow(request, url) {
   return json({ ok: false, status: last.status || undefined, error: last.status ? undefined : 'Could not reach IndexNow', tried }, last.status ? 200 : 502);
 }
 
+async function sha256Hex(text) {
+  const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(text));
+  return [...new Uint8Array(buf)].map((b) => b.toString(16).padStart(2, '0')).join('');
+}
+
+// POST /api/comments  body: { slug, name, kind, body, website }
+async function handleComment(request, url) {
+  const origin = request.headers.get('Origin');
+  if (origin && origin !== url.origin) return json({ ok: false, error: 'forbidden' }, 403);
+  const raw = await request.text();
+  if (raw.length > 6000) return json({ ok: false, error: 'too_big' }, 413);
+  let b;
+  try { b = JSON.parse(raw); } catch (e) { return json({ ok: false, error: 'bad_request' }, 400); }
+  if (!b || typeof b !== 'object') return json({ ok: false, error: 'bad_request' }, 400);
+  // Hidden field only bots fill in: pretend it worked.
+  if (b.website) return json({ ok: true });
+
+  const slug = String(b.slug || '');
+  if (!/^[a-z0-9-]{1,100}$/.test(slug)) return json({ ok: false, error: 'bad_item' }, 400);
+  const ip = request.headers.get('CF-Connecting-IP') || '';
+  const ipHash = ip ? (await sha256Hex(`aydan:${ip}`)).slice(0, 32) : null;
+
+  let res;
+  try {
+    res = await fetch(`${SUPABASE_URL}/rest/v1/rpc/submit_comment`, {
+      method: 'POST',
+      headers: { apikey: SUPABASE_KEY, 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        p_slug: slug,
+        p_name: String(b.name || '').slice(0, 100),
+        p_body: String(b.body || '').slice(0, 2000),
+        p_kind: String(b.kind || 'comment'),
+        p_ip: ipHash,
+      }),
+    });
+  } catch (e) {
+    return json({ ok: false, error: 'unavailable' }, 502);
+  }
+  if (!res.ok) return json({ ok: false, error: 'unavailable' }, 502);
+  const code = await res.json();
+  if (code === 'ok') return json({ ok: true });
+  return json({ ok: false, error: String(code) }, code === 'rate' ? 429 : 400);
+}
+
 function handleRobots(origin) {
   return new Response(`User-agent: *\nAllow: /\n\nSitemap: ${origin}/sitemap.xml\n`, {
     headers: { 'Content-Type': 'text/plain; charset=utf-8' },
@@ -347,6 +453,11 @@ export default {
     if (path === '/api/indexnow') {
       if (request.method !== 'POST') return new Response('Method not allowed', { status: 405, headers: { Allow: 'POST' } });
       return handleIndexNow(request, url);
+    }
+
+    if (path === '/api/comments') {
+      if (request.method !== 'POST') return new Response('Method not allowed', { status: 405, headers: { Allow: 'POST' } });
+      return handleComment(request, url);
     }
 
     if (path === `/${INDEXNOW_KEY}.txt`) {
