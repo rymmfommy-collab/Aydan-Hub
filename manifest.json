@@ -1,10 +1,10 @@
 {
-  "name": "Aydan Hub",
-  "short_name": "Aydan",
+  "name": "çábTech",
+  "short_name": "çábTech",
   "description": "The Ultimate Metaverse Hub for Games and Apps.",
   "start_url": "index.html",
   "display": "standalone",
-  "background_color": "#070512",
+  "background_color": "#ffffff",
   "theme_color": "#7d5fff",
   "icons": [
     {
