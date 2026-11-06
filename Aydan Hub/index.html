@@ -6,7 +6,7 @@
     <meta name="google-site-verification" content="pguMl4tskDKely2U8fS1zJ-V4GZD-fVGwDvB8wbOeVo" />
     <title>Aydan Hub | Metaverse</title>
     <meta name="description" content="Aydan Hub: apps, games, links and files, each with details and an official download link.">
-    <meta name="theme-color" content="#070512">
+    <meta name="theme-color" content="#ffffff">
     <link rel="icon" type="image/png" href="favicon.png">
     <link rel="apple-touch-icon" href="apple-touch-icon.png">
     <link rel="manifest" href="manifest.json">
@@ -15,26 +15,26 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap" rel="stylesheet">
 
     <style>
-        :root { --p: #7d5fff; --s: #ff00de; --bg: #070512; }
-        body { margin: 0; background: var(--bg); color: #fff; font-family: 'Inter', sans-serif; overflow-x: hidden; }
+        :root { --p: #7d5fff; --s: #ff00de; --bg: #ffffff; --ink: #14102e; --soft: #5b5683; }
+        body { margin: 0; background: var(--bg); color: var(--ink); font-family: 'Inter', sans-serif; overflow-x: hidden; }
 
         /* HEADER - FIXED & VISIBLE */
         header {
             display: flex; justify-content: space-between; align-items: center;
             padding: 10px 5%; position: fixed; top: 0; width: 100%;
-            box-sizing: border-box; z-index: 10000; background: rgba(7, 5, 18, 0.95);
-            border-bottom: 1px solid rgba(255,255,255,0.1); backdrop-filter: blur(15px);
+            box-sizing: border-box; z-index: 10000; background: rgba(255, 255, 255, 0.92);
+            border-bottom: 1px solid rgba(125,95,255,0.22); box-shadow: 0 4px 24px rgba(125,95,255,0.12); backdrop-filter: blur(15px);
         }
         .logo-box { display: flex; align-items: center; gap: 10px; cursor: pointer; }
         .logo-img { width: 40px; height: 40px; display: block; filter: drop-shadow(0 0 8px rgba(125,95,255,0.45)); }
         .logo-name { font-weight: 900; letter-spacing: 2px; font-size: 1.1rem; }
 
         nav { display: flex; gap: 12px; }
-        .nav-btn { color: #fff; text-decoration: none; font-size: 0.7rem; font-weight: 900; text-transform: uppercase; cursor: pointer; padding: 8px; transition: 0.3s; }
+        .nav-btn { color: var(--ink); text-decoration: none; font-size: 0.7rem; font-weight: 900; text-transform: uppercase; cursor: pointer; padding: 8px; transition: 0.3s; }
         .nav-btn:hover { color: var(--s); text-shadow: 0 0 10px var(--s); }
 
         /* SECTIONS */
-        #hero { height: 100vh; display: flex; align-items: center; justify-content: center; text-align: center; background: radial-gradient(circle at 18% 28%, rgba(125,95,255,0.40) 0%, transparent 42%), radial-gradient(circle at 82% 72%, rgba(255,0,222,0.28) 0%, transparent 42%), radial-gradient(circle at center, #1a103d 0%, #070512 70%); }
+        #hero { height: 100vh; display: flex; align-items: center; justify-content: center; text-align: center; background: linear-gradient(to bottom, rgba(255,255,255,0) 72%, #ffffff 100%), radial-gradient(circle at 18% 28%, rgba(125,95,255,0.30) 0%, transparent 45%), radial-gradient(circle at 82% 72%, rgba(255,0,222,0.22) 0%, transparent 45%), radial-gradient(circle at center, #ffffff 0%, #f3f0ff 75%); }
 
         /* FEATURED GLASS TILES (items uploaded to the HOME section).
            They float over the AYDAN HUB title; the name shows blurred through the glass. */
@@ -43,39 +43,39 @@
         @media (max-width: 600px) { .tiles { max-width: 310px; } }
         .tile {
             position: relative; z-index: 1; display: flex; flex-direction: column; padding: 10px;
-            border-radius: 28px; color: #fff; text-decoration: none;
-            background: rgba(255,255,255,0.10);
-            border: 1px solid rgba(255,255,255,0.28);
-            box-shadow: 0 18px 40px rgba(0,0,0,0.30), inset 0 1px 0 rgba(255,255,255,0.45);
+            border-radius: 28px; color: var(--ink); text-decoration: none;
+            background: rgba(255,255,255,0.42);
+            border: 1px solid rgba(125,95,255,0.40);
+            box-shadow: 0 14px 36px rgba(125,95,255,0.22), 0 0 0 1px rgba(255,255,255,0.7) inset, 0 0 18px rgba(255,0,222,0.10);
             -webkit-backdrop-filter: blur(9px) saturate(170%); backdrop-filter: blur(9px) saturate(170%);
             transition: transform 0.25s ease, box-shadow 0.25s ease;
         }
         .tile-img {
             display: block; width: 100%; height: auto; max-height: 360px; object-fit: contain; border-radius: 20px;   /* the whole picture, nothing cropped; very tall ones are scaled down to fit */
-            border: 1px solid rgba(255,255,255,0.22);
-            opacity: 0.86; /* slightly see-through: the photo stays clear and the AYDAN HUB name still glows faintly through */
+            border: 1px solid rgba(125,95,255,0.30);
+            opacity: 0.92; /* slightly see-through: the photo stays clear and the AYDAN HUB name still glows faintly through */
         }
         .tile-img.ph { aspect-ratio: 16 / 9; background: linear-gradient(135deg, #3a7bff, #1c4fd8); }
         .tile-body { padding: 12px 8px 8px; }
-        .tile-title { margin: 0 0 6px; font-size: 1.2rem; font-weight: 900; line-height: 1.15; text-shadow: 0 1px 8px rgba(0,0,0,0.3); }
-        .tile-desc { margin: 0; font-size: 0.88rem; line-height: 1.45; color: rgba(255,255,255,0.92); display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
-        @media (hover: hover) { .tile:hover { transform: translateY(-4px); box-shadow: 0 24px 48px rgba(125,95,255,0.35), inset 0 1px 0 rgba(255,255,255,0.5); } }
+        .tile-title { margin: 0 0 6px; font-size: 1.2rem; font-weight: 900; line-height: 1.15; text-shadow: 0 1px 10px rgba(255,255,255,0.8); }
+        .tile-desc { margin: 0; font-size: 0.88rem; line-height: 1.45; color: #2b2552; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
+        @media (hover: hover) { .tile:hover { transform: translateY(-4px); box-shadow: 0 24px 48px rgba(125,95,255,0.38), 0 0 26px rgba(255,0,222,0.22); } }
         @media (prefers-reduced-motion: reduce) { .tile { transition: none; } }
         /* browsers without blur support get a darker panel so text is still readable */
         @supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
-            .tile { background: rgba(20,16,50,0.78); }
+            .tile { background: rgba(255,255,255,0.92); }
         }
-        .hero-title { font-size: clamp(3rem, 15vw, 6rem); font-weight: 900; letter-spacing: -2px; }
+        .hero-title { font-size: clamp(3rem, 15vw, 6rem); font-weight: 900; letter-spacing: -2px; color: var(--ink); text-shadow: 0 0 28px rgba(125,95,255,0.35); }
 
         #content { display: none; padding: 100px 5% 50px; min-height: 100vh; }
         .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); gap: 10px; }
         @media (min-width: 700px) { .grid { grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 14px; } }
 
         /* CARD STYLE */
-        .card { background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 14px; padding: 8px; transition: 0.3s; }
+        .card { background: #fff; border: 1px solid rgba(125,95,255,0.22); box-shadow: 0 6px 18px rgba(125,95,255,0.10); border-radius: 14px; padding: 8px; transition: 0.3s; }
         .card-title { margin: 0; font-size: 0.75rem; font-weight: 700; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
         .card:hover { transform: translateY(-5px); border-color: var(--p); }
-        .card-img { width: 100%; aspect-ratio: 1 / 1; border-radius: 10px; background-size: cover; background-position: center; background-color: rgba(255,255,255,0.05); margin-bottom: 8px; }
+        .card-img { width: 100%; aspect-ratio: 1 / 1; border-radius: 10px; background-size: cover; background-position: center; background-color: #efeaff; margin-bottom: 8px; }
         .card-link { display: block; color: inherit; text-decoration: none; }
 
         /* GAMES: compact tiles (a little larger than the default). The links are inside each game's page. */
@@ -108,7 +108,7 @@
     </header>
 
     <section id="hero">
-        <h1 class="hero-title">AYDAN<br><span style="color:transparent; -webkit-text-stroke: 1px #fff;">HUB</span></h1>
+        <h1 class="hero-title">AYDAN<br><span style="color:transparent; -webkit-text-stroke: 2px #7d5fff; filter: drop-shadow(0 0 10px rgba(255,0,222,0.55));">HUB</span></h1>
     </section>
 
     <section id="featured" aria-label="Highlights">

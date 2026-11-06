@@ -68,6 +68,26 @@
         .btn-ok { width: auto; margin: 0; background: none; box-shadow: none; font-size: 0.7rem; padding: 6px 12px; color: #4dffa6; border: 1px solid #4dffa6; }
         .links { text-align: center; margin-top: 16px; }
         .links a { color: grey; text-decoration: none; font-size: 0.8rem; }
+    
+        /* ---- Light neon theme ---- */
+        body { background: #ffffff; color: #14102e; }
+        .card, .manage, .group { background: #fff; border-color: rgba(125,95,255,0.25); box-shadow: 0 6px 18px rgba(125,95,255,0.10); }
+        #list .group { background: #faf8ff; }
+        input, select, textarea { background: #f6f3ff; border-color: rgba(125,95,255,0.30); color: #14102e; }
+        button { color: #fff; }
+        .btn-edit { color: #5a3fe0; } .btn-ghost { color: #14102e; border-color: rgba(125,95,255,0.35); background: none; }
+        .btn-delete { background: none; }
+        label, .hint { color: #5b5683; } .section-label { color: #5a3fe0; border-top-color: rgba(125,95,255,0.2); }
+        .edit-banner { color: #5a3fe0; } .manage .count, .group .count { color: #5a3fe0; }
+        .manage[open] > summary, .group[open] summary { border-bottom-color: rgba(125,95,255,0.2); }
+        .item-row, .cm-item { border-bottom-color: rgba(125,95,255,0.15); }
+        .thumb, #preview { background-color: #efeaff; }
+        .gl-box { background: rgba(125,95,255,0.06); } .gl-box .gl-n { color: #5a3fe0; }
+        .cm-head { color: #5b5683; } .cm-head b { color: #14102e; } .cm-reply { background: rgba(125,95,255,0.10); }
+        .cm-tag.pending { color: #a07800; } .cm-tag.approved { color: #0a8a55; background: rgba(10,138,85,0.12); } .cm-tag.q { color: #c200a8; }
+        .msg.ok { color: #0a8a55; } .msg.err { color: #d62828; }
+        .btn-ok { color: #0a8a55; border-color: #0a8a55; background: none; }
+        .links a { color: #5b5683; }
     </style>
 </head>
 <body>
@@ -387,7 +407,7 @@
             if (!list.length) { box.innerHTML = '<p class="msg">No comments yet.</p>'; return; }
             box.innerHTML = list.map(c => `
                 <div class="cm-item" data-id="${esc(c.id)}">
-                    <div class="cm-head"><b>${esc(c.name)}</b> on <a href="/app/${esc(c.item_slug)}" target="_blank" rel="noopener" style="color:#cfc4ff">${esc(c.item_slug)}</a>
+                    <div class="cm-head"><b>${esc(c.name)}</b> on <a href="/app/${esc(c.item_slug)}" target="_blank" rel="noopener" style="color:#5a3fe0">${esc(c.item_slug)}</a>
                         <span class="cm-tag ${esc(c.status)}">${esc(c.status)}</span>${c.kind === 'question' ? '<span class="cm-tag q">question</span>' : ''}
                         · ${esc(String(c.created_at).slice(0, 10))}</div>
                     <div class="cm-body">${esc(c.body)}</div>
