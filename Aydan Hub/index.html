@@ -10,6 +10,12 @@
     <link rel="icon" type="image/png" href="favicon.png">
     <link rel="apple-touch-icon" href="apple-touch-icon.png">
     <link rel="manifest" href="manifest.json">
+    <meta name="application-name" content="çábTech">
+    <meta name="apple-mobile-web-app-title" content="çábTech">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="application-name" content="çábTech">
+    <meta name="apple-mobile-web-app-title" content="çábTech">
+    <meta name="apple-mobile-web-app-capable" content="yes">
 
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap" rel="stylesheet">
@@ -50,12 +56,12 @@
             -webkit-backdrop-filter: blur(9px) saturate(170%); backdrop-filter: blur(9px) saturate(170%);
             transition: transform 0.25s ease, box-shadow 0.25s ease;
         }
-        .tile-img {
-            display: block; width: 100%; height: auto; max-height: 360px; object-fit: contain; border-radius: 20px;   /* the whole picture, nothing cropped; very tall ones are scaled down to fit */
-            border: 1px solid rgba(125,95,255,0.30);
-            opacity: 0.92; /* slightly see-through: the photo stays clear and the AYDAN HUB name still glows faintly through */
-        }
-        .tile-img.ph { aspect-ratio: 16 / 9; background: linear-gradient(135deg, #3a7bff, #1c4fd8); }
+        /* Every HOME tile picture has the same wide shape (97:59, the exact proportions of the chosen layout tile). The whole photo is always visible;
+           a soft blurred copy of it fills any empty space at the sides or top and bottom. */
+        .tile-pic { position: relative; aspect-ratio: 97 / 59; width: 100%; overflow: hidden; border-radius: 20px; border: 1px solid rgba(125,95,255,0.30); background: #efeaff; }
+        .tile-pic .bg { position: absolute; inset: -16px; background-size: cover; background-position: center; filter: blur(16px) saturate(1.2); opacity: 0.75; }
+        .tile-pic img { position: relative; display: block; width: 100%; height: 100%; object-fit: contain; }
+        .tile-pic.ph { background: linear-gradient(135deg, #7d5fff, #ff00de); }
         .tile-body { padding: 12px 8px 8px; }
         .tile-title { margin: 0 0 6px; font-size: 1.2rem; font-weight: 900; line-height: 1.15; text-shadow: 0 1px 10px rgba(255,255,255,0.8); }
         .tile-desc { margin: 0; font-size: 0.88rem; line-height: 1.45; color: #2b2552; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
@@ -162,8 +168,8 @@
                 return `
                 <a class="tile" href="${esc(href)}" ${internal ? '' : 'target="_blank" rel="noopener noreferrer"'}>
                     ${img !== '#'
-                        ? `<img class="tile-img" src="${esc(img)}" alt="${esc(i.title)}" loading="lazy" decoding="async" onerror="this.outerHTML='<div class=\\'tile-img ph\\'></div>'">`
-                        : `<div class="tile-img ph"></div>`}
+                        ? `<div class="tile-pic"><div class="bg" style="background-image:url('${esc(img).replace(/'/g, '%27')}')"></div><img src="${esc(img)}" alt="${esc(i.title)}" loading="lazy" decoding="async" onerror="this.parentNode.className='tile-pic ph';this.remove()"></div>`
+                        : `<div class="tile-pic ph"></div>`}
                     <div class="tile-body">
                         <h3 class="tile-title">${esc(i.title)}</h3>
                         ${desc ? `<p class="tile-desc">${esc(desc)}</p>` : ''}
