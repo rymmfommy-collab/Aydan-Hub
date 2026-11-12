@@ -2,7 +2,7 @@
 
 A neon-styled hub for games, apps, links and files. Each item is a card with a photo and a button that opens its link. Content is managed from a private admin page, so there is no need to edit code to add something new.
 
-**Live site:** https://x.aydanhub.workers.dev
+**Live site:** https://x.cabtech.workers.dev
 
 ## Follow me
 
@@ -39,7 +39,7 @@ Aydan-Hub/
 
 ## Using the admin page
 
-1. Go to `https://x.aydanhub.workers.dev/admin.html`
+1. Go to `https://x.cabtech.workers.dev/admin.html`
 2. Log in with the admin account
 3. Enter a title, pick a photo (JPG, PNG, WEBP or GIF, up to 5 MB), choose a section and add the link
 4. Tap **Push to Hub**. The item shows on the site right away
