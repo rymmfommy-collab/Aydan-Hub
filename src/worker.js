@@ -249,9 +249,9 @@ function renderAppPage(item, origin, comments) {
 </div>
 ${item.description ? `<h2>About</h2><p class="desc">${esc(item.description)}</p>` : ''}
 ${links.length ? `<h2>Links</h2><ul class="links">${links.map((l) => `<li><a href="${esc(l.url)}" target="_blank" rel="noopener noreferrer nofollow"><span class="t"><span class="n">${esc(l.label || 'Link')}</span>${l.description ? `<span class="d">${esc(l.description)}</span>` : ''}</span><span class="go">Get</span></a></li>`).join('')}</ul>` : ''}
-${renderComments(item, comments)}
 ${rows.length ? `<h2>Details</h2><dl>${rows.map(([k, v]) => `<dt>${esc(k)}</dt><dd>${esc(v)}</dd>`).join('')}</dl>` : ''}
-<p class="note">${SITE_NAME} links to the official source where possible. Check the permissions, license and terms of any app before you install it.</p>`;
+<p class="note">${SITE_NAME} links to the official source where possible. Check the permissions, license and terms of any app before you install it.</p>
+${renderComments(item, comments)}`;
 
   // A front-page tile that just points to another page of the site has no content of its own
   const robots = String(item.url || '').startsWith('/') ? 'noindex' : undefined;
