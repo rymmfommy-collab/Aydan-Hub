@@ -262,7 +262,7 @@ function renderNotFound() {
   return layout({
     title: `Not found | ${SITE_NAME}`,
     description: 'This page does not exist.',
-    canonical: 'https://x.aydanhub.workers.dev/',
+    canonical: 'https://x.cabtech.workers.dev/',
     robots: 'noindex',
     body: `<h1>Page not found</h1><p>That item does not exist or was removed.</p><a class="btn" href="/">Back to ${SITE_NAME}</a>`,
   });
@@ -272,7 +272,7 @@ function renderUnavailable() {
   return layout({
     title: `Temporarily unavailable | ${SITE_NAME}`,
     description: 'Please try again shortly.',
-    canonical: 'https://x.aydanhub.workers.dev/',
+    canonical: 'https://x.cabtech.workers.dev/',
     robots: 'noindex',
     body: `<h1>Please try again</h1><p>The page could not load right now. Try again in a minute.</p>`,
   });
