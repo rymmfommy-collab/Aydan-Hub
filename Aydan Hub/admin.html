@@ -4,8 +4,13 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="robots" content="noindex, nofollow">
-    <title>Aydan Admin | Neon Control</title>
+    <title>çábTech Admin</title>
     <link rel="icon" type="image/png" href="favicon.png">
+    <link rel="manifest" href="admin-manifest.json">
+    <meta name="theme-color" content="#ffffff">
+    <meta name="application-name" content="çábTech Admin">
+    <meta name="apple-mobile-web-app-title" content="çábTech Admin">
+    <link rel="apple-touch-icon" href="apple-touch-icon.png">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap" rel="stylesheet">
     <style>
@@ -488,23 +493,25 @@
         // ---------- Make every photo the same square tile ----------
         const TILE = 800; // final size in pixels (800 x 800)
 
-        // keepShape = true (HOME tiles): keep the whole picture, only shrink it. Nothing is cut off.
+        // keepShape = true (HOME tiles): fit the whole picture inside the landscape HOME frame. Nothing is cut off.
         // keepShape = false (other sections): crop to the usual centered square.
-        const MAX_SIDE = 1280;
+        const HOME_W = 1312, HOME_H = 800;   // same landscape shape as the HOME tile (about 1.64 : 1)
         async function toTile(file, keepShape = false) {
             // GIFs are left alone so they keep animating
             if (file.type === 'image/gif') return { blob: file, type: file.type, ext: 'gif' };
 
             const bmp = await createImageBitmap(file, { imageOrientation: 'from-image' });
             if (keepShape) {
-                const scale = Math.min(1, MAX_SIDE / Math.max(bmp.width, bmp.height));   // never blow small photos up
-                const w = Math.round(bmp.width * scale), hgt = Math.round(bmp.height * scale);
+                // HOME tile: a landscape frame (1312 x 800). The whole picture is placed inside it, nothing is cut off.
                 const c = document.createElement('canvas');
-                c.width = w; c.height = hgt;
-                c.getContext('2d').drawImage(bmp, 0, 0, w, hgt);
+                c.width = HOME_W; c.height = HOME_H;
+                const scale = Math.min(HOME_W / bmp.width, HOME_H / bmp.height);
+                const w = Math.round(bmp.width * scale), hgt = Math.round(bmp.height * scale);
+                c.getContext('2d').drawImage(bmp, Math.round((HOME_W - w) / 2), Math.round((HOME_H - hgt) / 2), w, hgt);
                 bmp.close && bmp.close();
                 let b = await new Promise(r => c.toBlob(r, 'image/webp', 0.88));
                 if (b && b.type === 'image/webp') return { blob: b, type: 'image/webp', ext: 'webp' };
+                const g = c.getContext('2d'); g.globalCompositeOperation = 'destination-over'; g.fillStyle = '#fff'; g.fillRect(0, 0, HOME_W, HOME_H);
                 b = await new Promise(r => c.toBlob(r, 'image/jpeg', 0.9));
                 return { blob: b, type: 'image/jpeg', ext: 'jpg' };
             }
