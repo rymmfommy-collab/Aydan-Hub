@@ -1,5 +1,5 @@
 // Aydan Hub Worker
-// Serves the static site from /Aydan Hub and adds three dynamic routes:
+// Serves the static site from /Aydan Hub and adds dynamic routes:
 //   /app/<slug>   one indexable page per item in the Supabase `files` table
 //   /sitemap.xml  lists the home page and every item page
 //   /robots.txt   points crawlers to the sitemap
@@ -205,7 +205,7 @@ function renderAppPage(item, origin, comments) {
   const links = (Array.isArray(item.links) ? item.links : [])
     .map((l) => ({ label: String((l && l.label) || '').slice(0, 40), url: safeHttp(l && l.url), description: String((l && l.description) || '').slice(0, 140) }))
     .filter((l) => l.url)
-    .slice(0, 3);
+    .slice(0, 4);
 
   const description = metaDescription(
     item.description,
