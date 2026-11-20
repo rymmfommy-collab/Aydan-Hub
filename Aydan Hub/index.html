@@ -202,7 +202,7 @@
             g.className = 'grid' + (isGames ? ' games' : '');
             g.innerHTML = filtered.length ? filtered.map(i => {
                 // Up to 3 extra links per game (listed on the game's own page)
-                const links = (Array.isArray(i.links) ? i.links : []).filter(l => l && safeUrl(l.url) !== '#').slice(0, 3);
+                const links = (Array.isArray(i.links) ? i.links : []).filter(l => l && safeUrl(l.url) !== '#').slice(0, 4);
                 // Items with a slug get their own details page; the picture and title link to it
                 const page = i.slug ? '/app/' + encodeURIComponent(i.slug) : '';
                 const top = `
