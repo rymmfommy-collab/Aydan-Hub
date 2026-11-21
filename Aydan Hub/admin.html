@@ -11,6 +11,7 @@
     <meta name="application-name" content="çábTech Admin">
     <meta name="apple-mobile-web-app-title" content="çábTech Admin">
     <link rel="apple-touch-icon" href="apple-touch-icon.png">
+    <script>(function(){var t='light';try{t=localStorage.getItem('theme')||t}catch(e){}document.documentElement.setAttribute('data-theme',t==='dark'?'dark':'light')})();</script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap" rel="stylesheet">
     <style>
@@ -75,27 +76,46 @@
         .links a { color: grey; text-decoration: none; font-size: 0.8rem; }
     
         /* ---- Light neon theme ---- */
-        body { background: #ffffff; color: #14102e; }
-        .card, .manage, .group { background: #fff; border-color: rgba(125,95,255,0.25); box-shadow: 0 6px 18px rgba(125,95,255,0.10); }
-        #list .group { background: #faf8ff; }
-        input, select, textarea { background: #f6f3ff; border-color: rgba(125,95,255,0.30); color: #14102e; }
-        button { color: #fff; }
-        .btn-edit { color: #5a3fe0; } .btn-ghost { color: #14102e; border-color: rgba(125,95,255,0.35); background: none; }
-        .btn-delete { background: none; }
-        label, .hint { color: #5b5683; } .section-label { color: #5a3fe0; border-top-color: rgba(125,95,255,0.2); }
-        .edit-banner { color: #5a3fe0; } .manage .count, .group .count { color: #5a3fe0; }
-        .manage[open] > summary, .group[open] summary { border-bottom-color: rgba(125,95,255,0.2); }
-        .item-row, .cm-item { border-bottom-color: rgba(125,95,255,0.15); }
-        .thumb, #preview { background-color: #efeaff; }
-        .gl-box { background: rgba(125,95,255,0.06); } .gl-box .gl-n { color: #5a3fe0; }
-        .cm-head { color: #5b5683; } .cm-head b { color: #14102e; } .cm-reply { background: rgba(125,95,255,0.10); }
-        .cm-tag.pending { color: #a07800; } .cm-tag.approved { color: #0a8a55; background: rgba(10,138,85,0.12); } .cm-tag.q { color: #c200a8; }
-        .msg.ok { color: #0a8a55; } .msg.err { color: #d62828; }
-        .btn-ok { color: #0a8a55; border-color: #0a8a55; background: none; }
-        .links a { color: #5b5683; }
+        #theme-toggle { position: fixed; top: 12px; right: 12px; z-index: 50; width: 40px; height: 40px; padding: 0; margin: 0; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; cursor: pointer; color: #14102e; background: rgba(255,255,255,0.92); border: 1px solid rgba(125,95,255,0.35); }
+        html[data-theme="dark"] #theme-toggle { color: #fff; background: rgba(7,5,18,0.85); border-color: rgba(255,255,255,0.25); }
+        #theme-toggle svg { width: 20px; height: 20px; } #theme-toggle .moon { display: none; }
+        html:not([data-theme="dark"]) #theme-toggle .sun { display: none; } html:not([data-theme="dark"]) #theme-toggle .moon { display: block; }
+
+        html:not([data-theme="dark"]) body { background: #ffffff; color: #14102e; }
+        html:not([data-theme="dark"]) .card, html:not([data-theme="dark"]) .manage, html:not([data-theme="dark"]) .group { background: #fff; border-color: rgba(125,95,255,0.25); box-shadow: 0 6px 18px rgba(125,95,255,0.10); }
+        html:not([data-theme="dark"]) #list .group { background: #faf8ff; }
+        html:not([data-theme="dark"]) input, html:not([data-theme="dark"]) select, html:not([data-theme="dark"]) textarea { background: #f6f3ff; border-color: rgba(125,95,255,0.30); color: #14102e; }
+        html:not([data-theme="dark"]) button { color: #fff; }
+        html:not([data-theme="dark"]) .btn-edit { color: #5a3fe0; }
+        html:not([data-theme="dark"]) .btn-ghost { color: #14102e; border-color: rgba(125,95,255,0.35); background: none; }
+        html:not([data-theme="dark"]) .btn-delete { background: none; }
+        html:not([data-theme="dark"]) label, html:not([data-theme="dark"]) .hint { color: #5b5683; }
+        html:not([data-theme="dark"]) .section-label { color: #5a3fe0; border-top-color: rgba(125,95,255,0.2); }
+        html:not([data-theme="dark"]) .edit-banner { color: #5a3fe0; }
+        html:not([data-theme="dark"]) .manage .count, html:not([data-theme="dark"]) .group .count { color: #5a3fe0; }
+        html:not([data-theme="dark"]) .manage[open] > summary, html:not([data-theme="dark"]) .group[open] summary { border-bottom-color: rgba(125,95,255,0.2); }
+        html:not([data-theme="dark"]) .item-row, html:not([data-theme="dark"]) .cm-item { border-bottom-color: rgba(125,95,255,0.15); }
+        html:not([data-theme="dark"]) .thumb, html:not([data-theme="dark"]) #preview { background-color: #efeaff; }
+        html:not([data-theme="dark"]) .gl-box { background: rgba(125,95,255,0.06); }
+        html:not([data-theme="dark"]) .gl-box .gl-n { color: #5a3fe0; }
+        html:not([data-theme="dark"]) .cm-head { color: #5b5683; }
+        html:not([data-theme="dark"]) .cm-head b { color: #14102e; }
+        html:not([data-theme="dark"]) .cm-reply { background: rgba(125,95,255,0.10); }
+        html:not([data-theme="dark"]) .cm-tag.pending { color: #a07800; }
+        html:not([data-theme="dark"]) .cm-tag.approved { color: #0a8a55; background: rgba(10,138,85,0.12); }
+        html:not([data-theme="dark"]) .cm-tag.q { color: #c200a8; }
+        html:not([data-theme="dark"]) .msg.ok { color: #0a8a55; }
+        html:not([data-theme="dark"]) .msg.err { color: #d62828; }
+        html:not([data-theme="dark"]) .btn-ok { color: #0a8a55; border-color: #0a8a55; background: none; }
+        html:not([data-theme="dark"]) .links a { color: #5b5683; }
+
     </style>
 </head>
 <body>
+    <button id="theme-toggle" type="button" aria-label="Switch between dark and light mode" title="Dark / light mode" onclick="(function(){var n=document.documentElement.getAttribute('data-theme')==='dark'?'light':'dark';document.documentElement.setAttribute('data-theme',n);try{localStorage.setItem('theme',n)}catch(e){}})()">
+        <svg class="sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="4.2"/><path d="M12 2.5v2.4M12 19.1v2.4M2.5 12h2.4M19.1 12h2.4M5.3 5.3l1.7 1.7M17 17l1.7 1.7M18.7 5.3L17 7M7 17l-1.7 1.7"/></svg>
+        <svg class="moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 14.5A8.5 8.5 0 0 1 9.5 4a8.5 8.5 0 1 0 10.5 10.5z"/></svg>
+    </button>
     <div class="container">
 
         <!-- LOGIN -->
@@ -129,7 +149,6 @@
                     <option value="GAMES">GAMES</option>
                     <option value="APPS">APPS</option>
                     <option value="LINK">LINKS</option>
-                    <option value="FILES">FILES</option>
                     <option value="HOME">HOME (big tile on the front page)</option>
                 </select>
 
@@ -467,7 +486,7 @@
             const wasOpen = new Set([...document.querySelectorAll('#list details[open]')].map(d => d.dataset.cat));
 
             const SECTIONS = [
-                ['GAMES', 'Games'], ['APPS', 'Apps'], ['LINK', 'Links'], ['FILES', 'Files'], ['HOME', 'Home']
+                ['GAMES', 'Games'], ['APPS', 'Apps'], ['LINK', 'Links'], ['HOME', 'Home']
             ];
             const known = SECTIONS.map(s => s[0]);
             const other = items.filter(i => !known.includes(i.category));

@@ -13,23 +13,52 @@
     <meta name="application-name" content="çábTech">
     <meta name="apple-mobile-web-app-title" content="çábTech">
     <meta name="mobile-web-app-capable" content="yes">
-    <meta name="application-name" content="çábTech">
-    <meta name="apple-mobile-web-app-title" content="çábTech">
     <meta name="apple-mobile-web-app-capable" content="yes">
 
+    <script>
+        (function () {
+            var t = 'light';   /* default for first-time visitors */
+            try { t = localStorage.getItem('theme') || t; } catch (e) {}
+            document.documentElement.setAttribute('data-theme', t === 'dark' ? 'dark' : 'light');
+        })();
+    </script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap" rel="stylesheet">
 
     <style>
-        :root { --p: #7d5fff; --s: #ff00de; --bg: #ffffff; --ink: #14102e; --soft: #5b5683; }
+        :root {
+            --p: #7d5fff; --s: #ff00de;
+            --bg: #ffffff; --ink: #14102e; --soft: #5b5683; --desc: #2b2552;
+            --header-bg: rgba(255,255,255,0.92); --line: rgba(125,95,255,0.22); --header-shadow: 0 4px 24px rgba(125,95,255,0.12);
+            --hero-bg: linear-gradient(to bottom, rgba(255,255,255,0) 72%, #ffffff 100%), radial-gradient(circle at 18% 28%, rgba(125,95,255,0.30) 0%, transparent 45%), radial-gradient(circle at 82% 72%, rgba(255,0,222,0.22) 0%, transparent 45%), radial-gradient(circle at center, #ffffff 0%, #f3f0ff 75%);
+            --hero-title-glow: 0 0 28px rgba(125,95,255,0.35);
+            --tile-bg: rgba(255,255,255,0.42); --tile-border: rgba(125,95,255,0.40);
+            --tile-shadow: 0 14px 36px rgba(125,95,255,0.22), 0 0 0 1px rgba(255,255,255,0.7) inset, 0 0 18px rgba(255,0,222,0.10);
+            --tile-shadow-hover: 0 24px 48px rgba(125,95,255,0.38), 0 0 26px rgba(255,0,222,0.22);
+            --tile-title-shadow: 0 1px 10px rgba(255,255,255,0.8); --tile-fallback: rgba(255,255,255,0.92);
+            --pic-bg: #efeaff; --pic-border: rgba(125,95,255,0.30);
+            --card-bg: #ffffff; --card-border: rgba(125,95,255,0.22); --card-shadow: 0 6px 18px rgba(125,95,255,0.10);
+        }
+        :root[data-theme="dark"] {
+            --bg: #070512; --ink: #ffffff; --soft: #b9b3dd; --desc: rgba(255,255,255,0.92);
+            --header-bg: rgba(7,5,18,0.92); --line: rgba(255,255,255,0.12); --header-shadow: 0 4px 24px rgba(0,0,0,0.35);
+            --hero-bg: linear-gradient(to bottom, rgba(7,5,18,0) 72%, #070512 100%), radial-gradient(circle at 18% 28%, rgba(125,95,255,0.40) 0%, transparent 42%), radial-gradient(circle at 82% 72%, rgba(255,0,222,0.28) 0%, transparent 42%), radial-gradient(circle at center, #1a103d 0%, #070512 70%);
+            --hero-title-glow: 0 0 30px rgba(125,95,255,0.55);
+            --tile-bg: rgba(255,255,255,0.10); --tile-border: rgba(255,255,255,0.28);
+            --tile-shadow: 0 18px 40px rgba(0,0,0,0.30), inset 0 1px 0 rgba(255,255,255,0.45), 0 0 18px rgba(125,95,255,0.18);
+            --tile-shadow-hover: 0 24px 48px rgba(125,95,255,0.35), inset 0 1px 0 rgba(255,255,255,0.5);
+            --tile-title-shadow: 0 1px 8px rgba(0,0,0,0.35); --tile-fallback: rgba(20,16,50,0.85);
+            --pic-bg: rgba(255,255,255,0.06); --pic-border: rgba(255,255,255,0.22);
+            --card-bg: rgba(255,255,255,0.04); --card-border: rgba(255,255,255,0.10); --card-shadow: none;
+        }
         body { margin: 0; background: var(--bg); color: var(--ink); font-family: 'Inter', sans-serif; overflow-x: hidden; }
 
         /* HEADER - FIXED & VISIBLE */
         header {
             display: flex; justify-content: space-between; align-items: center;
             padding: 10px 5%; position: fixed; top: 0; width: 100%;
-            box-sizing: border-box; z-index: 10000; background: rgba(255, 255, 255, 0.92);
-            border-bottom: 1px solid rgba(125,95,255,0.22); box-shadow: 0 4px 24px rgba(125,95,255,0.12); backdrop-filter: blur(15px);
+            box-sizing: border-box; z-index: 10000; background: var(--header-bg);
+            border-bottom: 1px solid var(--line); box-shadow: var(--header-shadow); backdrop-filter: blur(15px);
         }
         .logo-box { display: flex; align-items: center; gap: 10px; cursor: pointer; }
         .logo-img { width: 40px; height: 40px; display: block; filter: drop-shadow(0 0 8px rgba(125,95,255,0.45)); }
@@ -39,8 +68,16 @@
         .nav-btn { color: var(--ink); text-decoration: none; font-size: 0.7rem; font-weight: 900; text-transform: uppercase; cursor: pointer; padding: 8px; transition: 0.3s; }
         .nav-btn:hover { color: var(--s); text-shadow: 0 0 10px var(--s); }
 
+        .header-right { display: flex; align-items: center; gap: 6px; }
+        #theme-toggle { width: 38px; height: 38px; padding: 0; display: inline-flex; align-items: center; justify-content: center; border-radius: 50%; cursor: pointer; color: var(--ink); background: transparent; border: 1px solid var(--line); transition: 0.3s; }
+        #theme-toggle:hover { border-color: var(--p); box-shadow: 0 0 12px rgba(125,95,255,0.45); }
+        #theme-toggle svg { width: 20px; height: 20px; }
+        #theme-toggle .moon { display: none; }
+        :root[data-theme="light"] #theme-toggle .sun { display: none; }
+        :root[data-theme="light"] #theme-toggle .moon { display: block; }
+
         /* SECTIONS */
-        #hero { height: 100vh; display: flex; align-items: center; justify-content: center; text-align: center; background: linear-gradient(to bottom, rgba(255,255,255,0) 72%, #ffffff 100%), radial-gradient(circle at 18% 28%, rgba(125,95,255,0.30) 0%, transparent 45%), radial-gradient(circle at 82% 72%, rgba(255,0,222,0.22) 0%, transparent 45%), radial-gradient(circle at center, #ffffff 0%, #f3f0ff 75%); }
+        #hero { height: 100vh; display: flex; align-items: center; justify-content: center; text-align: center; background: var(--hero-bg); }
 
         /* FEATURED GLASS TILES (items uploaded to the HOME section).
            They float over the AYDAN HUB title; the name shows blurred through the glass. */
@@ -50,38 +87,38 @@
         .tile {
             position: relative; z-index: 1; display: flex; flex-direction: column; padding: 10px;
             border-radius: 28px; color: var(--ink); text-decoration: none;
-            background: rgba(255,255,255,0.42);
-            border: 1px solid rgba(125,95,255,0.40);
-            box-shadow: 0 14px 36px rgba(125,95,255,0.22), 0 0 0 1px rgba(255,255,255,0.7) inset, 0 0 18px rgba(255,0,222,0.10);
+            background: var(--tile-bg);
+            border: 1px solid var(--tile-border);
+            box-shadow: var(--tile-shadow);
             -webkit-backdrop-filter: blur(9px) saturate(170%); backdrop-filter: blur(9px) saturate(170%);
             transition: transform 0.25s ease, box-shadow 0.25s ease;
         }
         /* Every HOME tile picture has the same wide shape (97:59, the exact proportions of the chosen layout tile). The whole photo is always visible;
            a soft blurred copy of it fills any empty space at the sides or top and bottom. */
-        .tile-pic { position: relative; aspect-ratio: 97 / 59; width: 100%; overflow: hidden; border-radius: 20px; border: 1px solid rgba(125,95,255,0.30); background: #efeaff; }
+        .tile-pic { position: relative; aspect-ratio: 97 / 59; width: 100%; overflow: hidden; border-radius: 20px; border: 1px solid var(--pic-border); background: var(--pic-bg); }
         .tile-pic .bg { position: absolute; inset: -16px; background-size: cover; background-position: center; filter: blur(16px) saturate(1.2); opacity: 0.75; }
         .tile-pic img { position: relative; display: block; width: 100%; height: 100%; object-fit: contain; }
         .tile-pic.ph { background: linear-gradient(135deg, #7d5fff, #ff00de); }
         .tile-body { box-sizing: border-box; height: calc(5.75rem + 20px); overflow: hidden; padding: 12px 8px 8px; } /* same height for every HOME tile */
-        .tile-title { margin: 0 0 6px; font-size: 1.2rem; font-weight: 900; line-height: 1.15; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; text-shadow: 0 1px 10px rgba(255,255,255,0.8); }
-        .tile-desc { margin: 0; font-size: 0.88rem; line-height: 1.45; color: #2b2552; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
-        @media (hover: hover) { .tile:hover { transform: translateY(-4px); box-shadow: 0 24px 48px rgba(125,95,255,0.38), 0 0 26px rgba(255,0,222,0.22); } }
+        .tile-title { margin: 0 0 6px; font-size: 1.2rem; font-weight: 900; line-height: 1.15; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; text-shadow: var(--tile-title-shadow); }
+        .tile-desc { margin: 0; font-size: 0.88rem; line-height: 1.45; color: var(--desc); display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+        @media (hover: hover) { .tile:hover { transform: translateY(-4px); box-shadow: var(--tile-shadow-hover); } }
         @media (prefers-reduced-motion: reduce) { .tile { transition: none; } }
         /* browsers without blur support get a darker panel so text is still readable */
         @supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
-            .tile { background: rgba(255,255,255,0.92); }
+            .tile { background: var(--tile-fallback); }
         }
-        .hero-title { font-size: clamp(3rem, 15vw, 6rem); font-weight: 900; letter-spacing: -2px; color: var(--ink); text-shadow: 0 0 28px rgba(125,95,255,0.35); }
+        .hero-title { font-size: clamp(3rem, 15vw, 6rem); font-weight: 900; letter-spacing: -2px; color: var(--ink); text-shadow: var(--hero-title-glow); }
 
         #content { display: none; padding: 100px 5% 50px; min-height: 100vh; }
         .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); gap: 10px; }
         @media (min-width: 700px) { .grid { grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 14px; } }
 
         /* CARD STYLE */
-        .card { background: #fff; border: 1px solid rgba(125,95,255,0.22); box-shadow: 0 6px 18px rgba(125,95,255,0.10); border-radius: 14px; padding: 8px; transition: 0.3s; }
+        .card { background: var(--card-bg); border: 1px solid var(--card-border); box-shadow: var(--card-shadow); border-radius: 14px; padding: 8px; transition: 0.3s; }
         .card-title { margin: 0; font-size: 0.75rem; font-weight: 700; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
         .card:hover { transform: translateY(-5px); border-color: var(--p); }
-        .card-img { width: 100%; aspect-ratio: 1 / 1; border-radius: 10px; background-size: cover; background-position: center; background-color: #efeaff; margin-bottom: 8px; }
+        .card-img { width: 100%; aspect-ratio: 1 / 1; border-radius: 10px; background-size: cover; background-position: center; background-color: var(--pic-bg); margin-bottom: 8px; }
         .card-link { display: block; color: inherit; text-decoration: none; }
 
         /* GAMES: compact tiles (a little larger than the default). The links are inside each game's page. */
@@ -104,13 +141,18 @@
             <img class="logo-img" src="logo.png" alt="Aydan Hub logo">
             <div class="logo-name">AYDAN</div>
         </div>
+        <div class="header-right">
         <nav>
             <a class="nav-btn" onclick="location.reload()">Home</a>
             <a class="nav-btn" onclick="openCat('GAMES', 'NEON GAMES')">Games</a>
             <a class="nav-btn" onclick="openCat('APPS', 'APPS')">Apps</a>
             <a class="nav-btn" onclick="openCat('LINK', 'LINKS')">Links</a>
-            <a class="nav-btn" onclick="openCat('FILES', 'STORAGE')">Files</a>
         </nav>
+        <button id="theme-toggle" type="button" aria-label="Switch between dark and light mode" title="Dark / light mode">
+            <svg class="sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="4.2"/><path d="M12 2.5v2.4M12 19.1v2.4M2.5 12h2.4M19.1 12h2.4M5.3 5.3l1.7 1.7M17 17l1.7 1.7M18.7 5.3L17 7M7 17l-1.7 1.7"/></svg>
+            <svg class="moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 14.5A8.5 8.5 0 0 1 9.5 4a8.5 8.5 0 1 0 10.5 10.5z"/></svg>
+        </button>
+        </div>
     </header>
 
     <section id="hero">
@@ -131,6 +173,15 @@
         const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
         let items = [];
 
+        // Dark / light mode switch (remembered in this browser)
+        document.getElementById('theme-toggle').addEventListener('click', function () {
+            const next = document.documentElement.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+            document.documentElement.setAttribute('data-theme', next);
+            try { localStorage.setItem('theme', next); } catch (e) {}
+            const m = document.querySelector('meta[name="theme-color"]');
+            if (m) m.setAttribute('content', next === 'dark' ? '#070512' : '#ffffff');
+        });
+
         async function load() {
             const { data } = await supabaseClient.from('files').select('*').order('created_at', { ascending: false });
             items = data || [];
@@ -145,7 +196,7 @@
         }
 
         // /?s=games opens the Games section (and apps, links, files)
-        const SECTION_LINKS = { games: ['GAMES', 'GAMES'], apps: ['APPS', 'APPS'], links: ['LINK', 'LINKS'], files: ['FILES', 'FILES'] };
+        const SECTION_LINKS = { games: ['GAMES', 'GAMES'], apps: ['APPS', 'APPS'], links: ['LINK', 'LINKS'] };
         function openFromQuery() {
             const s = new URLSearchParams(location.search).get('s');
             const sec = s && SECTION_LINKS[s.toLowerCase()];
