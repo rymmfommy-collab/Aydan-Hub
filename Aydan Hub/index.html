@@ -38,6 +38,7 @@
             --tile-title-shadow: 0 1px 10px rgba(255,255,255,0.8); --tile-fallback: rgba(255,255,255,0.92);
             --pic-bg: #efeaff; --pic-border: rgba(125,95,255,0.30);
             --card-bg: #ffffff; --card-border: rgba(125,95,255,0.22); --card-shadow: 0 6px 18px rgba(125,95,255,0.10);
+            --gold: #8a6d3b; --teal: #1b6b78; --pill: #efeaff; --pill-on: #ffffff; --menu-bg: rgba(250,247,255,0.55);
         }
         :root[data-theme="dark"] {
             --bg: #070512; --ink: #ffffff; --soft: #b9b3dd; --desc: rgba(255,255,255,0.92);
@@ -50,38 +51,44 @@
             --tile-title-shadow: 0 1px 8px rgba(0,0,0,0.35); --tile-fallback: rgba(20,16,50,0.85);
             --pic-bg: rgba(255,255,255,0.06); --pic-border: rgba(255,255,255,0.22);
             --card-bg: rgba(255,255,255,0.04); --card-border: rgba(255,255,255,0.10); --card-shadow: none;
+            --gold: #d1b27a; --teal: #7dd3e0; --pill: rgba(255,255,255,0.10); --pill-on: rgba(255,255,255,0.20); --menu-bg: rgba(7,5,18,0.55);
         }
         body { margin: 0; background: var(--bg); color: var(--ink); font-family: 'Inter', sans-serif; overflow-x: hidden; }
 
-        /* HEADER - FIXED & VISIBLE */
-        header {
-            display: flex; justify-content: space-between; align-items: center;
-            padding: 10px 5%; position: fixed; top: 0; width: 100%;
-            box-sizing: border-box; z-index: 10000; background: var(--header-bg);
-            border-bottom: 1px solid var(--line); box-shadow: var(--header-shadow); backdrop-filter: blur(15px);
-        }
-        .logo-box { display: flex; align-items: center; gap: 10px; cursor: pointer; }
-        .logo-img { width: 40px; height: 40px; display: block; filter: drop-shadow(0 0 8px rgba(125,95,255,0.45)); }
-        .logo-name { font-weight: 900; letter-spacing: 2px; font-size: 1.1rem; }
-
-        nav { display: flex; gap: 12px; }
-        .nav-btn { color: var(--ink); text-decoration: none; font-size: 0.7rem; font-weight: 900; text-transform: uppercase; cursor: pointer; padding: 8px; transition: 0.3s; }
-        .nav-btn:hover { color: var(--s); text-shadow: 0 0 10px var(--s); }
-
-        .header-right { display: flex; align-items: center; gap: 6px; }
-        #theme-toggle { width: 38px; height: 38px; padding: 0; display: inline-flex; align-items: center; justify-content: center; border-radius: 50%; cursor: pointer; color: var(--ink); background: transparent; border: 1px solid var(--line); transition: 0.3s; }
-        #theme-toggle:hover { border-color: var(--p); box-shadow: 0 0 12px rgba(125,95,255,0.45); }
-        #theme-toggle svg { width: 20px; height: 20px; }
-        #theme-toggle .moon { display: none; }
-        :root[data-theme="light"] #theme-toggle .sun { display: none; }
-        :root[data-theme="light"] #theme-toggle .moon { display: block; }
+        /* HEADER: centred title block, then a row of controls (mode switch, search, menu) */
+        .site-head { position: relative; z-index: 30; background: var(--bg); }
+        .site-top { position: relative; text-align: center; padding: 22px 76px 18px; background: var(--header-bg); border-bottom: 1px solid var(--line); }
+        .site-top a { display: block; color: inherit; text-decoration: none; }
+        .kicker { font-size: 0.68rem; letter-spacing: 0.28em; text-transform: uppercase; color: var(--gold); font-weight: 500; }
+        .brand-name { font-size: 1.18rem; font-weight: 800; margin: 6px 0 4px; letter-spacing: -0.2px; }
+        .brand-tag { font-size: 0.74rem; color: var(--teal); letter-spacing: 0.03em; }
+        .crest { position: absolute; right: 5%; top: 50%; transform: translateY(-50%); width: 54px; height: 54px; filter: drop-shadow(0 0 8px rgba(125,95,255,0.35)); }
+        .site-bar { display: flex; justify-content: flex-end; align-items: center; gap: 14px; padding: 12px 5%; border-bottom: 1px solid var(--line); background: var(--bg); }
+        .pill { display: flex; background: var(--pill); border-radius: 999px; padding: 4px; gap: 2px; }
+        .pill button { font: inherit; font-size: 0.75rem; font-weight: 800; padding: 7px 14px; border: 0; border-radius: 999px; background: transparent; color: var(--soft); cursor: pointer; }
+        :root[data-theme="light"] .pill [data-set="light"], :root[data-theme="dark"] .pill [data-set="dark"] { background: var(--pill-on); color: var(--ink); box-shadow: 0 1px 4px rgba(20,16,46,0.18); }
+        .icon-btn { width: 34px; height: 34px; display: inline-flex; align-items: center; justify-content: center; background: none; border: 0; padding: 0; cursor: pointer; color: var(--ink); text-decoration: none; }
+        .icon-btn svg { width: 26px; height: 26px; stroke: currentColor; fill: none; stroke-width: 2; stroke-linecap: round; }
+        .icon-btn:hover { color: var(--p); }
+        .searchbar { display: none; padding: 10px 5%; border-bottom: 1px solid var(--line); background: var(--bg); }
+        .searchbar.open { display: block; }
+        .searchbar input { width: 100%; box-sizing: border-box; font: inherit; color: var(--ink); background: var(--pic-bg); border: 1px solid var(--line); border-radius: 12px; padding: 12px 14px; }
+        /* full-page transparent menu */
+        .menu { position: fixed; inset: 0; z-index: 10000; display: flex; flex-direction: column; align-items: flex-end; padding: 22px 7% 40px; background: var(--menu-bg);
+            -webkit-backdrop-filter: blur(14px) saturate(160%); backdrop-filter: blur(14px) saturate(160%);
+            opacity: 0; visibility: hidden; transition: opacity 0.25s ease, visibility 0.25s; }
+        .menu.open { opacity: 1; visibility: visible; }
+        .menu .close { width: 44px; height: 44px; border-radius: 50%; border: 1px solid var(--line); background: var(--header-bg); display: flex; align-items: center; justify-content: center; cursor: pointer; margin-bottom: 26px; padding: 0; color: var(--ink); }
+        .menu .close svg { width: 22px; height: 22px; stroke: currentColor; fill: none; stroke-width: 2.2; stroke-linecap: round; }
+        .menu a { display: block; text-align: right; padding: 14px 4px; font-weight: 900; font-size: clamp(1.8rem, 8vw, 2.6rem); letter-spacing: -0.5px; text-transform: uppercase; color: var(--ink); text-decoration: none; }
+        .menu a:hover { color: var(--p); }
+        .menu .menu-brand { margin-top: auto; align-self: center; font-size: 0.7rem; letter-spacing: 0.28em; text-transform: uppercase; color: var(--gold); }
+        @media (prefers-reduced-motion: reduce) { .menu { transition: none; } }
 
         /* SECTIONS */
-        #hero { height: 100vh; display: flex; align-items: center; justify-content: center; text-align: center; background: var(--hero-bg); }
-
         /* FEATURED GLASS TILES (items uploaded to the HOME section).
-           They float over the AYDAN HUB title; the name shows blurred through the glass. */
-        #featured { display: none; position: relative; z-index: 2; margin-top: -62vh; padding: 0 5% 70px; }
+           They sit right under the header. */
+        #featured { display: none; position: relative; z-index: 2; padding: 26px 5% 70px; }
         .tiles { max-width: 1100px; margin: 0 auto; align-items: stretch; display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 260px), 1fr)); gap: 14px; }
         @media (max-width: 600px) { .tiles { max-width: 310px; } }
         .tile {
@@ -108,9 +115,7 @@
         @supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
             .tile { background: var(--tile-fallback); }
         }
-        .hero-title { font-size: clamp(3rem, 15vw, 6rem); font-weight: 900; letter-spacing: -2px; color: var(--ink); text-shadow: var(--hero-title-glow); }
-
-        #content { display: none; padding: 100px 5% 50px; min-height: 100vh; }
+        #content { display: none; padding: 26px 5% 50px; min-height: 60vh; }
         .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); gap: 10px; }
         @media (min-width: 700px) { .grid { grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 14px; } }
 
@@ -127,37 +132,34 @@
         .btn-row { display: flex; margin-top: 8px; }
         .btn-main { flex: 1; background: linear-gradient(45deg, var(--p), var(--s)); color: #fff; text-decoration: none; text-align: center; padding: 7px; border-radius: 8px; font-weight: 900; font-size: 0.7rem; }
 
-        @media (max-width: 600px) {
-            header { padding: 10px 3%; }
-            nav { gap: 5px; }
-            .nav-btn { font-size: 0.6rem; padding: 5px; }
-        }
     </style>
 </head>
 <body>
 
-    <header>
-        <div class="logo-box" onclick="location.reload()">
-            <img class="logo-img" src="logo.png" alt="Aydan Hub logo">
-            <div class="logo-name">AYDAN</div>
+    <header class="site-head">
+        <div class="site-top">
+            <a href="/" aria-label="çábTech home">
+                <div class="kicker">Digital Hub</div>
+                <div class="brand-name">çábTech</div>
+                <div class="brand-tag">Let's Sail into Technology</div>
+            </a>
+            <img class="crest" src="logo.png" alt="çábTech logo">
         </div>
-        <div class="header-right">
-        <nav>
-            <a class="nav-btn" onclick="location.reload()">Home</a>
-            <a class="nav-btn" onclick="openCat('GAMES', 'NEON GAMES')">Games</a>
-            <a class="nav-btn" onclick="openCat('APPS', 'APPS')">Apps</a>
-            <a class="nav-btn" onclick="openCat('LINK', 'LINKS')">Links</a>
-        </nav>
-        <button id="theme-toggle" type="button" aria-label="Switch between dark and light mode" title="Dark / light mode">
-            <svg class="sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="4.2"/><path d="M12 2.5v2.4M12 19.1v2.4M2.5 12h2.4M19.1 12h2.4M5.3 5.3l1.7 1.7M17 17l1.7 1.7M18.7 5.3L17 7M7 17l-1.7 1.7"/></svg>
-            <svg class="moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 14.5A8.5 8.5 0 0 1 9.5 4a8.5 8.5 0 1 0 10.5 10.5z"/></svg>
-        </button>
+        <div class="site-bar">
+            <div class="pill" role="group" aria-label="Colour mode"><button type="button" data-set="light">Light</button><button type="button" data-set="dark">Dark</button></div>
+            <button class="icon-btn" id="search-btn" type="button" aria-label="Search" aria-expanded="false"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg></button>
+            <button class="icon-btn" id="menu-btn" type="button" aria-label="Open menu" aria-expanded="false" aria-controls="menu"><svg viewBox="0 0 24 24"><path d="M3 6h18M3 12h18M3 18h18"/></svg></button>
         </div>
+        <div class="searchbar" id="searchbar"><input id="search-input" type="search" placeholder="Search apps and games" autocomplete="off" aria-label="Search apps and games"></div>
     </header>
-
-    <section id="hero">
-        <h1 class="hero-title">AYDAN<br><span style="color:transparent; -webkit-text-stroke: 2px #7d5fff; filter: drop-shadow(0 0 10px rgba(255,0,222,0.55));">HUB</span></h1>
-    </section>
+    <nav class="menu" id="menu" aria-label="Menu">
+        <button class="close" id="menu-close" type="button" aria-label="Close menu"><svg viewBox="0 0 24 24"><path d="M5 5l14 14M19 5L5 19"/></svg></button>
+        <a href="/" data-go="home">Home</a>
+        <a href="/?s=games" data-go="games">Games</a>
+        <a href="/?s=apps" data-go="apps">Apps</a>
+        <a href="/?s=links" data-go="links">Links</a>
+        <div class="menu-brand">çábTech</div>
+    </nav>
 
     <section id="featured" aria-label="Highlights">
         <div class="tiles" id="tiles"></div>
@@ -174,13 +176,63 @@
         let items = [];
 
         // Dark / light mode switch (remembered in this browser)
-        document.getElementById('theme-toggle').addEventListener('click', function () {
-            const next = document.documentElement.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
-            document.documentElement.setAttribute('data-theme', next);
-            try { localStorage.setItem('theme', next); } catch (e) {}
-            const m = document.querySelector('meta[name="theme-color"]');
-            if (m) m.setAttribute('content', next === 'dark' ? '#070512' : '#ffffff');
+        document.querySelectorAll('.pill button').forEach(function (btn) {
+            btn.addEventListener('click', function () {
+                const next = btn.getAttribute('data-set');
+                document.documentElement.setAttribute('data-theme', next);
+                try { localStorage.setItem('theme', next); } catch (e) {}
+                const m = document.querySelector('meta[name="theme-color"]');
+                if (m) m.setAttribute('content', next === 'dark' ? '#070512' : '#ffffff');
+            });
         });
+
+        // Full-page transparent menu
+        const menuEl = document.getElementById('menu');
+        const menuBtn = document.getElementById('menu-btn');
+        function setMenu(open) {
+            menuEl.classList.toggle('open', open);
+            menuBtn.setAttribute('aria-expanded', open ? 'true' : 'false');
+            document.documentElement.style.overflow = open ? 'hidden' : '';
+        }
+        menuBtn.addEventListener('click', () => setMenu(!menuEl.classList.contains('open')));
+        document.getElementById('menu-close').addEventListener('click', () => setMenu(false));
+        menuEl.addEventListener('click', (e) => { if (e.target === menuEl) setMenu(false); });
+        document.addEventListener('keydown', (e) => { if (e.key === 'Escape') setMenu(false); });
+        const MENU_SECTIONS = { games: ['GAMES', 'GAMES'], apps: ['APPS', 'APPS'], links: ['LINK', 'LINKS'] };
+        menuEl.querySelectorAll('a[data-go]').forEach(function (a) {
+            a.addEventListener('click', function (e) {
+                e.preventDefault();
+                setMenu(false);
+                const go = a.getAttribute('data-go');
+                if (go === 'home') goHome(); else openCat(MENU_SECTIONS[go][0], MENU_SECTIONS[go][1]);
+            });
+        });
+
+        // Search: finds items by title, description or developer
+        const searchBar = document.getElementById('searchbar');
+        const searchInput = document.getElementById('search-input');
+        function setSearch(open) {
+            searchBar.classList.toggle('open', open);
+            document.getElementById('search-btn').setAttribute('aria-expanded', open ? 'true' : 'false');
+            if (open) searchInput.focus(); else { searchInput.value = ''; goHome(); }
+        }
+        document.getElementById('search-btn').addEventListener('click', () => setSearch(!searchBar.classList.contains('open')));
+        searchInput.addEventListener('input', function () {
+            const q = searchInput.value.trim().toLowerCase();
+            if (!q) { goHome(true); return; }
+            const found = items.filter(i => i.category !== 'HOME' && [i.title, i.description, i.developer].some(t => String(t || '').toLowerCase().includes(q)));
+            showCards(found, false, 'No results for that search.');
+        });
+        searchInput.addEventListener('keydown', (e) => { if (e.key === 'Escape') setSearch(false); });
+
+        // Back to the front page
+        function goHome(keepSearch) {
+            document.getElementById('content').style.display = 'none';
+            if (!keepSearch) { searchBar.classList.remove('open'); searchInput.value = ''; }
+            try { if (location.search) history.replaceState(null, '', location.pathname); } catch (e) {}
+            renderFeatured();
+            window.scrollTo(0, 0);
+        }
 
         async function load() {
             const { data } = await supabaseClient.from('files').select('*').order('created_at', { ascending: false });
@@ -201,6 +253,7 @@
             const s = new URLSearchParams(location.search).get('s');
             const sec = s && SECTION_LINKS[s.toLowerCase()];
             if (sec) openCat(sec[0], sec[1]);
+            else if (new URLSearchParams(location.search).get('search')) setSearch(true);
         }
 
         // Items uploaded to the HOME section show on the front page as glass tiles
@@ -244,15 +297,16 @@
         }
 
         function openCat(cat, label) {
-            document.getElementById('hero').style.display = 'none';
+            showCards(items.filter(i => i.category === cat), cat === 'GAMES', 'No content in this section.');
+        }
+
+        function showCards(filtered, isGames, emptyText) {
             document.getElementById('featured').style.display = 'none';
             document.getElementById('content').style.display = 'block';
-            const filtered = items.filter(i => i.category === cat);
             const g = document.getElementById('main-grid');
-            const isGames = cat === 'GAMES';
             g.className = 'grid' + (isGames ? ' games' : '');
             g.innerHTML = filtered.length ? filtered.map(i => {
-                // Up to 3 extra links per game (listed on the game's own page)
+                // Up to 4 extra links per game (listed on the game's own page)
                 const links = (Array.isArray(i.links) ? i.links : []).filter(l => l && safeUrl(l.url) !== '#').slice(0, 4);
                 // Items with a slug get their own details page; the picture and title link to it
                 const page = i.slug ? '/app/' + encodeURIComponent(i.slug) : '';
@@ -267,8 +321,8 @@
                         <a href="${esc(safeUrl(i.url))}" target="_blank" rel="noopener noreferrer" class="btn-main">GET</a>
                     </div>`}
                 </div>`;
-            }).join('') : `<p>No content in this section.</p>`;
-            window.scrollTo(0,0);
+            }).join('') : `<p>${esc(emptyText)}</p>`;
+            window.scrollTo(0, 0);
         }
         load();
     </script>
