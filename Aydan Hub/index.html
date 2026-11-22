@@ -127,6 +127,7 @@
         .gc span { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; font-size: 0.72rem; color: var(--soft); margin-top: 2px; }
         .empty { color: var(--soft); padding: 22px 0; }
         .foot { margin-top: 34px; padding: 26px 5%; text-align: center; color: var(--soft); font-size: 0.78rem; border-top: 1px solid var(--line); background: var(--card-bg); }
+        .cabtech-mark { display: inline-block; margin-top: 6px; font-weight: 800; color: var(--ac); letter-spacing: 0.03em; }
         @media (hover: hover) { .app:hover, .gc:hover { border-color: var(--ac); } }
         @media (min-width: 760px) { .apps { grid-template-columns: 1fr 1fr; } .feat { min-height: 210px; padding: 40px; } .feat h2 { font-size: 2.2rem; } .gc { width: 190px; } }
     </style>
@@ -167,7 +168,10 @@
         </div>
         <div id="home"></div>
     </main>
-    <div class="foot">&copy; çábTech &middot; Let's Sail into Technology</div>
+    <div class="foot">
+        <div>&copy; çábTech &middot; Let's Sail into Technology</div>
+        <span class="cabtech-mark" id="cabtech-stop">@cabTech</span>
+    </div>
 
     <script>
         const SUPABASE_URL = 'https://tvasdkfdizdwkroatgno.supabase.co';
@@ -282,9 +286,10 @@
         function appRow(i) {
             const t = dest(i), pic = picStyle(i);
             const word = i.category === 'LINK' ? 'OPEN' : 'GET';
+            const showDesc = i.category !== 'APPS' && i.description;
             return `<a class="app" href="${esc(t.href)}"${t.attrs}>
                 <div class="ico"${pic}>${pic ? '' : esc((i.title || '?').trim().charAt(0).toUpperCase())}</div>
-                <div class="meta"><b>${esc(i.title)}</b>${i.description ? `<span>${esc(i.description)}</span>` : ''}<i>${LABEL[i.category] || 'Item'} &middot; Official link</i></div>
+                <div class="meta"><b>${esc(i.title)}</b>${showDesc ? `<span>${esc(i.description)}</span>` : ''}<i>${LABEL[i.category] || 'Item'} &middot; Official link</i></div>
                 <div class="get">${word}</div></a>`;
         }
         function gameCard(i) {
@@ -316,6 +321,31 @@
             }
             homeEl.innerHTML = h;
         }
+
+        // Stop scrolling down once @cabTech reaches the bottom of the viewport
+        (function () {
+            const target = document.getElementById('cabtech-stop');
+            let prevY = window.scrollY;
+
+            function stopScrollPosition() {
+                if (!target) return document.documentElement.scrollHeight - window.innerHeight;
+                const bottomY = target.getBoundingClientRect().bottom + window.scrollY;
+                return Math.max(0, Math.round(bottomY - window.innerHeight));
+            }
+
+            window.addEventListener('scroll', function () {
+                const y = window.scrollY;
+                const goingDown = y > prevY;
+                prevY = y;
+
+                const maxScroll = stopScrollPosition();
+                if (goingDown && y >= maxScroll) {
+                    window.scrollTo({ top: maxScroll, behavior: 'instant' });
+                    prevY = maxScroll;
+                }
+            }, { passive: true });
+        })();
+
         load();
     </script>
 </body>
