@@ -72,23 +72,44 @@ const BASE_CSS = `
   :root { --p:#7d5fff; --s:#ff00de; --bg:#ffffff; --ink:#14102e; --soft:#5b5683; --desc:#2b2552; --accent:#5a3fe0; --qtext:#c200a8;
     --header-bg:rgba(255,255,255,.95); --line:rgba(125,95,255,.22); --header-shadow:0 4px 24px rgba(125,95,255,.12);
     --card:#fff; --card-border:rgba(125,95,255,.22); --card-shadow:0 6px 18px rgba(125,95,255,.10);
-    --pic-bg:#efeaff; --input-bg:#f6f3ff; --input-border:rgba(125,95,255,.30); }
+    --pic-bg:#efeaff; --input-bg:#f6f3ff; --input-border:rgba(125,95,255,.30);
+    --gold:#8a6d3b; --teal:#1b6b78; --pill:#efeaff; --pill-on:#ffffff; --menu-bg:rgba(250,247,255,.55); }
   :root[data-theme="dark"] { --bg:#070512; --ink:#ffffff; --soft:#b9b3dd; --desc:#e6e2ff; --accent:#cfc4ff; --qtext:#ffb3f3;
     --header-bg:rgba(7,5,18,.95); --line:rgba(255,255,255,.12); --header-shadow:0 4px 24px rgba(0,0,0,.35);
     --card:rgba(255,255,255,.04); --card-border:rgba(255,255,255,.12); --card-shadow:none;
-    --pic-bg:rgba(255,255,255,.06); --input-bg:rgba(255,255,255,.07); --input-border:rgba(255,255,255,.18); }
+    --pic-bg:rgba(255,255,255,.06); --input-bg:rgba(255,255,255,.07); --input-border:rgba(255,255,255,.18);
+    --gold:#d1b27a; --teal:#7dd3e0; --pill:rgba(255,255,255,.10); --pill-on:rgba(255,255,255,.20); --menu-bg:rgba(7,5,18,.55); }
   * { box-sizing: border-box; }
   body { margin:0; background:var(--bg); color:var(--ink); font-family:'Inter',system-ui,sans-serif; line-height:1.55; }
-  header { display:flex; align-items:center; gap:10px; padding:10px 5%; background:var(--header-bg); border-bottom:1px solid var(--line); box-shadow:var(--header-shadow); }
-  header .spacer { flex:1; }
-  #theme-toggle { width:38px; height:38px; padding:0; display:inline-flex; align-items:center; justify-content:center; border-radius:50%; cursor:pointer; color:var(--ink); background:transparent; border:1px solid var(--line); }
-  #theme-toggle:hover { border-color:var(--p); box-shadow:0 0 12px rgba(125,95,255,.45); }
-  #theme-toggle svg { width:20px; height:20px; }
-  #theme-toggle .moon { display:none; }
-  :root[data-theme="light"] #theme-toggle .sun { display:none; }
-  :root[data-theme="light"] #theme-toggle .moon { display:block; }
-  header a { display:flex; align-items:center; gap:10px; color:var(--ink); text-decoration:none; font-weight:900; letter-spacing:2px; }
-  header img { width:40px; height:40px; filter:drop-shadow(0 0 8px rgba(125,95,255,.45)); }
+    /* HEADER: centred title block, then a row of controls (mode switch, search, menu) */
+    .site-head { position: relative; z-index: 30; background: var(--bg); }
+    .site-top { position: relative; text-align: center; padding: 22px 76px 18px; background: var(--header-bg); border-bottom: 1px solid var(--line); }
+    .site-top a { display: block; color: inherit; text-decoration: none; }
+    .kicker { font-size: 0.68rem; letter-spacing: 0.28em; text-transform: uppercase; color: var(--gold); font-weight: 500; }
+    .brand-name { font-size: 1.18rem; font-weight: 800; margin: 6px 0 4px; letter-spacing: -0.2px; }
+    .brand-tag { font-size: 0.74rem; color: var(--teal); letter-spacing: 0.03em; }
+    .crest { position: absolute; right: 5%; top: 50%; transform: translateY(-50%); width: 54px; height: 54px; filter: drop-shadow(0 0 8px rgba(125,95,255,0.35)); }
+    .site-bar { display: flex; justify-content: flex-end; align-items: center; gap: 14px; padding: 12px 5%; border-bottom: 1px solid var(--line); background: var(--bg); }
+    .pill { display: flex; background: var(--pill); border-radius: 999px; padding: 4px; gap: 2px; }
+    .pill button { font: inherit; font-size: 0.75rem; font-weight: 800; padding: 7px 14px; border: 0; border-radius: 999px; background: transparent; color: var(--soft); cursor: pointer; }
+    :root[data-theme="light"] .pill [data-set="light"], :root[data-theme="dark"] .pill [data-set="dark"] { background: var(--pill-on); color: var(--ink); box-shadow: 0 1px 4px rgba(20,16,46,0.18); }
+    .icon-btn { width: 34px; height: 34px; display: inline-flex; align-items: center; justify-content: center; background: none; border: 0; padding: 0; cursor: pointer; color: var(--ink); text-decoration: none; }
+    .icon-btn svg { width: 26px; height: 26px; stroke: currentColor; fill: none; stroke-width: 2; stroke-linecap: round; }
+    .icon-btn:hover { color: var(--p); }
+    .searchbar { display: none; padding: 10px 5%; border-bottom: 1px solid var(--line); background: var(--bg); }
+    .searchbar.open { display: block; }
+    .searchbar input { width: 100%; box-sizing: border-box; font: inherit; color: var(--ink); background: var(--pic-bg); border: 1px solid var(--line); border-radius: 12px; padding: 12px 14px; }
+    /* full-page transparent menu */
+    .menu { position: fixed; inset: 0; z-index: 10000; display: flex; flex-direction: column; align-items: flex-end; padding: 22px 7% 40px; background: var(--menu-bg);
+        -webkit-backdrop-filter: blur(14px) saturate(160%); backdrop-filter: blur(14px) saturate(160%);
+        opacity: 0; visibility: hidden; transition: opacity 0.25s ease, visibility 0.25s; }
+    .menu.open { opacity: 1; visibility: visible; }
+    .menu .close { width: 44px; height: 44px; border-radius: 50%; border: 1px solid var(--line); background: var(--header-bg); display: flex; align-items: center; justify-content: center; cursor: pointer; margin-bottom: 26px; padding: 0; color: var(--ink); }
+    .menu .close svg { width: 22px; height: 22px; stroke: currentColor; fill: none; stroke-width: 2.2; stroke-linecap: round; }
+    .menu a { display: block; text-align: right; padding: 14px 4px; font-weight: 900; font-size: clamp(1.8rem, 8vw, 2.6rem); letter-spacing: -0.5px; text-transform: uppercase; color: var(--ink); text-decoration: none; }
+    .menu a:hover { color: var(--p); }
+    .menu .menu-brand { margin-top: auto; align-self: center; font-size: 0.7rem; letter-spacing: 0.28em; text-transform: uppercase; color: var(--gold); }
+    @media (prefers-reduced-motion: reduce) { .menu { transition: none; } }
   main { max-width:720px; margin:0 auto; padding:28px 5% 60px; }
   h1 { font-size:clamp(1.6rem,6vw,2.4rem); font-weight:900; margin:0 0 6px; }
   .crumbs { font-size:.8rem; color:var(--soft); margin-bottom:18px; }
@@ -154,12 +175,32 @@ ${image ? `<meta property="og:image" content="${esc(image)}">` : ''}
 ${jsonLd ? `<script type="application/ld+json">${JSON.stringify(jsonLd).replace(/</g, '\\u003c')}</script>` : ''}
 </head>
 <body>
-<header><a href="/"><img src="/logo.png" alt="${SITE_NAME} logo"><span>AYDAN</span></a><span class="spacer"></span>
-<button id="theme-toggle" type="button" aria-label="Switch between dark and light mode" title="Dark / light mode">
-<svg class="sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="4.2"/><path d="M12 2.5v2.4M12 19.1v2.4M2.5 12h2.4M19.1 12h2.4M5.3 5.3l1.7 1.7M17 17l1.7 1.7M18.7 5.3L17 7M7 17l-1.7 1.7"/></svg>
-<svg class="moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 14.5A8.5 8.5 0 0 1 9.5 4a8.5 8.5 0 1 0 10.5 10.5z"/></svg>
-</button></header>
-<script>document.getElementById('theme-toggle').addEventListener('click',function(){var n=document.documentElement.getAttribute('data-theme')==='dark'?'light':'dark';document.documentElement.setAttribute('data-theme',n);try{localStorage.setItem('theme',n)}catch(e){}});</script>
+<header class="site-head">
+        <div class="site-top">
+            <a href="/" aria-label="çábTech home">
+                <div class="kicker">Digital Hub</div>
+                <div class="brand-name">çábTech</div>
+                <div class="brand-tag">Let&#39;s Sail into Technology</div>
+            </a>
+            <img class="crest" src="/logo.png" alt="çábTech logo">
+        </div>
+        <div class="site-bar">
+            <div class="pill" role="group" aria-label="Colour mode"><button type="button" data-set="light">Light</button><button type="button" data-set="dark">Dark</button></div>
+            <a class="icon-btn" href="/?search=1" aria-label="Search"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg></a>
+            <button class="icon-btn" id="menu-btn" type="button" aria-label="Open menu" aria-expanded="false" aria-controls="menu"><svg viewBox="0 0 24 24"><path d="M3 6h18M3 12h18M3 18h18"/></svg></button>
+        </div>
+    </header>
+    <nav class="menu" id="menu" aria-label="Menu">
+        <button class="close" id="menu-close" type="button" aria-label="Close menu"><svg viewBox="0 0 24 24"><path d="M5 5l14 14M19 5L5 19"/></svg></button>
+        <a href="/" data-go="home">Home</a>
+        <a href="/?s=games" data-go="games">Games</a>
+        <a href="/?s=apps" data-go="apps">Apps</a>
+        <a href="/?s=links" data-go="links">Links</a>
+        <div class="menu-brand">çábTech</div>
+    </nav>
+<script>(function(){var m=document.getElementById('menu'),b=document.getElementById('menu-btn');function set(o){m.classList.toggle('open',o);b.setAttribute('aria-expanded',o?'true':'false');document.documentElement.style.overflow=o?'hidden':''}
+b.addEventListener('click',function(){set(!m.classList.contains('open'))});document.getElementById('menu-close').addEventListener('click',function(){set(false)});m.addEventListener('click',function(e){if(e.target===m)set(false)});document.addEventListener('keydown',function(e){if(e.key==='Escape')set(false)});
+document.querySelectorAll('.pill button').forEach(function(x){x.addEventListener('click',function(){var n=x.getAttribute('data-set');document.documentElement.setAttribute('data-theme',n);try{localStorage.setItem('theme',n)}catch(e){}})})})();</script>
 <main>
 ${body}
 </main>
