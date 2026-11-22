@@ -127,7 +127,6 @@
         .gc span { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; font-size: 0.72rem; color: var(--soft); margin-top: 2px; }
         .empty { color: var(--soft); padding: 22px 0; }
         .foot { margin-top: 34px; padding: 26px 5%; text-align: center; color: var(--soft); font-size: 0.78rem; border-top: 1px solid var(--line); background: var(--card-bg); }
-        .cabtech-mark { display: inline-block; margin-top: 6px; font-weight: 800; color: var(--ac); letter-spacing: 0.03em; }
         @media (hover: hover) { .app:hover, .gc:hover { border-color: var(--ac); } }
         @media (min-width: 760px) { .apps { grid-template-columns: 1fr 1fr; } .feat { min-height: 210px; padding: 40px; } .feat h2 { font-size: 2.2rem; } .gc { width: 190px; } }
     </style>
@@ -151,7 +150,6 @@
     </header>
     <nav class="menu" id="menu" aria-label="Menu">
         <button class="close" id="menu-close" type="button" aria-label="Close menu"><svg viewBox="0 0 24 24"><path d="M5 5l14 14M19 5L5 19"/></svg></button>
-        <a href="/" data-go="home">Home</a>
         <a href="/?s=games" data-go="games">Games</a>
         <a href="/?s=apps" data-go="apps">Apps</a>
         <a href="/?s=links" data-go="links">Links</a>
@@ -168,185 +166,9 @@
         </div>
         <div id="home"></div>
     </main>
-    <div class="foot">
-        <div>&copy; çábTech &middot; Let's Sail into Technology</div>
-        <span class="cabtech-mark" id="cabtech-stop">@cabTech</span>
-    </div>
+    <div class="foot">&copy; çábTech &middot; Let's Sail into Technology</div>
 
     <script>
         const SUPABASE_URL = 'https://tvasdkfdizdwkroatgno.supabase.co';
         const SUPABASE_KEY = 'sb_publishable_UQ0g7DJ4_Um1nrAEd6z4nA_LnMUIcSA';
-        const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-        let items = [];
-
-        // Dark / light mode switch (remembered in this browser)
-        document.getElementById('theme-btn').addEventListener('click', function () {
-            const next = document.documentElement.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
-            document.documentElement.setAttribute('data-theme', next);
-            try { localStorage.setItem('theme', next); } catch (e) {}
-            const m = document.querySelector('meta[name="theme-color"]');
-            if (m) m.setAttribute('content', next === 'dark' ? '#070512' : '#ffffff');
-        });
-
-        // Full-page transparent menu
-        const menuEl = document.getElementById('menu');
-        const menuBtn = document.getElementById('menu-btn');
-        function setMenu(open) {
-            menuEl.classList.toggle('open', open);
-            menuBtn.setAttribute('aria-expanded', open ? 'true' : 'false');
-            document.documentElement.style.overflow = open ? 'hidden' : '';
-        }
-        menuBtn.addEventListener('click', () => setMenu(!menuEl.classList.contains('open')));
-        document.getElementById('menu-close').addEventListener('click', () => setMenu(false));
-        menuEl.addEventListener('click', (e) => { if (e.target === menuEl) setMenu(false); });
-        document.addEventListener('keydown', (e) => { if (e.key === 'Escape') setMenu(false); });
-        const MENU_SECTIONS = { games: ['GAMES', 'GAMES'], apps: ['APPS', 'APPS'], links: ['LINK', 'LINKS'] };
-        menuEl.querySelectorAll('a[data-go]').forEach(function (a) {
-            a.addEventListener('click', function (e) {
-                e.preventDefault();
-                setMenu(false);
-                const go = a.getAttribute('data-go');
-                if (go === 'home') goHome(); else openCat(MENU_SECTIONS[go][0], MENU_SECTIONS[go][1]);
-            });
-        });
-
-        // Store-style home: search pill + chips (All / Games / Apps / Links)
-        const homeEl = document.getElementById('home');
-        const searchInput = document.getElementById('search-input');
-        let chip = 'all';
-        const CHIPS = { games: 'GAMES', apps: 'APPS', links: 'LINK' };
-        const LABEL = { GAMES: 'Game', APPS: 'App', LINK: 'Link' };
-
-        function setChip(c) {
-            chip = c;
-            searchInput.value = '';
-            document.querySelectorAll('.chip').forEach(b => b.classList.toggle('on', b.getAttribute('data-chip') === c));
-            render();
-        }
-        document.getElementById('chips').addEventListener('click', function (e) {
-            const b = e.target.closest('.chip'); if (b) setChip(b.getAttribute('data-chip'));
-        });
-        document.getElementById('search-btn').addEventListener('click', function () {
-            window.scrollTo(0, 0); searchInput.focus();
-        });
-        searchInput.addEventListener('input', render);
-        searchInput.addEventListener('keydown', (e) => { if (e.key === 'Escape') { searchInput.value = ''; render(); } });
-
-        function goHome() { setChip('all'); window.scrollTo(0, 0); }
-        function openCat(cat) {
-            const k = Object.keys(CHIPS).find(x => CHIPS[x] === cat);
-            setChip(k || 'all'); window.scrollTo(0, 0);
-        }
-
-        async function load() {
-            const { data } = await supabaseClient.from('files').select('*').order('created_at', { ascending: false });
-            items = data || [];
-            render();
-            openFromQuery();
-        }
-
-        // Addresses inside this website, e.g. /app/moviebox or /?s=games. Anything else is not accepted here.
-        function internalPath(u) {
-            const s = String(u || '');
-            return /^\/(?!\/)[A-Za-z0-9\-._~\/?=&%#]*$/.test(s) ? s : '';
-        }
-
-        // /?s=games opens the Games filter (also apps, links); /?search=1 focuses the search box
-        function openFromQuery() {
-            const p = new URLSearchParams(location.search);
-            const s = (p.get('s') || '').toLowerCase();
-            if (CHIPS[s]) setChip(s);
-            else if (p.get('search')) searchInput.focus();
-        }
-
-        // Escape text so titles can never inject HTML or scripts
-        function esc(s) {
-            return String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-        }
-
-        // Only allow normal web links
-        function safeUrl(u) {
-            try {
-                const x = new URL(u);
-                return (x.protocol === 'https:' || x.protocol === 'http:') ? x.href.replace(/'/g, '%27') : '#';
-            } catch (e) { return '#'; }
-        }
-
-        // Where an item opens: a chosen page inside the site, its own page, or its outside link
-        function dest(i) {
-            const d = internalPath(i.url);
-            const internal = !!d || !!i.slug;
-            const href = d || (i.slug ? '/app/' + encodeURIComponent(i.slug) : safeUrl(i.url));
-            return { href, attrs: internal ? '' : ' target="_blank" rel="noopener noreferrer"' };
-        }
-        function picStyle(i) {
-            const img = safeUrl(i.image_url || '');
-            return img !== '#' ? ` style="background-image:url('${esc(img).replace(/'/g, '%27')}')"` : '';
-        }
-        function appRow(i) {
-            const t = dest(i), pic = picStyle(i);
-            const word = i.category === 'LINK' ? 'OPEN' : 'GET';
-            const showDesc = i.category !== 'APPS' && i.description;
-            return `<a class="app" href="${esc(t.href)}"${t.attrs}>
-                <div class="ico"${pic}>${pic ? '' : esc((i.title || '?').trim().charAt(0).toUpperCase())}</div>
-                <div class="meta"><b>${esc(i.title)}</b>${showDesc ? `<span>${esc(i.description)}</span>` : ''}<i>${LABEL[i.category] || 'Item'} &middot; Official link</i></div>
-                <div class="get">${word}</div></a>`;
-        }
-        function gameCard(i) {
-            const t = dest(i);
-            return `<a class="gc" href="${esc(t.href)}"${t.attrs}><div class="gp"${picStyle(i)}></div><b>${esc(i.title)}</b>${i.description ? `<span>${esc(i.description)}</span>` : ''}</a>`;
-        }
-        function banner(i) {
-            const t = dest(i), img = safeUrl(i.image_url || '');
-            const st = img !== '#' ? ` style="background-image:url('${esc(img).replace(/'/g, '%27')}')"` : '';
-            const desc = (i.description || '').trim();
-            return `<a class="feat${img !== '#' ? ' pic' : ''}" href="${esc(t.href)}"${t.attrs}${st}><small>Featured</small><h2>${esc(i.title)}</h2>${desc ? `<p>${esc(desc)}</p>` : '<p></p>'}<span class="btn">View details</span></a>`;
-        }
-
-        function render() {
-            const q = searchInput.value.trim().toLowerCase();
-            const rest = items.filter(i => i.category !== 'HOME');
-            const by = c => items.filter(i => i.category === c);
-            let h = '';
-            if (q) {
-                const found = rest.filter(i => [i.title, i.description, i.developer].some(t => String(t || '').toLowerCase().includes(q)));
-                h = `<h3 class="sec">Results</h3>` + (found.length ? `<div class="apps">${found.map(appRow).join('')}</div>` : `<p class="empty">No results for that search.</p>`);
-            } else {
-                const apps = by('APPS'), games = by('GAMES'), links = by('LINK'), home = by('HOME');
-                if (chip === 'all' && home.length) h += `<div class="banners">${home.map(banner).join('')}</div>`;
-                if ((chip === 'all' || chip === 'apps') && apps.length) h += `<h3 class="sec">${chip === 'all' ? 'Popular apps' : 'Apps'}</h3><div class="apps">${apps.map(appRow).join('')}</div>`;
-                if ((chip === 'all' || chip === 'games') && games.length) h += `<h3 class="sec">Games</h3><div class="rail${chip === 'games' ? ' wrapped' : ''}">${games.map(gameCard).join('')}</div>`;
-                if ((chip === 'all' || chip === 'links') && links.length) h += `<h3 class="sec">Links</h3><div class="apps">${links.map(appRow).join('')}</div>`;
-                if (!h || (chip !== 'all' && !({games, apps, links})[chip].length)) h = `<p class="empty">No content in this section.</p>`;
-            }
-            homeEl.innerHTML = h;
-        }
-
-        // Stop scrolling down once @cabTech reaches the bottom of the viewport
-        (function () {
-            const target = document.getElementById('cabtech-stop');
-            let prevY = window.scrollY;
-
-            function stopScrollPosition() {
-                if (!target) return document.documentElement.scrollHeight - window.innerHeight;
-                const bottomY = target.getBoundingClientRect().bottom + window.scrollY;
-                return Math.max(0, Math.round(bottomY - window.innerHeight));
-            }
-
-            window.addEventListener('scroll', function () {
-                const y = window.scrollY;
-                const goingDown = y > prevY;
-                prevY = y;
-
-                const maxScroll = stopScrollPosition();
-                if (goingDown && y >= maxScroll) {
-                    window.scrollTo({ top: maxScroll, behavior: 'instant' });
-                    prevY = maxScroll;
-                }
-            }, { passive: true });
-        })();
-
-        load();
-    </script>
-</body>
-</html>
+        const supabaseClient
