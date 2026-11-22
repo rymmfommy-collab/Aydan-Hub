@@ -17,7 +17,7 @@
 
     <script>
         (function () {
-            var t = 'light';   /* default for first-time visitors */
+            var t = 'light';
             try { t = localStorage.getItem('theme') || t; } catch (e) {}
             document.documentElement.setAttribute('data-theme', t === 'dark' ? 'dark' : 'light');
         })();
@@ -55,7 +55,6 @@
         }
         body { margin: 0; background: var(--page); color: var(--ink); font-family: 'Inter', sans-serif; overflow-x: hidden; }
 
-        /* HEADER: logo at the left, title in the middle, buttons at the right */
         .site-head { position: relative; z-index: 30; background: var(--header-bg); border-bottom: 1px solid var(--line); }
         .site-row { display: flex; align-items: center; gap: 8px; padding: 10px 4%; }
         .logo { flex: none; display: block; }
@@ -72,10 +71,7 @@
         .icon-btn.round svg { width: 20px; height: 20px; }
         :root[data-theme="light"] .icon-btn .moon { display: none; }
         :root[data-theme="dark"] .icon-btn .sun { display: none; }
-        .searchbar { display: none; padding: 10px 5%; border-top: 1px solid var(--line); background: var(--bg); }
-        .searchbar.open { display: block; }
-        .searchbar input { width: 100%; box-sizing: border-box; font: inherit; color: var(--ink); background: var(--pic-bg); border: 1px solid var(--line); border-radius: 12px; padding: 12px 14px; }
-        /* full-page transparent menu */
+
         .menu { position: fixed; inset: 0; z-index: 10000; display: flex; flex-direction: column; align-items: flex-end; padding: 22px 7% 40px; background: var(--menu-bg);
             -webkit-backdrop-filter: blur(14px) saturate(160%); backdrop-filter: blur(14px) saturate(160%);
             opacity: 0; visibility: hidden; transition: opacity 0.25s ease, visibility 0.25s; }
@@ -87,8 +83,6 @@
         .menu .menu-brand { margin-top: auto; align-self: center; font-size: 0.7rem; letter-spacing: 0.28em; text-transform: uppercase; color: var(--gold); }
         @media (prefers-reduced-motion: reduce) { .menu { transition: none; } }
 
-        /* HOME (store style) */
-        body { background: var(--page); }
         .wrap { box-sizing: border-box; max-width: 1000px; margin: 0 auto; padding: 0 5% 20px; }
         .searchpill { margin: 16px auto 0; display: flex; align-items: center; gap: 10px; background: var(--card-bg); border: 1px solid var(--line); border-radius: 999px; padding: 0 18px; box-shadow: 0 4px 16px rgba(60,40,140,0.07); }
         .searchpill svg { flex: none; width: 20px; height: 20px; stroke: var(--ac); fill: none; stroke-width: 2; stroke-linecap: round; }
@@ -164,11 +158,156 @@
             <button class="chip" type="button" data-chip="apps">Apps</button>
             <button class="chip" type="button" data-chip="links">Links</button>
         </div>
-        <div id="home"></div>
+        <div id="home"><p class="empty">Loading...</p></div>
     </main>
     <div class="foot">&copy; çábTech &middot; Let's Sail into Technology</div>
 
     <script>
         const SUPABASE_URL = 'https://tvasdkfdizdwkroatgno.supabase.co';
         const SUPABASE_KEY = 'sb_publishable_UQ0g7DJ4_Um1nrAEd6z4nA_LnMUIcSA';
-        const supabaseClient
+        const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+        let items = [];
+
+        document.getElementById('theme-btn').addEventListener('click', function () {
+            const next = document.documentElement.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+            document.documentElement.setAttribute('data-theme', next);
+            try { localStorage.setItem('theme', next); } catch (e) {}
+            const m = document.querySelector('meta[name="theme-color"]');
+            if (m) m.setAttribute('content', next === 'dark' ? '#070512' : '#ffffff');
+        });
+
+        const menuEl = document.getElementById('menu');
+        const menuBtn = document.getElementById('menu-btn');
+        function setMenu(open) {
+            menuEl.classList.toggle('open', open);
+            menuBtn.setAttribute('aria-expanded', open ? 'true' : 'false');
+            document.documentElement.style.overflow = open ? 'hidden' : '';
+        }
+        menuBtn.addEventListener('click', () => setMenu(!menuEl.classList.contains('open')));
+        document.getElementById('menu-close').addEventListener('click', () => setMenu(false));
+        menuEl.addEventListener('click', (e) => { if (e.target === menuEl) setMenu(false); });
+        document.addEventListener('keydown', (e) => { if (e.key === 'Escape') setMenu(false); });
+        const MENU_SECTIONS = { games: 'GAMES', apps: 'APPS', links: 'LINK' };
+        menuEl.querySelectorAll('a[data-go]').forEach(function (a) {
+            a.addEventListener('click', function (e) {
+                e.preventDefault();
+                setMenu(false);
+                const go = a.getAttribute('data-go');
+                if (MENU_SECTIONS[go]) openCat(MENU_SECTIONS[go]);
+            });
+        });
+
+        const homeEl = document.getElementById('home');
+        const searchInput = document.getElementById('search-input');
+        let chip = 'all';
+        const CHIPS = { games: 'GAMES', apps: 'APPS', links: 'LINK' };
+        const LABEL = { GAMES: 'Game', APPS: 'App', LINK: 'Link' };
+
+        function setChip(c) {
+            chip = c;
+            searchInput.value = '';
+            document.querySelectorAll('.chip').forEach(b => b.classList.toggle('on', b.getAttribute('data-chip') === c));
+            render();
+        }
+        document.getElementById('chips').addEventListener('click', function (e) {
+            const b = e.target.closest('.chip'); if (b) setChip(b.getAttribute('data-chip'));
+        });
+        document.getElementById('search-btn').addEventListener('click', function () {
+            window.scrollTo(0, 0); searchInput.focus();
+        });
+        searchInput.addEventListener('input', render);
+        searchInput.addEventListener('keydown', (e) => { if (e.key === 'Escape') { searchInput.value = ''; render(); } });
+
+        function goHome() { setChip('all'); window.scrollTo(0, 0); }
+        function openCat(cat) {
+            const k = Object.keys(CHIPS).find(x => CHIPS[x] === cat);
+            setChip(k || 'all'); window.scrollTo(0, 0);
+        }
+
+        async function load() {
+            const { data, error } = await supabaseClient.from('files').select('*').order('created_at', { ascending: false });
+            if (error) {
+                console.error('Supabase load error:', error);
+                homeEl.innerHTML = '<p class="empty">Unable to load items right now.</p>';
+                return;
+            }
+            items = data || [];
+            render();
+            openFromQuery();
+        }
+
+        function internalPath(u) {
+            const s = String(u || '');
+            return /^\/(?!\/)[A-Za-z0-9\-._~\/?=&%#]*$/.test(s) ? s : '';
+        }
+
+        function openFromQuery() {
+            const p = new URLSearchParams(location.search);
+            const s = (p.get('s') || '').toLowerCase();
+            if (CHIPS[s]) setChip(s);
+            else if (p.get('search')) searchInput.focus();
+        }
+
+        function esc(s) {
+            return String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+        }
+
+        function safeUrl(u) {
+            try {
+                const x = new URL(u);
+                return (x.protocol === 'https:' || x.protocol === 'http:') ? x.href.replace(/'/g, '%27') : '#';
+            } catch (e) { return '#'; }
+        }
+
+        function dest(i) {
+            const d = internalPath(i.url);
+            const internal = !!d || !!i.slug;
+            const href = d || (i.slug ? '/app/' + encodeURIComponent(i.slug) : safeUrl(i.url));
+            return { href, attrs: internal ? '' : ' target="_blank" rel="noopener noreferrer"' };
+        }
+        function picStyle(i) {
+            const img = safeUrl(i.image_url || '');
+            return img !== '#' ? ` style="background-image:url('${esc(img).replace(/'/g, '%27')}')"` : '';
+        }
+        function appRow(i) {
+            const t = dest(i), pic = picStyle(i);
+            const word = i.category === 'LINK' ? 'OPEN' : 'GET';
+            const showDesc = i.category !== 'APPS' && i.description;
+            return `<a class="app" href="${esc(t.href)}"${t.attrs}>
+                <div class="ico"${pic}>${pic ? '' : esc((i.title || '?').trim().charAt(0).toUpperCase())}</div>
+                <div class="meta"><b>${esc(i.title)}</b>${showDesc ? `<span>${esc(i.description)}</span>` : ''}<i>${LABEL[i.category] || 'Item'} &middot; Official link</i></div>
+                <div class="get">${word}</div></a>`;
+        }
+        function gameCard(i) {
+            const t = dest(i);
+            return `<a class="gc" href="${esc(t.href)}"${t.attrs}><div class="gp"${picStyle(i)}></div><b>${esc(i.title)}</b>${i.description ? `<span>${esc(i.description)}</span>` : ''}</a>`;
+        }
+        function banner(i) {
+            const t = dest(i), img = safeUrl(i.image_url || '');
+            const st = img !== '#' ? ` style="background-image:url('${esc(img).replace(/'/g, '%27')}')"` : '';
+            const desc = (i.description || '').trim();
+            return `<a class="feat${img !== '#' ? ' pic' : ''}" href="${esc(t.href)}"${t.attrs}${st}><small>Featured</small><h2>${esc(i.title)}</h2>${desc ? `<p>${esc(desc)}</p>` : '<p></p>'}<span class="btn">View details</span></a>`;
+        }
+
+        function render() {
+            const q = searchInput.value.trim().toLowerCase();
+            const rest = items.filter(i => i.category !== 'HOME');
+            const by = c => items.filter(i => i.category === c);
+            let h = '';
+            if (q) {
+                const found = rest.filter(i => [i.title, i.description, i.developer].some(t => String(t || '').toLowerCase().includes(q)));
+                h = `<h3 class="sec">Results</h3>` + (found.length ? `<div class="apps">${found.map(appRow).join('')}</div>` : `<p class="empty">No results for that search.</p>`);
+            } else {
+                const apps = by('APPS'), games = by('GAMES'), links = by('LINK'), home = by('HOME');
+                if (chip === 'all' && home.length) h += `<div class="banners">${home.map(banner).join('')}</div>`;
+                if ((chip === 'all' || chip === 'apps') && apps.length) h += `<h3 class="sec">${chip === 'all' ? 'Popular apps' : 'Apps'}</h3><div class="apps">${apps.map(appRow).join('')}</div>`;
+                if ((chip === 'all' || chip === 'games') && games.length) h += `<h3 class="sec">Games</h3><div class="rail${chip === 'games' ? ' wrapped' : ''}">${games.map(gameCard).join('')}</div>`;
+                if ((chip === 'all' || chip === 'links') && links.length) h += `<h3 class="sec">Links</h3><div class="apps">${links.map(appRow).join('')}</div>`;
+                if (!h || (chip !== 'all' && !({games, apps, links})[chip].length)) h = `<p class="empty">No content in this section.</p>`;
+            }
+            homeEl.innerHTML = h;
+        }
+        load();
+    </script>
+</body>
+</html>
