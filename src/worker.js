@@ -8,7 +8,7 @@
 const SUPABASE_URL = 'https://tvasdkfdizdwkroatgno.supabase.co';
 // Publishable key: safe to be public. Access is limited by row-level security.
 const SUPABASE_KEY = 'sb_publishable_UQ0g7DJ4_Um1nrAEd6z4nA_LnMUIcSA';
-const SITE_NAME = 'Aydan Hub';
+const SITE_NAME = 'çábTech';
 const CACHE_SECONDS = 120;
 
 // IndexNow (Bing, Yandex and others). The key is public by design: the same
@@ -149,6 +149,22 @@ const BASE_CSS = `
   form.cf .hp { position:absolute; left:-9999px; height:0; overflow:hidden; }
   #cmsg { font-size:.9rem; min-height:1.2em; margin:0; }
   .note { margin-top:26px; font-size:.8rem; color:var(--soft); }
+  /* LIQUID GLASS THEME */
+:root,:root[data-theme="dark"]{--ink:#ffffff;--soft:rgba(255,255,255,.72);--desc:rgba(255,255,255,.9);--accent:#d8ceff;--qtext:#ffb3f3;--ac:#8b6dff;--g-bg:rgba(255,255,255,.09);--g-bg2:rgba(24,18,52,.92);--g-bd:rgba(255,255,255,.22);--g-sh:0 10px 32px rgba(0,0,0,.35), inset 0 1px 0 rgba(255,255,255,.35);--blur:24px;--g-menu:rgba(7,5,26,.5);--gold:#e9d5a6;--teal:#9ff0ff;--input-bg:rgba(255,255,255,.10);--input-border:rgba(255,255,255,.22);--pic-bg:rgba(255,255,255,.08);
+  --wall-base:#07051a;--wall:radial-gradient(520px 440px at 6% 4%,rgba(125,95,255,.7),transparent 70%),radial-gradient(480px 420px at 98% 24%,rgba(255,0,222,.42),transparent 70%),radial-gradient(520px 460px at 14% 74%,rgba(24,194,156,.34),transparent 70%),radial-gradient(520px 440px at 92% 96%,rgba(47,138,232,.5),transparent 70%)}
+  :root[data-theme="light"]{--ink:#17123a;--soft:#4d4880;--desc:#2b2552;--accent:#5a3fe0;--qtext:#c200a8;--ac:#6a3df0;--g-bg:rgba(255,255,255,.38);--g-bg2:rgba(255,255,255,.92);--g-bd:rgba(255,255,255,.75);--g-sh:0 8px 28px rgba(80,60,180,.16), inset 0 1px 0 rgba(255,255,255,.9);--blur:22px;--g-menu:rgba(240,236,255,.45);--gold:#8a6d3b;--teal:#1b6b78;--input-bg:rgba(255,255,255,.55);--input-border:rgba(125,95,255,.30);--pic-bg:rgba(255,255,255,.5);
+  --wall-base:#e9e4ff;--wall:radial-gradient(520px 460px at 8% 6%,rgba(150,120,255,.75),transparent 70%),radial-gradient(480px 420px at 96% 20%,rgba(255,140,220,.65),transparent 70%),radial-gradient(560px 480px at 12% 78%,rgba(110,225,205,.65),transparent 70%),radial-gradient(520px 460px at 92% 94%,rgba(120,175,255,.7),transparent 70%)}
+  :root,:root[data-theme="light"],:root[data-theme="dark"]{ --card-bg:var(--g-bg); --card:var(--g-bg); --card-border:var(--g-bd); --card-shadow:var(--g-sh); --line:var(--g-bd); --header-bg:var(--g-bg); --page:transparent; --menu-bg:var(--g-menu); }
+html{min-height:100%}
+body{background:var(--wall) fixed; background-color:var(--wall-base); color:var(--ink)}
+.site-head{margin:10px 10px 0; border-radius:28px; position:sticky; top:10px; background:var(--g-bg); border:1px solid var(--g-bd); box-shadow:var(--g-sh); -webkit-backdrop-filter:blur(var(--blur)) saturate(190%); backdrop-filter:blur(var(--blur)) saturate(190%)}
+.icon-btn.round{background:rgba(255,255,255,.18)}
+dl,ul.links a,.cm li,form.cf{ -webkit-backdrop-filter:blur(var(--blur)) saturate(190%); backdrop-filter:blur(var(--blur)) saturate(190%); box-shadow:var(--g-sh); border-radius:22px }
+.icon{box-shadow:inset 0 1px 0 rgba(255,255,255,.55), 0 6px 18px rgba(0,0,0,.25); border:1px solid var(--g-bd)}
+.btn{border:1px solid rgba(255,255,255,.5); box-shadow:inset 0 1px 0 rgba(255,255,255,.5), 0 8px 22px rgba(0,0,0,.25)}
+ul.links .go{border-radius:999px}
+.cm .rep{background:rgba(255,255,255,.12)}
+.crumbs a{color:var(--accent)} h2{color:var(--accent)}
 `;
 
 function layout({ title, description, canonical, image, robots, jsonLd, body }) {
@@ -159,8 +175,8 @@ function layout({ title, description, canonical, image, robots, jsonLd, body }) 
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>${esc(title)}</title>
 <meta name="description" content="${esc(description)}">
-<meta name="theme-color" content="#ffffff">
-<script>(function(){var t='light';try{t=localStorage.getItem('theme')||t}catch(e){}document.documentElement.setAttribute('data-theme',t==='dark'?'dark':'light')})();</script>
+<meta name="theme-color" content="#07051a">
+<script>(function(){var t='dark';try{t=localStorage.getItem('theme')||t}catch(e){}document.documentElement.setAttribute('data-theme',t==='dark'?'dark':'light')})();</script>
 ${robots ? `<meta name="robots" content="${esc(robots)}">` : ''}
 <link rel="canonical" href="${esc(canonical)}">
 <link rel="icon" type="image/png" href="/favicon.png">
