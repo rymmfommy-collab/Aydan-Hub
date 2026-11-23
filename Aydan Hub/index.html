@@ -6,7 +6,7 @@
     <meta name="google-site-verification" content="pguMl4tskDKely2U8fS1zJ-V4GZD-fVGwDvB8wbOeVo" />
     <title>çábTech | Let's Sail into Technology</title>
     <meta name="description" content="çábTech: apps, games and links, each with details and an official download link.">
-    <meta name="theme-color" content="#ffffff">
+    <meta name="theme-color" content="#07051a">
     <link rel="icon" type="image/png" href="favicon.png">
     <link rel="apple-touch-icon" href="apple-touch-icon.png">
     <link rel="manifest" href="manifest.json">
@@ -17,7 +17,7 @@
 
     <script>
         (function () {
-            var t = 'light';   /* default for first-time visitors */
+            var t = 'dark';   /* default for first-time visitors */
             try { t = localStorage.getItem('theme') || t; } catch (e) {}
             document.documentElement.setAttribute('data-theme', t === 'dark' ? 'dark' : 'light');
         })();
@@ -38,7 +38,7 @@
             --tile-title-shadow: 0 1px 10px rgba(255,255,255,0.8); --tile-fallback: rgba(255,255,255,0.92);
             --pic-bg: #efeaff; --pic-border: rgba(125,95,255,0.30);
             --card-bg: #ffffff; --card-border: rgba(125,95,255,0.22); --card-shadow: 0 6px 18px rgba(125,95,255,0.10);
-            --gold: #8a6d3b; --teal: #1b6b78; --pill: #efeaff; --pill-on: #ffffff; --menu-bg: rgba(250,247,255,0.55); --page: #ffffff; --ac: #6a3df0;
+            --gold: #8a6d3b; --teal: #1b6b78; --pill: #efeaff; --pill-on: #ffffff; --menu-bg: rgba(250,247,255,0.55); --page: #f6f5fb; --ac: #6a3df0;
         }
         :root[data-theme="dark"] {
             --bg: #070512; --ink: #ffffff; --soft: #b9b3dd; --desc: rgba(255,255,255,0.92);
@@ -50,10 +50,12 @@
             --tile-shadow-hover: 0 24px 48px rgba(125,95,255,0.35), inset 0 1px 0 rgba(255,255,255,0.5);
             --tile-title-shadow: 0 1px 8px rgba(0,0,0,0.35); --tile-fallback: rgba(20,16,50,0.85);
             --pic-bg: rgba(255,255,255,0.06); --pic-border: rgba(255,255,255,0.22);
-            --card-bg: rgba(255,255,255,0.04); --card-border: rgba(255,255,255,0.10); --card-shadow: none;
+            --card-bg: rgba(255,255,255,0.07); --card-border: rgba(255,255,255,0.10); --card-shadow: none;
             --gold: #d1b27a; --teal: #7dd3e0; --pill: rgba(255,255,255,0.10); --pill-on: rgba(255,255,255,0.20); --menu-bg: rgba(7,5,18,0.55); --page: #070512; --ac: #8b6dff;
         }
-        body { margin: 0; background: var(--bg); color: var(--ink); font-family: 'Inter', sans-serif; overflow-x: hidden; }
+        body { margin: 0; background: var(--page); color: var(--ink); font-family: 'Inter', sans-serif; overflow-x: clip; min-height: 100vh; min-height: 100dvh; display: flex; flex-direction: column; }
+        html { overscroll-behavior-y: none; }
+        main.wrap { flex: 1 0 auto; width: 100%; }
 
         /* HEADER: logo at the left, title in the middle, buttons at the right */
         .site-head { position: relative; z-index: 30; background: var(--header-bg); border-bottom: 1px solid var(--line); }
@@ -87,53 +89,50 @@
         .menu .menu-brand { margin-top: auto; align-self: center; font-size: 0.7rem; letter-spacing: 0.28em; text-transform: uppercase; color: var(--gold); }
         @media (prefers-reduced-motion: reduce) { .menu { transition: none; } }
 
-        /* SECTIONS */
-        /* FEATURED GLASS TILES (items uploaded to the HOME section).
-           They sit right under the header. */
-        #featured { display: none; position: relative; z-index: 2; padding: 26px 5% 70px; }
-        .tiles { max-width: 1100px; margin: 0 auto; align-items: stretch; display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 260px), 1fr)); gap: 14px; }
-        @media (max-width: 600px) { .tiles { max-width: 310px; } }
-        .tile {
-            position: relative; z-index: 1; display: flex; flex-direction: column; padding: 10px;
-            border-radius: 28px; color: var(--ink); text-decoration: none;
-            background: var(--tile-bg);
-            border: 1px solid var(--tile-border);
-            box-shadow: var(--tile-shadow);
-            -webkit-backdrop-filter: blur(9px) saturate(170%); backdrop-filter: blur(9px) saturate(170%);
-            transition: transform 0.25s ease, box-shadow 0.25s ease;
-        }
-        /* Every HOME tile picture has the same wide shape (97:59, the exact proportions of the chosen layout tile). The whole photo is always visible;
-           a soft blurred copy of it fills any empty space at the sides or top and bottom. */
-        .tile-pic { position: relative; aspect-ratio: 97 / 59; width: 100%; overflow: hidden; border-radius: 20px; border: 1px solid var(--pic-border); background: var(--pic-bg); }
-        .tile-pic .bg { position: absolute; inset: -16px; background-size: cover; background-position: center; filter: blur(16px) saturate(1.2); opacity: 0.75; }
-        .tile-pic img { position: relative; display: block; width: 100%; height: 100%; object-fit: contain; }
-        .tile-pic.ph { background: linear-gradient(135deg, #7d5fff, #ff00de); }
-        .tile-body { box-sizing: border-box; height: calc(5.75rem + 20px); overflow: hidden; padding: 12px 8px 8px; } /* same height for every HOME tile */
-        .tile-title { margin: 0 0 6px; font-size: 1.2rem; font-weight: 900; line-height: 1.15; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; text-shadow: var(--tile-title-shadow); }
-        .tile-desc { margin: 0; font-size: 0.88rem; line-height: 1.45; color: var(--desc); display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
-        @media (hover: hover) { .tile:hover { transform: translateY(-4px); box-shadow: var(--tile-shadow-hover); } }
-        @media (prefers-reduced-motion: reduce) { .tile { transition: none; } }
-        /* browsers without blur support get a darker panel so text is still readable */
-        @supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
-            .tile { background: var(--tile-fallback); }
-        }
-        #content { display: none; padding: 26px 5% 50px; min-height: 60vh; }
-        .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); gap: 10px; }
-        @media (min-width: 700px) { .grid { grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 14px; } }
-
-        /* CARD STYLE */
-        .card { background: var(--card-bg); border: 1px solid var(--card-border); box-shadow: var(--card-shadow); border-radius: 14px; padding: 8px; transition: 0.3s; }
-        .card-title { margin: 0; font-size: 0.75rem; font-weight: 700; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-        .card:hover { transform: translateY(-5px); border-color: var(--p); }
-        .card-img { width: 100%; aspect-ratio: 1 / 1; border-radius: 10px; background-size: cover; background-position: center; background-color: var(--pic-bg); margin-bottom: 8px; }
-        .card-link { display: block; color: inherit; text-decoration: none; }
-
-        /* GAMES: compact tiles (a little larger than the default). The links are inside each game's page. */
-        .grid.games { grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 12px; }
-        @media (min-width: 700px) { .grid.games { grid-template-columns: repeat(auto-fill, minmax(170px, 1fr)); gap: 14px; } }
-        .btn-row { display: flex; margin-top: 8px; }
-        .btn-main { flex: 1; background: linear-gradient(45deg, var(--p), var(--s)); color: #fff; text-decoration: none; text-align: center; padding: 7px; border-radius: 8px; font-weight: 900; font-size: 0.7rem; }
-
+        /* HOME (store style) */
+        body { background: var(--page); }
+        .wrap { box-sizing: border-box; max-width: 1000px; margin: 0 auto; padding: 0 5% 34px; }
+        .searchpill { margin: 16px auto 0; display: flex; align-items: center; gap: 10px; background: var(--card-bg); border: 1px solid var(--line); border-radius: 999px; padding: 0 18px; box-shadow: 0 4px 16px rgba(60,40,140,0.07); }
+        .searchpill svg { flex: none; width: 20px; height: 20px; stroke: var(--ac); fill: none; stroke-width: 2; stroke-linecap: round; }
+        .searchpill input { flex: 1; min-width: 0; border: 0; outline: 0; background: transparent; font: inherit; font-size: 0.92rem; color: var(--ink); padding: 13px 0; }
+        .searchpill input::placeholder { color: var(--soft); }
+        .chips { display: flex; gap: 8px; margin: 14px 0 4px; overflow-x: auto; scrollbar-width: none; }
+        .chips::-webkit-scrollbar { display: none; }
+        .chips::-webkit-scrollbar { display: none; }
+        .chip { flex: none; padding: 8px 16px; border-radius: 999px; background: var(--card-bg); border: 1px solid var(--line); color: var(--ink); font: inherit; font-weight: 700; font-size: 0.8rem; cursor: pointer; white-space: nowrap; }
+        .chip.on { background: var(--ac); color: #fff; border-color: var(--ac); }
+        .banners { display: flex; gap: 12px; margin: 18px 0; overflow-x: auto; scroll-snap-type: x mandatory; scrollbar-width: none; }
+        .banners::-webkit-scrollbar { display: none; }
+        .banners::-webkit-scrollbar { display: none; }
+        .feat { flex: none; width: 100%; box-sizing: border-box; scroll-snap-align: start; border-radius: 22px; padding: 26px 22px; color: #fff; text-decoration: none; position: relative; overflow: hidden; min-height: 170px; display: flex; flex-direction: column; justify-content: center;
+            background: linear-gradient(120deg, #6a3df0, #c24dff 60%, #ff7ad9) center/cover; }
+        .feat:after { content: ""; position: absolute; right: -40px; top: -40px; width: 190px; height: 190px; border-radius: 50%; background: rgba(255,255,255,0.18); }
+        .feat.pic:after { display: none; }
+        .feat.pic:before { content: ""; position: absolute; inset: 0; background: linear-gradient(90deg, rgba(20,10,60,0.82), rgba(20,10,60,0.35) 70%, rgba(20,10,60,0.1)); }
+        .feat > * { position: relative; z-index: 1; }
+        .feat small { letter-spacing: 0.2em; text-transform: uppercase; font-size: 0.65rem; opacity: 0.85; }
+        .feat h2 { margin: 8px 0 6px; font-size: 1.5rem; line-height: 1.1; max-width: 16ch; }
+        .feat p { margin: 0 0 14px; font-size: 0.85rem; opacity: 0.92; max-width: 34ch; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+        .feat .btn { align-self: flex-start; background: #fff; color: #6a3df0; font-weight: 800; border-radius: 999px; padding: 10px 20px; font-size: 0.8rem; }
+        .sec { margin: 24px 0 12px; font-size: 1.1rem; font-weight: 800; }
+        .apps { display: grid; grid-template-columns: minmax(0, 1fr); gap: 10px; }
+        .app { display: flex; align-items: center; gap: 14px; background: var(--card-bg); border: 1px solid var(--line); border-radius: 18px; padding: 12px 14px; box-shadow: 0 4px 14px rgba(60,40,140,0.06); color: inherit; text-decoration: none; }
+        .ico { flex: none; width: 56px; height: 56px; border-radius: 15px; color: #fff; font-weight: 900; font-size: 1.4rem; display: flex; align-items: center; justify-content: center; background: linear-gradient(135deg, #7d5fff, #ff00de) center/cover; }
+        .meta { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px; }
+        .meta b { font-size: 0.98rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .meta span { font-size: 0.8rem; color: var(--soft); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .meta i { font-style: normal; font-size: 0.7rem; color: var(--ac); font-weight: 700; }
+        .get { flex: none; border: 1.5px solid var(--ac); color: var(--ac); font-weight: 800; font-size: 0.75rem; border-radius: 999px; padding: 8px 16px; }
+        .rail { display: flex; gap: 12px; overflow-x: auto; padding-bottom: 6px; scrollbar-width: thin; }
+        .rail.wrapped { flex-wrap: wrap; overflow: visible; }
+        .rail.wrapped { flex-wrap: wrap; overflow: visible; }
+        .gc { flex: none; width: 150px; box-sizing: border-box; background: var(--card-bg); border: 1px solid var(--line); border-radius: 16px; padding: 8px; box-shadow: 0 4px 14px rgba(60,40,140,0.06); color: inherit; text-decoration: none; }
+        .gp { aspect-ratio: 4 / 3; border-radius: 11px; margin-bottom: 8px; background: linear-gradient(135deg, #ff7a59, #7d5fff) center/cover; }
+        .gc b { display: block; font-size: 0.85rem; line-height: 1.2; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+        .gc span { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; font-size: 0.72rem; color: var(--soft); margin-top: 2px; }
+        .empty { color: var(--soft); padding: 22px 0; }
+        @media (hover: hover) { .app:hover, .gc:hover { border-color: var(--ac); } }
+        @media (min-width: 760px) { .apps { grid-template-columns: repeat(2, minmax(0, 1fr)); } .feat { min-height: 210px; padding: 40px; } .feat h2 { font-size: 2.2rem; } .gc { width: 190px; } }
         /* BOTTOM BAR (only on the All view): Contact, Ask, Socials */
         .foot { position: fixed; left: 0; right: 0; bottom: 0; z-index: 20; box-sizing: border-box; padding: 8px 5% 10px; text-align: center; color: var(--soft); font-size: 0.68rem; border-top: 1px solid var(--line); background: var(--card-bg); display: none; }
         body.on-all .foot { display: block; }
@@ -162,6 +161,32 @@
         .soc { display: flex; gap: 12px; flex-wrap: wrap; }
         .soc a { height: 44px; padding: 0 14px; border-radius: 14px; display: flex; align-items: center; justify-content: center; gap: 8px; background: var(--ac); color: #fff; font-weight: 800; font-size: 0.85rem; text-decoration: none; }
         .soc a svg { width: 20px; height: 20px; stroke: #fff; fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+        /* LIQUID GLASS THEME */
+:root,:root[data-theme="dark"]{--ink:#ffffff;--soft:rgba(255,255,255,.72);--desc:rgba(255,255,255,.9);--accent:#d8ceff;--qtext:#ffb3f3;--ac:#8b6dff;--g-bg:rgba(255,255,255,.09);--g-bg2:rgba(24,18,52,.92);--g-bd:rgba(255,255,255,.22);--g-sh:0 10px 32px rgba(0,0,0,.35), inset 0 1px 0 rgba(255,255,255,.35);--blur:24px;--g-menu:rgba(7,5,26,.5);--gold:#e9d5a6;--teal:#9ff0ff;--input-bg:rgba(255,255,255,.10);--input-border:rgba(255,255,255,.22);--pic-bg:rgba(255,255,255,.08);
+--wall-base:#07051a;--wall:radial-gradient(520px 440px at 6% 4%,rgba(125,95,255,.7),transparent 70%),radial-gradient(480px 420px at 98% 24%,rgba(255,0,222,.42),transparent 70%),radial-gradient(520px 460px at 14% 74%,rgba(24,194,156,.34),transparent 70%),radial-gradient(520px 440px at 92% 96%,rgba(47,138,232,.5),transparent 70%)}
+:root[data-theme="light"]{--ink:#17123a;--soft:#4d4880;--desc:#2b2552;--accent:#5a3fe0;--qtext:#c200a8;--ac:#6a3df0;--g-bg:rgba(255,255,255,.38);--g-bg2:rgba(255,255,255,.92);--g-bd:rgba(255,255,255,.75);--g-sh:0 8px 28px rgba(80,60,180,.16), inset 0 1px 0 rgba(255,255,255,.9);--blur:22px;--g-menu:rgba(240,236,255,.45);--gold:#8a6d3b;--teal:#1b6b78;--input-bg:rgba(255,255,255,.55);--input-border:rgba(125,95,255,.30);--pic-bg:rgba(255,255,255,.5);
+--wall-base:#e9e4ff;--wall:radial-gradient(520px 460px at 8% 6%,rgba(150,120,255,.75),transparent 70%),radial-gradient(480px 420px at 96% 20%,rgba(255,140,220,.65),transparent 70%),radial-gradient(560px 480px at 12% 78%,rgba(110,225,205,.65),transparent 70%),radial-gradient(520px 460px at 92% 94%,rgba(120,175,255,.7),transparent 70%)}
+:root,:root[data-theme="light"],:root[data-theme="dark"]{ --card-bg:var(--g-bg); --card:var(--g-bg); --card-border:var(--g-bd); --card-shadow:var(--g-sh); --line:var(--g-bd); --header-bg:var(--g-bg); --page:transparent; --menu-bg:var(--g-menu); }
+html{min-height:100%}
+body{background:var(--wall) fixed; background-color:var(--wall-base); color:var(--ink)}
+.site-head{margin:10px 10px 0; border-radius:28px; position:sticky; top:10px; background:var(--g-bg); border:1px solid var(--g-bd); box-shadow:var(--g-sh); -webkit-backdrop-filter:blur(var(--blur)) saturate(190%); backdrop-filter:blur(var(--blur)) saturate(190%)}
+.icon-btn.round{background:rgba(255,255,255,.18)}
+.searchpill,.chip,.app,.gc,.sheet,.empty{ -webkit-backdrop-filter:blur(var(--blur)) saturate(190%); backdrop-filter:blur(var(--blur)) saturate(190%); box-shadow:var(--g-sh); }
+.searchpill,.app,.gc,.sheet{background:var(--g-bg); border:1px solid var(--g-bd)}
+.chip{background:var(--g-bg); border:1px solid var(--g-bd); color:var(--ink)}
+.chip.on{background:var(--ac); color:#fff; border-color:rgba(255,255,255,.5); box-shadow:0 6px 18px rgba(0,0,0,.18), inset 0 1px 0 rgba(255,255,255,.5)}
+.feat{border:1px solid rgba(255,255,255,.6); box-shadow:inset 0 1px 0 rgba(255,255,255,.6)}
+.app,.gc{border-radius:24px}
+.ico,.gp{box-shadow:inset 0 1px 0 rgba(255,255,255,.55), 0 4px 12px rgba(0,0,0,.18)}
+.get{background:rgba(255,255,255,.18); border:1px solid var(--g-bd); color:var(--ink); -webkit-backdrop-filter:blur(8px); backdrop-filter:blur(8px)}
+.foot{left:12px; right:12px; bottom:10px; border-radius:34px; border:1px solid var(--g-bd); background:var(--g-bg); box-shadow:var(--g-sh); -webkit-backdrop-filter:blur(var(--blur)) saturate(190%); backdrop-filter:blur(var(--blur)) saturate(190%)}
+:root[data-theme] .foot{background:var(--g-bg)}
+.bi{background:rgba(255,255,255,.16); border:1px solid var(--g-bd); color:var(--ink)}
+.bi.on{background:var(--ac); color:#fff}
+.sheet{background:var(--g-bg2) !important; border-radius:26px}
+.sec,.meta b,.gc b{color:var(--ink)} .gc span,.meta span{color:var(--soft)} .tagline{color:var(--soft)}
+.searchpill svg{stroke:var(--ac)} .searchpill input{color:var(--ink)}
+.sheet h4,.sheet a.row{color:var(--ink)} .sheet input,.sheet textarea{background:rgba(255,255,255,.18); border-color:var(--g-bd); color:var(--ink)}
     </style>
 </head>
 <body>
@@ -180,26 +205,26 @@
                 <button class="icon-btn" id="menu-btn" type="button" aria-label="Open menu" aria-expanded="false" aria-controls="menu"><svg viewBox="0 0 24 24"><path d="M3 6h18M3 12h18M3 18h18"/></svg></button>
             </div>
         </div>
-        <div class="searchbar" id="searchbar"><input id="search-input" type="search" placeholder="Search apps and games" autocomplete="off" aria-label="Search apps and games"></div>
     </header>
     <nav class="menu" id="menu" aria-label="Menu">
         <button class="close" id="menu-close" type="button" aria-label="Close menu"><svg viewBox="0 0 24 24"><path d="M5 5l14 14M19 5L5 19"/></svg></button>
-        <a href="/" data-go="home">Home</a>
         <a href="/?s=games" data-go="games">Games</a>
         <a href="/?s=apps" data-go="apps">Apps</a>
         <a href="/?s=links" data-go="links">Links</a>
         <div class="menu-brand">çábTech</div>
     </nav>
 
-    <section id="featured" aria-label="Highlights">
-        <div class="tiles" id="tiles"></div>
-    </section>
-
-    <section id="content">
-        <div class="grid" id="main-grid"></div>
-    </section>
-
-<div class="foot" id="foot">
+    <main class="wrap">
+        <label class="searchpill"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg><input id="search-input" type="search" placeholder="Search apps and games" autocomplete="off" aria-label="Search apps and games"></label>
+        <div class="chips" id="chips" role="tablist">
+            <button class="chip on" type="button" data-chip="all">All</button>
+            <button class="chip" type="button" data-chip="games">Games</button>
+            <button class="chip" type="button" data-chip="apps">Apps</button>
+            <button class="chip" type="button" data-chip="links">Links</button>
+        </div>
+        <div id="home"><p class="empty">Loading...</p></div>
+    </main>
+    <div class="foot" id="foot">
         <div class="sheet" id="sheet-contact"><h4>Contact us</h4><div id="contact-rows"></div></div>
         <div class="sheet" id="sheet-ask"><h4>Ask us anything</h4>
             <form id="ask-form" autocomplete="off">
@@ -231,7 +256,7 @@
             document.documentElement.setAttribute('data-theme', next);
             try { localStorage.setItem('theme', next); } catch (e) {}
             const m = document.querySelector('meta[name="theme-color"]');
-            if (m) m.setAttribute('content', next === 'dark' ? '#070512' : '#ffffff');
+            if (m) m.setAttribute('content', next === 'dark' ? '#07051a' : '#e9e4ff');
         });
 
         // Full-page transparent menu
@@ -246,46 +271,53 @@
         document.getElementById('menu-close').addEventListener('click', () => setMenu(false));
         menuEl.addEventListener('click', (e) => { if (e.target === menuEl) setMenu(false); });
         document.addEventListener('keydown', (e) => { if (e.key === 'Escape') setMenu(false); });
-        const MENU_SECTIONS = { games: ['GAMES', 'GAMES'], apps: ['APPS', 'APPS'], links: ['LINK', 'LINKS'] };
+        const MENU_SECTIONS = { games: 'GAMES', apps: 'APPS', links: 'LINK' };
         menuEl.querySelectorAll('a[data-go]').forEach(function (a) {
             a.addEventListener('click', function (e) {
                 e.preventDefault();
                 setMenu(false);
                 const go = a.getAttribute('data-go');
-                if (go === 'home') goHome(); else openCat(MENU_SECTIONS[go][0], MENU_SECTIONS[go][1]);
+                if (MENU_SECTIONS[go]) openCat(MENU_SECTIONS[go]);
             });
         });
 
-        // Search: finds items by title, description or developer
-        const searchBar = document.getElementById('searchbar');
+        // Store-style home: search pill + chips (All / Games / Apps / Links)
+        const homeEl = document.getElementById('home');
         const searchInput = document.getElementById('search-input');
-        function setSearch(open) {
-            searchBar.classList.toggle('open', open);
-            document.getElementById('search-btn').setAttribute('aria-expanded', open ? 'true' : 'false');
-            if (open) searchInput.focus(); else { searchInput.value = ''; goHome(); }
-        }
-        document.getElementById('search-btn').addEventListener('click', () => setSearch(!searchBar.classList.contains('open')));
-        searchInput.addEventListener('input', function () {
-            const q = searchInput.value.trim().toLowerCase();
-            if (!q) { goHome(true); return; }
-            const found = items.filter(i => i.category !== 'HOME' && [i.title, i.description, i.developer].some(t => String(t || '').toLowerCase().includes(q)));
-            showCards(found, false, 'No results for that search.');
-        });
-        searchInput.addEventListener('keydown', (e) => { if (e.key === 'Escape') setSearch(false); });
+        let chip = 'all';
+        const CHIPS = { games: 'GAMES', apps: 'APPS', links: 'LINK' };
+        const LABEL = { GAMES: 'Game', APPS: 'App', LINK: 'Link' };
 
-        // Back to the front page
-        function goHome(keepSearch) {
-            document.getElementById('content').style.display = 'none';
-            if (!keepSearch) { searchBar.classList.remove('open'); searchInput.value = ''; }
-            try { if (location.search) history.replaceState(null, '', location.pathname); } catch (e) {}
-            renderFeatured();
-            window.scrollTo(0, 0);
+        function setChip(c) {
+            chip = c;
+            searchInput.value = '';
+            document.querySelectorAll('.chip').forEach(b => b.classList.toggle('on', b.getAttribute('data-chip') === c));
+            render();
+        }
+        document.getElementById('chips').addEventListener('click', function (e) {
+            const b = e.target.closest('.chip'); if (b) setChip(b.getAttribute('data-chip'));
+        });
+        document.getElementById('search-btn').addEventListener('click', function () {
+            window.scrollTo(0, 0); searchInput.focus();
+        });
+        searchInput.addEventListener('input', render);
+        searchInput.addEventListener('keydown', (e) => { if (e.key === 'Escape') { searchInput.value = ''; render(); } });
+
+        function goHome() { setChip('all'); window.scrollTo(0, 0); }
+        function openCat(cat) {
+            const k = Object.keys(CHIPS).find(x => CHIPS[x] === cat);
+            setChip(k || 'all'); window.scrollTo(0, 0);
         }
 
         async function load() {
-            const { data } = await supabaseClient.from('files').select('*').order('created_at', { ascending: false });
+            const { data, error } = await supabaseClient.from('files').select('*').order('created_at', { ascending: false });
+            if (error) {
+                console.error('Supabase load error:', error);
+                homeEl.innerHTML = '<p class="empty">Unable to load items right now.</p>';
+                return;
+            }
             items = data || [];
-            renderFeatured();
+            render();
             openFromQuery();
         }
 
@@ -295,41 +327,12 @@
             return /^\/(?!\/)[A-Za-z0-9\-._~\/?=&%#]*$/.test(s) ? s : '';
         }
 
-        // /?s=games opens the Games section (and apps, links, files)
-        const SECTION_LINKS = { games: ['GAMES', 'GAMES'], apps: ['APPS', 'APPS'], links: ['LINK', 'LINKS'] };
+        // /?s=games opens the Games filter (also apps, links); /?search=1 focuses the search box
         function openFromQuery() {
-            const s = new URLSearchParams(location.search).get('s');
-            const sec = s && SECTION_LINKS[s.toLowerCase()];
-            if (sec) openCat(sec[0], sec[1]);
-            else if (new URLSearchParams(location.search).get('search')) setSearch(true);
-        }
-
-        // Items uploaded to the HOME section show on the front page as glass tiles
-        function renderFeatured() {
-            const home = items.filter(i => i.category === 'HOME');
-            const section = document.getElementById('featured');
-            if (!home.length) { section.style.display = 'none'; syncBar(); return; }
-            document.getElementById('tiles').innerHTML = home.map(i => {
-                // Open the item's own page when it has one, otherwise its link
-                // A chosen page inside the site wins, then the item's own page, then an outside link
-                const dest = internalPath(i.url);
-                const internal = !!dest || !!i.slug;
-                const href = dest || (i.slug ? '/app/' + encodeURIComponent(i.slug) : safeUrl(i.url));
-                const img = safeUrl(i.image_url || '');
-                const desc = (i.description || '').trim();
-                return `
-                <a class="tile" href="${esc(href)}" ${internal ? '' : 'target="_blank" rel="noopener noreferrer"'}>
-                    ${img !== '#'
-                        ? `<div class="tile-pic"><div class="bg" style="background-image:url('${esc(img).replace(/'/g, '%27')}')"></div><img src="${esc(img)}" alt="${esc(i.title)}" loading="lazy" decoding="async" onerror="this.parentNode.className='tile-pic ph';this.remove()"></div>`
-                        : `<div class="tile-pic ph"></div>`}
-                    <div class="tile-body">
-                        <h3 class="tile-title">${esc(i.title)}</h3>
-                        ${desc ? `<p class="tile-desc">${esc(desc)}</p>` : ''}
-                    </div>
-                </a>`;
-            }).join('');
-            section.style.display = 'block';
-            syncBar();
+            const p = new URLSearchParams(location.search);
+            const s = (p.get('s') || '').toLowerCase();
+            if (CHIPS[s]) setChip(s);
+            else if (p.get('search')) searchInput.focus();
         }
 
         // Escape text so titles can never inject HTML or scripts
@@ -345,35 +348,56 @@
             } catch (e) { return '#'; }
         }
 
-        function openCat(cat, label) {
-            showCards(items.filter(i => i.category === cat), cat === 'GAMES', 'No content in this section.');
+        // Where an item opens: a chosen page inside the site, its own page, or its outside link
+        function dest(i) {
+            const d = internalPath(i.url);
+            const internal = !!d || !!i.slug;
+            const href = d || (i.slug ? '/app/' + encodeURIComponent(i.slug) : safeUrl(i.url));
+            return { href, attrs: internal ? '' : ' target="_blank" rel="noopener noreferrer"' };
+        }
+        function picStyle(i) {
+            const img = safeUrl(i.image_url || '');
+            return img !== '#' ? ` style="background-image:url('${esc(img).replace(/'/g, '%27')}')"` : '';
+        }
+        function appRow(i) {
+            const t = dest(i), pic = picStyle(i);
+            const word = i.category === 'LINK' ? 'OPEN' : 'GET';
+            return `<a class="app" href="${esc(t.href)}"${t.attrs}>
+                <div class="ico"${pic}>${pic ? '' : esc((i.title || '?').trim().charAt(0).toUpperCase())}</div>
+                <div class="meta"><b>${esc(i.title)}</b></div>
+                <div class="get">${word}</div></a>`;
+        }
+        function gameCard(i) {
+            const t = dest(i);
+            return `<a class="gc" href="${esc(t.href)}"${t.attrs}><div class="gp"${picStyle(i)}></div><b>${esc(i.title)}</b>${i.description ? `<span>${esc(i.description)}</span>` : ''}</a>`;
+        }
+        function banner(i) {
+            const t = dest(i), img = safeUrl(i.image_url || '');
+            const st = img !== '#' ? ` style="background-image:url('${esc(img).replace(/'/g, '%27')}')"` : '';
+            const desc = (i.description || '').trim();
+            return `<a class="feat${img !== '#' ? ' pic' : ''}" href="${esc(t.href)}"${t.attrs}${st}><small>Featured</small><h2>${esc(i.title)}</h2>${desc ? `<p>${esc(desc)}</p>` : '<p></p>'}<span class="btn">View details</span></a>`;
         }
 
-        function showCards(filtered, isGames, emptyText) {
-            document.getElementById('featured').style.display = 'none';
-            document.getElementById('content').style.display = 'block';
-            const g = document.getElementById('main-grid');
-            g.className = 'grid' + (isGames ? ' games' : '');
-            g.innerHTML = filtered.length ? filtered.map(i => {
-                // Up to 4 extra links per game (listed on the game's own page)
-                const links = (Array.isArray(i.links) ? i.links : []).filter(l => l && safeUrl(l.url) !== '#').slice(0, 4);
-                // Items with a slug get their own details page; the picture and title link to it
-                const page = i.slug ? '/app/' + encodeURIComponent(i.slug) : '';
-                const top = `
-                    <div class="card-img" style="background-image: url('${esc(safeUrl(i.image_url || 'https://via.placeholder.com/400x200'))}')"></div>
-                    <h3 class="card-title">${esc(i.title)}</h3>`;
-                // Games with links open their own page (where the links are listed), so no GET button on the tile
-                return `
-                <div class="card">
-                    ${page ? `<a class="card-link" href="${esc(page)}">${top}</a>` : top}
-                    ${(page && (i.category === 'APPS' || links.length)) ? '' : `<div class="btn-row">
-                        <a href="${esc(safeUrl(i.url))}" target="_blank" rel="noopener noreferrer" class="btn-main">GET</a>
-                    </div>`}
-                </div>`;
-            }).join('') : `<p>${esc(emptyText)}</p>`;
-            window.scrollTo(0, 0);
+        function render() {
+            const q = searchInput.value.trim().toLowerCase();
+            const rest = items.filter(i => i.category !== 'HOME');
+            const by = c => items.filter(i => i.category === c);
+            let h = '';
+            if (q) {
+                const found = rest.filter(i => [i.title, i.description, i.developer].some(t => String(t || '').toLowerCase().includes(q)));
+                h = `<h3 class="sec">Results</h3>` + (found.length ? `<div class="apps">${found.map(appRow).join('')}</div>` : `<p class="empty">No results for that search.</p>`);
+            } else {
+                const apps = by('APPS'), games = by('GAMES'), links = by('LINK'), home = by('HOME');
+                if (chip === 'all' && home.length) h += `<div class="banners">${home.map(banner).join('')}</div>`;
+                if ((chip === 'all' || chip === 'apps') && apps.length) h += `<h3 class="sec">${chip === 'all' ? 'Popular apps' : 'Apps'}</h3><div class="apps">${apps.map(appRow).join('')}</div>`;
+                if ((chip === 'all' || chip === 'games') && games.length) h += `<h3 class="sec">Games</h3><div class="rail${chip === 'games' ? ' wrapped' : ''}">${games.map(gameCard).join('')}</div>`;
+                if ((chip === 'all' || chip === 'links') && links.length) h += `<h3 class="sec">Links</h3><div class="apps">${links.map(appRow).join('')}</div>`;
+                if (!h || (chip !== 'all' && !({games, apps, links})[chip].length)) h = `<p class="empty">No content in this section.</p>`;
+            }
+            homeEl.innerHTML = h;
             syncBar();
         }
+
         // ---- Bottom bar: Contact, Ask, Socials (only shown on the All view) ----
         // EDIT HERE: your contact details and social links. Leave a value empty ('') to hide it.
         const CONTACT_EMAIL = 'rymmfommy@gmail.com';
@@ -400,7 +424,7 @@
             document.querySelectorAll('.bi').forEach(x => x.classList.remove('on'));
         }
         function syncBar() {
-            document.body.classList.toggle('on-all', document.getElementById('content').style.display !== 'block');
+            document.body.classList.toggle('on-all', chip === 'all' && !searchInput.value.trim());
             closeSheets();
         }
         document.querySelectorAll('.bi').forEach(b => b.addEventListener('click', () => {
