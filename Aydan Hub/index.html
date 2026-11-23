@@ -210,7 +210,7 @@ body{background:var(--wall) fixed; background-color:var(--wall-base); color:var(
         <button class="close" id="menu-close" type="button" aria-label="Close menu"><svg viewBox="0 0 24 24"><path d="M5 5l14 14M19 5L5 19"/></svg></button>
         <a href="/?s=games" data-go="games">Games</a>
         <a href="/?s=apps" data-go="apps">Apps</a>
-        <a href="/?s=links" data-go="links">Links</a>
+        <a href="/?s=links" data-go="links">Descriptions</a>
         <div class="menu-brand">çábTech</div>
     </nav>
 
@@ -220,7 +220,7 @@ body{background:var(--wall) fixed; background-color:var(--wall-base); color:var(
             <button class="chip on" type="button" data-chip="all">All</button>
             <button class="chip" type="button" data-chip="games">Games</button>
             <button class="chip" type="button" data-chip="apps">Apps</button>
-            <button class="chip" type="button" data-chip="links">Links</button>
+            <button class="chip" type="button" data-chip="links">Descriptions</button>
         </div>
         <div id="home"><p class="empty">Loading...</p></div>
     </main>
@@ -281,12 +281,12 @@ body{background:var(--wall) fixed; background-color:var(--wall-base); color:var(
             });
         });
 
-        // Store-style home: search pill + chips (All / Games / Apps / Links)
+        // Store-style home: search pill + chips (All / Games / Apps / Descriptions)
         const homeEl = document.getElementById('home');
         const searchInput = document.getElementById('search-input');
         let chip = 'all';
         const CHIPS = { games: 'GAMES', apps: 'APPS', links: 'LINK' };
-        const LABEL = { GAMES: 'Game', APPS: 'App', LINK: 'Link' };
+        const LABEL = { GAMES: 'Game', APPS: 'App', LINK: 'Description' };
 
         function setChip(c) {
             chip = c;
@@ -391,7 +391,7 @@ body{background:var(--wall) fixed; background-color:var(--wall-base); color:var(
                 if (chip === 'all' && home.length) h += `<div class="banners">${home.map(banner).join('')}</div>`;
                 if ((chip === 'all' || chip === 'apps') && apps.length) h += `<h3 class="sec">${chip === 'all' ? 'Popular apps' : 'Apps'}</h3><div class="apps">${apps.map(appRow).join('')}</div>`;
                 if ((chip === 'all' || chip === 'games') && games.length) h += `<h3 class="sec">Games</h3><div class="rail${chip === 'games' ? ' wrapped' : ''}">${games.map(gameCard).join('')}</div>`;
-                if ((chip === 'all' || chip === 'links') && links.length) h += `<h3 class="sec">Links</h3><div class="apps">${links.map(appRow).join('')}</div>`;
+                if ((chip === 'all' || chip === 'links') && links.length) h += `<h3 class="sec">Descriptions</h3><div class="apps">${links.map(appRow).join('')}</div>`;
                 if (!h || (chip !== 'all' && !({games, apps, links})[chip].length)) h = `<p class="empty">No content in this section.</p>`;
             }
             homeEl.innerHTML = h;
