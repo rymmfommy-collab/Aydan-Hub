@@ -17,7 +17,7 @@
 
     <script>
         (function () {
-            var t = 'light';
+            var t = 'light';   /* default for first-time visitors */
             try { t = localStorage.getItem('theme') || t; } catch (e) {}
             document.documentElement.setAttribute('data-theme', t === 'dark' ? 'dark' : 'light');
         })();
@@ -53,8 +53,11 @@
             --card-bg: rgba(255,255,255,0.07); --card-border: rgba(255,255,255,0.10); --card-shadow: none;
             --gold: #d1b27a; --teal: #7dd3e0; --pill: rgba(255,255,255,0.10); --pill-on: rgba(255,255,255,0.20); --menu-bg: rgba(7,5,18,0.55); --page: #070512; --ac: #a58bff;
         }
-        body { margin: 0; background: var(--page); color: var(--ink); font-family: 'Inter', sans-serif; overflow-x: hidden; }
+        body { margin: 0; background: var(--page); color: var(--ink); font-family: 'Inter', sans-serif; overflow-x: clip; min-height: 100vh; min-height: 100dvh; display: flex; flex-direction: column; }
+        html { overscroll-behavior-y: none; }
+        main.wrap { flex: 1 0 auto; width: 100%; }
 
+        /* HEADER: logo at the left, title in the middle, buttons at the right */
         .site-head { position: relative; z-index: 30; background: var(--header-bg); border-bottom: 1px solid var(--line); }
         .site-row { display: flex; align-items: center; gap: 8px; padding: 10px 4%; }
         .logo { flex: none; display: block; }
@@ -71,7 +74,10 @@
         .icon-btn.round svg { width: 20px; height: 20px; }
         :root[data-theme="light"] .icon-btn .moon { display: none; }
         :root[data-theme="dark"] .icon-btn .sun { display: none; }
-
+        .searchbar { display: none; padding: 10px 5%; border-top: 1px solid var(--line); background: var(--bg); }
+        .searchbar.open { display: block; }
+        .searchbar input { width: 100%; box-sizing: border-box; font: inherit; color: var(--ink); background: var(--pic-bg); border: 1px solid var(--line); border-radius: 12px; padding: 12px 14px; }
+        /* full-page transparent menu */
         .menu { position: fixed; inset: 0; z-index: 10000; display: flex; flex-direction: column; align-items: flex-end; padding: 22px 7% 40px; background: var(--menu-bg);
             -webkit-backdrop-filter: blur(14px) saturate(160%); backdrop-filter: blur(14px) saturate(160%);
             opacity: 0; visibility: hidden; transition: opacity 0.25s ease, visibility 0.25s; }
@@ -83,18 +89,20 @@
         .menu .menu-brand { margin-top: auto; align-self: center; font-size: 0.7rem; letter-spacing: 0.28em; text-transform: uppercase; color: var(--gold); }
         @media (prefers-reduced-motion: reduce) { .menu { transition: none; } }
 
-        .wrap { box-sizing: border-box; max-width: 1000px; margin: 0 auto; padding: 0 5% 20px; }
+        /* HOME (store style) */
+        body { background: var(--page); }
+        .wrap { box-sizing: border-box; max-width: 1000px; margin: 0 auto; padding: 0 5% 34px; }
         .searchpill { margin: 16px auto 0; display: flex; align-items: center; gap: 10px; background: var(--card-bg); border: 1px solid var(--line); border-radius: 999px; padding: 0 18px; box-shadow: 0 4px 16px rgba(60,40,140,0.07); }
         .searchpill svg { flex: none; width: 20px; height: 20px; stroke: var(--ac); fill: none; stroke-width: 2; stroke-linecap: round; }
         .searchpill input { flex: 1; min-width: 0; border: 0; outline: 0; background: transparent; font: inherit; font-size: 0.92rem; color: var(--ink); padding: 13px 0; }
         .searchpill input::placeholder { color: var(--soft); }
-        .chips { display: flex; gap: 8px; margin: 14px 0 4px; overflow-x: auto; scrollbar-width: none; }
+        .chips { display: flex; flex-wrap: wrap; gap: 8px; margin: 14px 0 4px; }
         .chips::-webkit-scrollbar { display: none; }
         .chip { flex: none; padding: 8px 16px; border-radius: 999px; background: var(--card-bg); border: 1px solid var(--line); color: var(--ink); font: inherit; font-weight: 700; font-size: 0.8rem; cursor: pointer; white-space: nowrap; }
         .chip.on { background: var(--ac); color: #fff; border-color: var(--ac); }
-        .banners { display: flex; gap: 12px; margin: 18px 0; overflow-x: auto; scroll-snap-type: x mandatory; scrollbar-width: none; }
+        .banners { display: flex; flex-direction: column; gap: 12px; margin: 18px 0; }
         .banners::-webkit-scrollbar { display: none; }
-        .feat { flex: none; width: 100%; box-sizing: border-box; scroll-snap-align: start; border-radius: 22px; padding: 26px 22px; color: #fff; text-decoration: none; position: relative; overflow: hidden; min-height: 170px; display: flex; flex-direction: column; justify-content: center;
+        .feat { flex: none; width: 100%; box-sizing: border-box; border-radius: 22px; padding: 26px 22px; color: #fff; text-decoration: none; position: relative; overflow: hidden; min-height: 170px; display: flex; flex-direction: column; justify-content: center;
             background: linear-gradient(120deg, #6a3df0, #c24dff 60%, #ff7ad9) center/cover; }
         .feat:after { content: ""; position: absolute; right: -40px; top: -40px; width: 190px; height: 190px; border-radius: 50%; background: rgba(255,255,255,0.18); }
         .feat.pic:after { display: none; }
@@ -113,14 +121,15 @@
         .meta span { font-size: 0.8rem; color: var(--soft); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
         .meta i { font-style: normal; font-size: 0.7rem; color: var(--ac); font-weight: 700; }
         .get { flex: none; border: 1.5px solid var(--ac); color: var(--ac); font-weight: 800; font-size: 0.75rem; border-radius: 999px; padding: 8px 16px; }
-        .rail { display: flex; gap: 12px; overflow-x: auto; padding-bottom: 6px; scrollbar-width: thin; }
+        .rail { display: flex; flex-wrap: wrap; gap: 12px; }
         .rail.wrapped { flex-wrap: wrap; overflow: visible; }
         .gc { flex: none; width: 150px; box-sizing: border-box; background: var(--card-bg); border: 1px solid var(--line); border-radius: 16px; padding: 8px; box-shadow: 0 4px 14px rgba(60,40,140,0.06); color: inherit; text-decoration: none; }
         .gp { aspect-ratio: 4 / 3; border-radius: 11px; margin-bottom: 8px; background: linear-gradient(135deg, #ff7a59, #7d5fff) center/cover; }
         .gc b { display: block; font-size: 0.85rem; line-height: 1.2; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
         .gc span { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; font-size: 0.72rem; color: var(--soft); margin-top: 2px; }
         .empty { color: var(--soft); padding: 22px 0; }
-        .foot { margin-top: 34px; padding: 26px 5%; text-align: center; color: var(--soft); font-size: 0.78rem; border-top: 1px solid var(--line); background: var(--card-bg); }
+        .foot { position: fixed; left: 0; right: 0; bottom: 0; z-index: 20; box-sizing: border-box; padding: 12px 5%; text-align: center; color: var(--soft); font-size: 0.78rem; border-top: 1px solid var(--line); background: var(--card-bg); }
+        body { box-sizing: border-box; padding-bottom: 46px; }
         @media (hover: hover) { .app:hover, .gc:hover { border-color: var(--ac); } }
         @media (min-width: 760px) { .apps { grid-template-columns: 1fr 1fr; } .feat { min-height: 210px; padding: 40px; } .feat h2 { font-size: 2.2rem; } .gc { width: 190px; } }
     </style>
@@ -168,6 +177,7 @@
         const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
         let items = [];
 
+        // Dark / light mode switch (remembered in this browser)
         document.getElementById('theme-btn').addEventListener('click', function () {
             const next = document.documentElement.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
             document.documentElement.setAttribute('data-theme', next);
@@ -176,6 +186,7 @@
             if (m) m.setAttribute('content', next === 'dark' ? '#070512' : '#ffffff');
         });
 
+        // Full-page transparent menu
         const menuEl = document.getElementById('menu');
         const menuBtn = document.getElementById('menu-btn');
         function setMenu(open) {
@@ -197,6 +208,7 @@
             });
         });
 
+        // Store-style home: search pill + chips (All / Games / Apps / Links)
         const homeEl = document.getElementById('home');
         const searchInput = document.getElementById('search-input');
         let chip = 'all';
@@ -236,11 +248,13 @@
             openFromQuery();
         }
 
+        // Addresses inside this website, e.g. /app/moviebox or /?s=games. Anything else is not accepted here.
         function internalPath(u) {
             const s = String(u || '');
             return /^\/(?!\/)[A-Za-z0-9\-._~\/?=&%#]*$/.test(s) ? s : '';
         }
 
+        // /?s=games opens the Games filter (also apps, links); /?search=1 focuses the search box
         function openFromQuery() {
             const p = new URLSearchParams(location.search);
             const s = (p.get('s') || '').toLowerCase();
@@ -248,10 +262,12 @@
             else if (p.get('search')) searchInput.focus();
         }
 
+        // Escape text so titles can never inject HTML or scripts
         function esc(s) {
             return String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
         }
 
+        // Only allow normal web links
         function safeUrl(u) {
             try {
                 const x = new URL(u);
@@ -259,6 +275,7 @@
             } catch (e) { return '#'; }
         }
 
+        // Where an item opens: a chosen page inside the site, its own page, or its outside link
         function dest(i) {
             const d = internalPath(i.url);
             const internal = !!d || !!i.slug;
@@ -272,10 +289,9 @@
         function appRow(i) {
             const t = dest(i), pic = picStyle(i);
             const word = i.category === 'LINK' ? 'OPEN' : 'GET';
-            const showDesc = i.category !== 'APPS' && i.description;
             return `<a class="app" href="${esc(t.href)}"${t.attrs}>
                 <div class="ico"${pic}>${pic ? '' : esc((i.title || '?').trim().charAt(0).toUpperCase())}</div>
-                <div class="meta"><b>${esc(i.title)}</b>${showDesc ? `<span>${esc(i.description)}</span>` : ''}<i>${LABEL[i.category] || 'Item'} &middot; Official link</i></div>
+                <div class="meta"><b>${esc(i.title)}</b></div>
                 <div class="get">${word}</div></a>`;
         }
         function gameCard(i) {
