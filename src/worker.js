@@ -27,7 +27,7 @@ const ADMIN_EMAIL = 'rymmfommy@gmail.com';
 const CATEGORY_LABELS = {
   GAMES: 'Game',
   APPS: 'App',
-  LINK: 'Link',
+  LINK: 'Description',
   FILES: 'File',
   HOME: 'File',
 };
@@ -213,7 +213,7 @@ ${jsonLd ? `<script type="application/ld+json">${JSON.stringify(jsonLd).replace(
         <a href="/" data-go="home">Home</a>
         <a href="/?s=games" data-go="games">Games</a>
         <a href="/?s=apps" data-go="apps">Apps</a>
-        <a href="/?s=links" data-go="links">Links</a>
+        <a href="/?s=links" data-go="links">Descriptions</a>
         <div class="menu-brand">çábTech</div>
     </nav>
 <script>(function(){var m=document.getElementById('menu'),b=document.getElementById('menu-btn');function set(o){m.classList.toggle('open',o);b.setAttribute('aria-expanded',o?'true':'false');document.documentElement.style.overflow=o?'hidden':''}
