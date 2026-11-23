@@ -51,7 +51,7 @@
             --tile-title-shadow: 0 1px 8px rgba(0,0,0,0.35); --tile-fallback: rgba(20,16,50,0.85);
             --pic-bg: rgba(255,255,255,0.06); --pic-border: rgba(255,255,255,0.22);
             --card-bg: rgba(255,255,255,0.07); --card-border: rgba(255,255,255,0.10); --card-shadow: none;
-            --gold: #d1b27a; --teal: #7dd3e0; --pill: rgba(255,255,255,0.10); --pill-on: rgba(255,255,255,0.20); --menu-bg: rgba(7,5,18,0.55); --page: #070512; --ac: #a58bff;
+            --gold: #d1b27a; --teal: #7dd3e0; --pill: rgba(255,255,255,0.10); --pill-on: rgba(255,255,255,0.20); --menu-bg: rgba(7,5,18,0.55); --page: #070512; --ac: #8b6dff;
         }
         body { margin: 0; background: var(--page); color: var(--ink); font-family: 'Inter', sans-serif; overflow-x: clip; min-height: 100vh; min-height: 100dvh; display: flex; flex-direction: column; }
         html { overscroll-behavior-y: none; }
@@ -128,10 +128,36 @@
         .gc b { display: block; font-size: 0.85rem; line-height: 1.2; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
         .gc span { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; font-size: 0.72rem; color: var(--soft); margin-top: 2px; }
         .empty { color: var(--soft); padding: 22px 0; }
-        .foot { position: fixed; left: 0; right: 0; bottom: 0; z-index: 20; box-sizing: border-box; padding: 12px 5%; text-align: center; color: var(--soft); font-size: 0.78rem; border-top: 1px solid var(--line); background: var(--card-bg); }
-        body { box-sizing: border-box; padding-bottom: 46px; }
         @media (hover: hover) { .app:hover, .gc:hover { border-color: var(--ac); } }
         @media (min-width: 760px) { .apps { grid-template-columns: 1fr 1fr; } .feat { min-height: 210px; padding: 40px; } .feat h2 { font-size: 2.2rem; } .gc { width: 190px; } }
+        /* BOTTOM BAR (only on the All view): Contact, Ask, Socials */
+        .foot { position: fixed; left: 0; right: 0; bottom: 0; z-index: 20; box-sizing: border-box; padding: 8px 5% 10px; text-align: center; color: var(--soft); font-size: 0.68rem; border-top: 1px solid var(--line); background: var(--card-bg); display: none; }
+        body.on-all .foot { display: block; }
+        :root[data-theme="dark"] .foot { background: #0d0a1f; }
+        body { box-sizing: border-box; }
+        body.on-all { padding-bottom: 76px; }
+        .bar-icons { display: flex; justify-content: center; gap: 14px; }
+        .bi { width: 44px; height: 44px; border-radius: 50%; border: 1px solid var(--line); background: var(--page); color: var(--ac); display: flex; align-items: center; justify-content: center; cursor: pointer; padding: 0; }
+        .bi svg { width: 22px; height: 22px; stroke: currentColor; fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+        .bi.on { background: var(--ac); color: #fff; border-color: var(--ac); }
+        .tagline { margin-top: 6px; }
+        .sheet { position: fixed; left: 50%; transform: translateX(-50%); bottom: 86px; z-index: 25; width: min(92%, 420px); box-sizing: border-box; background: var(--card-bg); border: 1px solid var(--line); border-radius: 20px; padding: 16px; box-shadow: 0 18px 44px rgba(60,40,140,0.25); display: none; text-align: left; }
+        :root[data-theme="dark"] .sheet { background: #17122f; }
+        .sheet.open { display: block; }
+        .sheet h4 { margin: 0 0 10px; font-size: 1rem; color: var(--ink); }
+        .sheet a.row { display: flex; align-items: center; gap: 10px; padding: 10px 0; border-top: 1px solid var(--line); color: var(--ink); text-decoration: none; font-size: 0.9rem; }
+        .sheet a.row:first-of-type { border-top: 0; }
+        .sheet a.row svg { width: 20px; height: 20px; stroke: var(--ac); fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; flex: none; }
+        .sheet input, .sheet textarea { width: 100%; box-sizing: border-box; font: inherit; font-size: 0.9rem; color: var(--ink); background: var(--page); border: 1px solid var(--line); border-radius: 12px; padding: 10px 12px; margin-bottom: 8px; }
+        .sheet textarea { min-height: 80px; resize: none; }
+        .sheet .send { width: 100%; border: 0; border-radius: 999px; padding: 11px; background: var(--ac); color: #fff; font: inherit; font-weight: 800; cursor: pointer; }
+        .sheet .send:disabled { opacity: 0.6; }
+        .sheet .hp { position: absolute; left: -9999px; width: 1px; height: 1px; opacity: 0; }
+        #ask-msg { margin: 8px 0 0; font-size: 0.82rem; color: var(--soft); min-height: 1.1em; }
+        #ask-msg.ok { color: #1a8f5a; } #ask-msg.err { color: #c0392b; }
+        .soc { display: flex; gap: 12px; flex-wrap: wrap; }
+        .soc a { height: 44px; padding: 0 14px; border-radius: 14px; display: flex; align-items: center; justify-content: center; gap: 8px; background: var(--ac); color: #fff; font-weight: 800; font-size: 0.85rem; text-decoration: none; }
+        .soc a svg { width: 20px; height: 20px; stroke: #fff; fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
     </style>
 </head>
 <body>
@@ -169,7 +195,25 @@
         </div>
         <div id="home"><p class="empty">Loading...</p></div>
     </main>
-    <div class="foot">&copy; çábTech &middot; Let's Sail into Technology</div>
+    <div class="foot" id="foot">
+        <div class="sheet" id="sheet-contact"><h4>Contact us</h4><div id="contact-rows"></div></div>
+        <div class="sheet" id="sheet-ask"><h4>Ask us anything</h4>
+            <form id="ask-form" autocomplete="off">
+                <input id="ask-name" placeholder="Your name" maxlength="40" required>
+                <input id="ask-contact" placeholder="Email or phone, so we can reply (optional)" maxlength="80">
+                <textarea id="ask-body" placeholder="Your question" maxlength="1000" required></textarea>
+                <input class="hp" id="ask-hp" tabindex="-1" autocomplete="off" aria-hidden="true">
+                <button class="send" id="ask-send" type="submit">Send</button>
+                <p id="ask-msg" role="status"></p>
+            </form></div>
+        <div class="sheet" id="sheet-soc"><h4>Follow çábTech</h4><div class="soc" id="soc-links"></div></div>
+        <div class="bar-icons">
+            <button class="bi" type="button" data-sheet="contact" aria-label="Contact us"><svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 7l9 6 9-6"/></svg></button>
+            <button class="bi" type="button" data-sheet="ask" aria-label="Ask a question"><svg viewBox="0 0 24 24"><path d="M4 5h16v10H9l-5 4z"/></svg></button>
+            <button class="bi" type="button" data-sheet="soc" aria-label="Social media"><svg viewBox="0 0 24 24"><circle cx="6" cy="12" r="2.5"/><circle cx="18" cy="6" r="2.5"/><circle cx="18" cy="18" r="2.5"/><path d="M8.2 10.8l7.6-3.6M8.2 13.2l7.6 3.6"/></svg></button>
+        </div>
+        <div class="tagline">&copy; çábTech &middot; Let's Sail into Technology</div>
+    </div>
 
     <script>
         const SUPABASE_URL = 'https://tvasdkfdizdwkroatgno.supabase.co';
@@ -322,7 +366,63 @@
                 if (!h || (chip !== 'all' && !({games, apps, links})[chip].length)) h = `<p class="empty">No content in this section.</p>`;
             }
             homeEl.innerHTML = h;
+            syncBar();
         }
+
+        // ---- Bottom bar: Contact, Ask, Socials (only shown on the All view) ----
+        // EDIT HERE: your contact details and social links. Leave a value empty ('') to hide it.
+        const CONTACT_EMAIL = 'rymmfommy@gmail.com';
+        const CONTACT_WHATSAPP_LINK = 'https://wa.me/message/KB6SUQEBLLDDP1/';
+        const SOCIALS = [
+            { name: 'Instagram', url: 'https://www.instagram.com/cabtechtiktok?avpt=YXNiN3AydGx2cnE4', bg: 'linear-gradient(135deg,#f58529,#dd2a7b,#8134af)', g: '<rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.3" cy="6.7" r=".6"/>' },
+            { name: 'YouTube', url: 'https://youtube.com/@mfsquoted?si=Wm3FrgRr2x1Uqjbb', bg: '#ff0000', g: '<rect x="2.5" y="5.5" width="19" height="13" rx="4"/><path d="M10 9l5 3-5 3z"/>' },
+            { name: 'Facebook', url: 'https://www.facebook.com/share/1FPhXANVyZ/', bg: '#1877f2', g: '<path d="M14 21v-8h2.6l.4-3h-3V8.2c0-.9.3-1.5 1.6-1.5H17V4.1A20 20 0 0 0 14.8 4C12.6 4 11 5.4 11 7.8V10H8.5v3H11v8"/>' },
+            { name: 'TikTok', url: 'https://www.tiktok.com/@xcab521', bg: '#111111', g: '<path d="M14 4v10.5a3.5 3.5 0 1 1-3.5-3.5"/><path d="M14 4c.4 2.4 2 4 4.5 4.2"/>' }
+        ];
+        const SVG = (p) => '<svg viewBox="0 0 24 24">' + p + '</svg>';
+        (function buildBar() {
+            const rows = [];
+            if (CONTACT_EMAIL) rows.push(`<a class="row" href="mailto:${esc(CONTACT_EMAIL)}">${SVG('<rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 7l9 6 9-6"/>')} ${esc(CONTACT_EMAIL)}</a>`);
+            if (safeUrl(CONTACT_WHATSAPP_LINK) !== '#') rows.push(`<a class="row" href="${esc(safeUrl(CONTACT_WHATSAPP_LINK))}" target="_blank" rel="noopener noreferrer">${SVG('<path d="M5 4h4l2 5-2.5 1.5a11 11 0 0 0 5 5L15 13l5 2v4a2 2 0 0 1-2 2A16 16 0 0 1 3 6a2 2 0 0 1 2-2z"/>')} WhatsApp</a>`);
+            document.getElementById('contact-rows').innerHTML = rows.join('') || '<p class="empty" style="padding:0">Use the Ask box.</p>';
+            const soc = SOCIALS.filter(x => safeUrl(x.url) !== '#');
+            document.getElementById('soc-links').innerHTML = soc.length
+                ? soc.map(x => `<a href="${esc(safeUrl(x.url))}" target="_blank" rel="noopener noreferrer" aria-label="${esc(x.name)}" style="background:${x.bg}">${SVG(x.g)}${esc(x.name)}</a>`).join('')
+                : '<p class="empty" style="padding:0">Coming soon.</p>';
+        })();
+        function closeSheets() {
+            document.querySelectorAll('.sheet').forEach(x => x.classList.remove('open'));
+            document.querySelectorAll('.bi').forEach(x => x.classList.remove('on'));
+        }
+        function syncBar() {
+            document.body.classList.toggle('on-all', chip === 'all' && !searchInput.value.trim());
+            closeSheets();
+        }
+        document.querySelectorAll('.bi').forEach(b => b.addEventListener('click', () => {
+            const sh = document.getElementById('sheet-' + b.dataset.sheet);
+            const was = sh.classList.contains('open');
+            closeSheets();
+            if (!was) { sh.classList.add('open'); b.classList.add('on'); }
+        }));
+        document.addEventListener('click', (e) => { if (!e.target.closest('.foot')) closeSheets(); });
+        const ASK_ERR = { links: 'Please remove links from your message.', busy: 'Too many questions right now. Try again in a few minutes.', bad_name: 'Please enter your name.', bad_body: 'Please write your question (2 to 1000 characters).', bad_contact: 'The contact detail is too long.' };
+        document.getElementById('ask-form').addEventListener('submit', async function (e) {
+            e.preventDefault();
+            const msg = document.getElementById('ask-msg'), btn = document.getElementById('ask-send');
+            if (document.getElementById('ask-hp').value) { msg.className = 'ok'; msg.textContent = 'Thank you! We got your question.'; return; }
+            btn.disabled = true; msg.className = ''; msg.textContent = 'Sending...';
+            try {
+                const { data, error } = await supabaseClient.rpc('submit_question', {
+                    p_name: document.getElementById('ask-name').value,
+                    p_contact: document.getElementById('ask-contact').value,
+                    p_body: document.getElementById('ask-body').value
+                });
+                if (error || !data) throw new Error('fail');
+                if (data === 'ok') { msg.className = 'ok'; msg.textContent = 'Thank you! We got your question.'; document.getElementById('ask-body').value = ''; }
+                else { msg.className = 'err'; msg.textContent = ASK_ERR[data] || 'Could not send. Please try again.'; }
+            } catch (err) { msg.className = 'err'; msg.textContent = 'Could not send. Please try again.'; }
+            btn.disabled = false;
+        });
         load();
     </script>
 </body>
