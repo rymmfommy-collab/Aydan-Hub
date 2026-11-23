@@ -148,7 +148,7 @@
                 <select id="category">
                     <option value="GAMES">GAMES</option>
                     <option value="APPS">APPS</option>
-                    <option value="LINK">LINKS</option>
+                    <option value="LINK">DESCRIPTIONS</option>
                     <option value="HOME">HOME (big tile on the front page)</option>
                 </select>
 
@@ -230,6 +230,11 @@
                 <summary>Comments &amp; questions <span class="count" id="cm-count">0</span></summary>
                 <div id="cm-list"><p class="msg">Loading...</p></div>
             </details>
+
+            <details class="manage" id="qs-manage">
+                <summary>Ask box messages <span class="count" id="qs-count">0</span></summary>
+                <div id="qs-list"><p class="msg">Loading...</p></div>
+            </details>
         </div>
     </div>
 
@@ -271,7 +276,7 @@
         function showView(loggedIn) {
             $('login-view').classList.toggle('hidden', loggedIn);
             $('admin-view').classList.toggle('hidden', !loggedIn);
-            if (loggedIn) { loadList(); loadComments(); }
+            if (loggedIn) { loadList(); loadComments(); loadQuestions(); }
         }
 
         async function login() {
@@ -313,7 +318,7 @@
         }
 
         // ---------- HOME tiles: choose a page inside the site ----------
-        const SECTION_DESTS = [['/?s=games', 'Games section'], ['/?s=apps', 'Apps section'], ['/?s=links', 'Links section'], ['/?s=files', 'Files section']];
+        const SECTION_DESTS = [['/?s=games', 'Games section'], ['/?s=apps', 'Apps section'], ['/?s=links', 'Descriptions section'], ['/?s=files', 'Files section']];
 
         function buildDestOptions(selected) {
             const own = [['', "This item's own page (default)"]];
@@ -470,6 +475,33 @@
             }
             if (error) { alert('Failed: ' + error.message); btn.disabled = false; return; }
             loadComments();
+        });
+
+        // ---------- Ask box messages (from the home page bottom bar) ----------
+        async function loadQuestions() {
+            const box = $('qs-list');
+            const { data, error } = await supabaseClient.from('questions')
+                .select('id,name,contact,body,created_at').order('created_at', { ascending: false }).limit(200);
+            if (error) { box.innerHTML = '<p class="msg err">Could not load messages: ' + esc(error.message) + '</p>'; return; }
+            const list = data || [];
+            $('qs-count').textContent = list.length;
+            $('qs-count').style.background = list.length ? 'rgba(255,200,0,0.25)' : '';
+            if (!list.length) { box.innerHTML = '<p class="msg">No messages yet.</p>'; return; }
+            box.innerHTML = list.map(c => `
+                <div class="cm-item" data-id="${esc(c.id)}">
+                    <div class="cm-head"><b>${esc(c.name)}</b> &middot; ${c.contact ? esc(c.contact) : 'no contact given'} &middot; ${esc(String(c.created_at).slice(0, 10))}</div>
+                    <div class="cm-body">${esc(c.body)}</div>
+                    <div class="cm-actions"><button class="btn-delete" data-act="del">DELETE</button></div>
+                </div>`).join('');
+        }
+        $('qs-list').addEventListener('click', async (e) => {
+            const btn = e.target.closest('button[data-act="del"]');
+            if (!btn) return;
+            if (!confirm('Delete this message?')) return;
+            btn.disabled = true;
+            const { error } = await supabaseClient.from('questions').delete().eq('id', btn.closest('.cm-item').dataset.id);
+            if (error) { alert('Could not delete: ' + error.message); btn.disabled = false; return; }
+            loadQuestions();
         });
 
         // ---------- List ----------
