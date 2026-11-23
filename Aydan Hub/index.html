@@ -96,13 +96,15 @@
         .searchpill svg { flex: none; width: 20px; height: 20px; stroke: var(--ac); fill: none; stroke-width: 2; stroke-linecap: round; }
         .searchpill input { flex: 1; min-width: 0; border: 0; outline: 0; background: transparent; font: inherit; font-size: 0.92rem; color: var(--ink); padding: 13px 0; }
         .searchpill input::placeholder { color: var(--soft); }
-        .chips { display: flex; flex-wrap: wrap; gap: 8px; margin: 14px 0 4px; }
+        .chips { display: flex; gap: 8px; margin: 14px 0 4px; overflow-x: auto; scrollbar-width: none; }
+        .chips::-webkit-scrollbar { display: none; }
         .chips::-webkit-scrollbar { display: none; }
         .chip { flex: none; padding: 8px 16px; border-radius: 999px; background: var(--card-bg); border: 1px solid var(--line); color: var(--ink); font: inherit; font-weight: 700; font-size: 0.8rem; cursor: pointer; white-space: nowrap; }
         .chip.on { background: var(--ac); color: #fff; border-color: var(--ac); }
-        .banners { display: flex; flex-direction: column; gap: 12px; margin: 18px 0; }
+        .banners { display: flex; gap: 12px; margin: 18px 0; overflow-x: auto; scroll-snap-type: x mandatory; scrollbar-width: none; }
         .banners::-webkit-scrollbar { display: none; }
-        .feat { flex: none; width: 100%; box-sizing: border-box; border-radius: 22px; padding: 26px 22px; color: #fff; text-decoration: none; position: relative; overflow: hidden; min-height: 170px; display: flex; flex-direction: column; justify-content: center;
+        .banners::-webkit-scrollbar { display: none; }
+        .feat { flex: none; width: 100%; box-sizing: border-box; scroll-snap-align: start; border-radius: 22px; padding: 26px 22px; color: #fff; text-decoration: none; position: relative; overflow: hidden; min-height: 170px; display: flex; flex-direction: column; justify-content: center;
             background: linear-gradient(120deg, #6a3df0, #c24dff 60%, #ff7ad9) center/cover; }
         .feat:after { content: ""; position: absolute; right: -40px; top: -40px; width: 190px; height: 190px; border-radius: 50%; background: rgba(255,255,255,0.18); }
         .feat.pic:after { display: none; }
@@ -121,7 +123,8 @@
         .meta span { font-size: 0.8rem; color: var(--soft); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
         .meta i { font-style: normal; font-size: 0.7rem; color: var(--ac); font-weight: 700; }
         .get { flex: none; border: 1.5px solid var(--ac); color: var(--ac); font-weight: 800; font-size: 0.75rem; border-radius: 999px; padding: 8px 16px; }
-        .rail { display: flex; flex-wrap: wrap; gap: 12px; }
+        .rail { display: flex; gap: 12px; overflow-x: auto; padding-bottom: 6px; scrollbar-width: thin; }
+        .rail.wrapped { flex-wrap: wrap; overflow: visible; }
         .rail.wrapped { flex-wrap: wrap; overflow: visible; }
         .gc { flex: none; width: 150px; box-sizing: border-box; background: var(--card-bg); border: 1px solid var(--line); border-radius: 16px; padding: 8px; box-shadow: 0 4px 14px rgba(60,40,140,0.06); color: inherit; text-decoration: none; }
         .gp { aspect-ratio: 4 / 3; border-radius: 11px; margin-bottom: 8px; background: linear-gradient(135deg, #ff7a59, #7d5fff) center/cover; }
