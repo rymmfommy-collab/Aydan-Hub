@@ -124,15 +124,18 @@
         .meta i { font-style: normal; font-size: 0.7rem; color: var(--ac); font-weight: 700; }
         .get { flex: none; border: 1.5px solid var(--ac); color: var(--ac); font-weight: 800; font-size: 0.75rem; border-radius: 999px; padding: 8px 16px; }
         .rail { display: flex; gap: 12px; overflow-x: auto; padding-bottom: 6px; scrollbar-width: thin; }
-        .rail.wrapped { flex-wrap: wrap; overflow: visible; }
-        .rail.wrapped { flex-wrap: wrap; overflow: visible; }
+        .rail.wrapped { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; overflow: visible; }
+        .rail.wrapped .gc { width: auto; min-width: 0; padding: 6px; border-radius: 18px; }
+        .rail.wrapped .gp { border-radius: 9px; margin-bottom: 6px; }
+        .rail.wrapped .gc b { font-size: 0.72rem; }
+        .rail.wrapped .gc span { font-size: 0.62rem; }
         .gc { flex: none; width: 150px; box-sizing: border-box; background: var(--card-bg); border: 1px solid var(--line); border-radius: 16px; padding: 8px; box-shadow: 0 4px 14px rgba(60,40,140,0.06); color: inherit; text-decoration: none; }
         .gp { aspect-ratio: 4 / 3; border-radius: 11px; margin-bottom: 8px; background: linear-gradient(135deg, #ff7a59, #7d5fff) center/cover; }
         .gc b { display: block; font-size: 0.85rem; line-height: 1.2; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
         .gc span { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; font-size: 0.72rem; color: var(--soft); margin-top: 2px; }
         .empty { color: var(--soft); padding: 22px 0; }
         @media (hover: hover) { .app:hover, .gc:hover { border-color: var(--ac); } }
-        @media (min-width: 760px) { .apps { grid-template-columns: repeat(2, minmax(0, 1fr)); } .feat { min-height: 210px; padding: 40px; } .feat h2 { font-size: 2.2rem; } .gc { width: 190px; } }
+        @media (min-width: 760px) { .rail.wrapped { grid-template-columns: repeat(auto-fill, minmax(170px, 1fr)); gap: 12px; } .rail.wrapped .gc { padding: 8px; border-radius: 24px; } .rail.wrapped .gc b { font-size: 0.85rem; } .rail.wrapped .gc span { font-size: 0.72rem; } .apps { grid-template-columns: repeat(2, minmax(0, 1fr)); } .feat { min-height: 210px; padding: 40px; } .feat h2 { font-size: 2.2rem; } .gc { width: 190px; } }
         /* BOTTOM BAR (only on the All view): Contact, Ask, Socials */
         .foot { position: fixed; left: 0; right: 0; bottom: 0; z-index: 20; box-sizing: border-box; padding: 8px 5% 10px; text-align: center; color: var(--soft); font-size: 0.68rem; border-top: 1px solid var(--line); background: var(--card-bg); display: none; }
         body.on-all .foot { display: block; }
@@ -391,8 +394,8 @@ body{background:var(--wall) fixed; background-color:var(--wall-base); color:var(
                 if (chip === 'all' && home.length) h += `<div class="banners">${home.map(banner).join('')}</div>`;
                 if ((chip === 'all' || chip === 'apps') && apps.length) h += `<h3 class="sec">${chip === 'all' ? 'Popular apps' : 'Apps'}</h3><div class="apps">${apps.map(appRow).join('')}</div>`;
                 if ((chip === 'all' || chip === 'games') && games.length) h += `<h3 class="sec">Games</h3><div class="rail${chip === 'games' ? ' wrapped' : ''}">${games.map(gameCard).join('')}</div>`;
-                if ((chip === 'all' || chip === 'links') && links.length) h += `<h3 class="sec">Descriptions</h3><div class="apps">${links.map(appRow).join('')}</div>`;
-                if (!h || (chip !== 'all' && !({games, apps, links})[chip].length)) h = `<p class="empty">No content in this section.</p>`;
+                if (chip === 'links' && links.length) h += `<h3 class="sec">Descriptions</h3><div class="apps">${links.map(appRow).join('')}</div>`;
+                if (!h || (chip !== 'all' && !({games, apps, links})[chip].length) || (chip === 'all' && !home.length && !apps.length && !games.length)) h = `<p class="empty">No content in this section.</p>`;
             }
             homeEl.innerHTML = h;
             syncBar();
