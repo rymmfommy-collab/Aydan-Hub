@@ -148,6 +148,7 @@ const BASE_CSS = `
   form.cf button:disabled { opacity:.6; }
   form.cf .hp { position:absolute; left:-9999px; height:0; overflow:hidden; }
   #cmsg { font-size:.9rem; min-height:1.2em; margin:0; }
+  .dl { cursor:pointer; -webkit-user-select:none; user-select:none; -webkit-touch-callout:none; -webkit-user-drag:none; }
   .note { margin-top:26px; font-size:.8rem; color:var(--soft); }
   /* LIQUID GLASS THEME */
 :root,:root[data-theme="dark"]{--ink:#ffffff;--soft:rgba(255,255,255,.72);--desc:rgba(255,255,255,.9);--accent:#d8ceff;--qtext:#ffb3f3;--ac:#8b6dff;--g-bg:rgba(255,255,255,.09);--g-bg2:rgba(24,18,52,.92);--g-bd:rgba(255,255,255,.22);--g-sh:0 10px 32px rgba(0,0,0,.35), inset 0 1px 0 rgba(255,255,255,.35);--blur:24px;--g-menu:rgba(7,5,26,.5);--gold:#e9d5a6;--teal:#9ff0ff;--input-bg:rgba(255,255,255,.10);--input-border:rgba(255,255,255,.22);--pic-bg:rgba(255,255,255,.08);
@@ -276,6 +277,17 @@ ${list ? `<ul class="cm">${list}</ul>` : '<p class="desc">No comments yet. Be th
 </script>`;
 }
 
+// Download links are not written as normal links. The address is scrambled in the page and opened by a click,
+// so "copy link address", long-press and right-click have nothing to copy.
+function enc(u) {
+  return btoa(String(u)).split('').reverse().join('');
+}
+const DL_SCRIPT = `<script>(function(){function go(t){try{var u=atob(t.getAttribute('data-u').split('').reverse().join(''));if(/^https?:\\/\\//i.test(u))window.open(u,'_blank','noopener')}catch(e){}}
+document.addEventListener('click',function(e){var t=e.target.closest&&e.target.closest('[data-u]');if(t){e.preventDefault();go(t)}});
+document.addEventListener('keydown',function(e){if(e.key==='Enter'){var t=e.target.closest&&e.target.closest('[data-u]');if(t){e.preventDefault();go(t)}}});
+['contextmenu','dragstart','selectstart'].forEach(function(n){document.addEventListener(n,function(e){if(e.target.closest&&e.target.closest('[data-u]'))e.preventDefault()})});
+})();</script>`;
+
 function renderAppPage(item, origin, comments) {
   const canonical = `${origin}/app/${item.slug}`;
   const label = CATEGORY_LABELS[item.category] || 'Item';
@@ -307,7 +319,6 @@ function renderAppPage(item, origin, comments) {
   if (item.developer) jsonLd.author = { '@type': 'Organization', name: item.developer };
   if (item.license) jsonLd.license = item.license;
   if (item.created_at) jsonLd.datePublished = item.created_at;
-  if (download) jsonLd.downloadUrl = download;
 
   const rows = [
     ['Type', label],
@@ -324,14 +335,15 @@ function renderAppPage(item, origin, comments) {
   <div>
     <span class="tag">${esc(label)}</span>
     <h1>${esc(item.title)}</h1>
-    ${download && !links.length ? `<a class="btn" href="${esc(download)}" target="_blank" rel="noopener noreferrer nofollow">Get ${esc(item.title)}</a>` : ''}
+    ${download && !links.length ? `<a class="btn dl" role="link" tabindex="0" data-u="${enc(download)}">Get ${esc(item.title)}</a>` : ''}
   </div>
 </div>
 ${item.description ? `<h2>About</h2><p class="desc">${esc(item.description)}</p>` : ''}
-${links.length ? `<h2>Links</h2><ul class="links">${links.map((l) => `<li><a href="${esc(l.url)}" target="_blank" rel="noopener noreferrer nofollow"><span class="t"><span class="n">${esc(l.label || 'Link')}</span>${l.description ? `<span class="d">${esc(l.description)}</span>` : ''}</span><span class="go">Get</span></a></li>`).join('')}</ul>` : ''}
+${links.length ? `<h2>Links</h2><ul class="links">${links.map((l) => `<li><a class="dl" role="link" tabindex="0" data-u="${enc(l.url)}"><span class="t"><span class="n">${esc(l.label || 'Link')}</span>${l.description ? `<span class="d">${esc(l.description)}</span>` : ''}</span><span class="go">Get</span></a></li>`).join('')}</ul>` : ''}
 ${rows.length ? `<h2>Details</h2><dl>${rows.map(([k, v]) => `<dt>${esc(k)}</dt><dd>${esc(v)}</dd>`).join('')}</dl>` : ''}
 <p class="note">${SITE_NAME} links to the official source where possible. Check the permissions, license and terms of any app before you install it.</p>
-${renderComments(item, comments)}`;
+${renderComments(item, comments)}
+${DL_SCRIPT}`;
 
   // A front-page tile that just points to another page of the site has no content of its own
   const robots = String(item.url || '').startsWith('/') ? 'noindex' : undefined;
