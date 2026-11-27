@@ -109,6 +109,22 @@
         html:not([data-theme="dark"]) .btn-ok { color: #0a8a55; border-color: #0a8a55; background: none; }
         html:not([data-theme="dark"]) .links a { color: #5b5683; }
 
+        /* "Where should this tile open?" picker: same folded groups as Manage uploads */
+        .dest-current { margin: 8px 0 10px; padding: 12px 14px; border-radius: 12px; border: 1px solid rgba(125,95,255,0.45); background: rgba(125,95,255,0.14); font-weight: 800; font-size: 0.9rem; }
+        .dest-current small { display: block; font-weight: 600; font-size: 0.7rem; letter-spacing: 1px; text-transform: uppercase; opacity: 0.7; margin-bottom: 2px; }
+        #dest-picker .group { margin: 10px 0 0; background: rgba(255,255,255,0.02); }
+        #dest-picker .group summary { padding: 14px 0; font-size: 0.9rem; }
+        .dest-opt { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 12px 0; border-top: 1px solid rgba(255,255,255,0.08); cursor: pointer; font-size: 0.9rem; }
+        .dest-opt:first-of-type { border-top: 0; }
+        .dest-opt .dot, .dest-top .dot { flex: none; width: 18px; height: 18px; border-radius: 50%; border: 2px solid #7d5fff; box-sizing: border-box; }
+        .dest-opt.on .dot, .dest-top.on .dot { background: #7d5fff; box-shadow: inset 0 0 0 3px #1a1233; }
+        .dest-opt.on { font-weight: 800; }
+        .dest-top { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 14px 16px; border: 1px solid rgba(255,255,255,0.1); border-radius: 16px; background: rgba(255,255,255,0.03); cursor: pointer; font-weight: 800; font-size: 0.9rem; }
+        html:not([data-theme="dark"]) .dest-opt { border-top-color: rgba(125,95,255,0.2); }
+        html:not([data-theme="dark"]) .dest-opt.on .dot, html:not([data-theme="dark"]) .dest-top.on .dot { box-shadow: inset 0 0 0 3px #fff; }
+        html:not([data-theme="dark"]) .dest-top { background: #fff; border-color: rgba(125,95,255,0.25); }
+        html:not([data-theme="dark"]) #dest-picker .group { background: #faf8ff; }
+        html:not([data-theme="dark"]) .dest-current { background: rgba(125,95,255,0.10); }
     </style>
 </head>
 <body>
@@ -154,8 +170,10 @@
 
                 <div id="home-dest" class="hidden">
                     <label for="dest">Where should this tile open?</label>
-                    <p class="hint">Pick a page inside your site. If you leave it as the first choice, the tile opens this item's own page.</p>
-                    <select id="dest"></select>
+                    <p class="hint">Pick a section or a page inside your site. If you leave the first choice, the tile opens this item's own page.</p>
+                    <select id="dest" class="hidden" aria-hidden="true" tabindex="-1"></select>
+                    <div class="dest-current" id="dest-current"></div>
+                    <div id="dest-picker"></div>
                 </div>
 
                 <label for="url">Link (official download or source)</label>
@@ -318,31 +336,55 @@
         }
 
         // ---------- HOME tiles: choose a page inside the site ----------
-        const SECTION_DESTS = [['/?s=games', 'Games section'], ['/?s=apps', 'Apps section'], ['/?s=links', 'Descriptions section'], ['/?s=files', 'Files section']];
+        const SECTION_DESTS = [['/?s=games', 'Games section'], ['/?s=apps', 'Apps section'], ['/?s=links', 'Descriptions section']];
 
+        let destPages = [];   // pages you can pick: { v: address, t: title, cat: category }
         function buildDestOptions(selected) {
-            const own = [['', "This item's own page (default)"]];
-            const pages = Object.values(itemsById)
+            destPages = Object.values(itemsById)
                 .filter(i => i.slug && String(i.id) !== String(editingId))
-                .map(i => ['/app/' + i.slug, i.title + ' (' + (i.category || '').toLowerCase() + ')']);
-            const groups = [
-                ['', own],
-                ['Sections', SECTION_DESTS],
-                ['Pages', pages]
-            ];
-            let html = '';
-            for (const [label, opts] of groups) {
-                if (!opts.length) continue;
-                const inner = opts.map(([v, t]) => `<option value="${esc(v)}">${esc(t)}</option>`).join('');
-                html += label ? `<optgroup label="${esc(label)}">${inner}</optgroup>` : inner;
-            }
-            $('dest').innerHTML = html;
+                .map(i => ({ v: '/app/' + i.slug, t: i.title, cat: i.category || 'OTHER' }));
+            // the hidden <select> still holds the chosen value (the rest of this page reads it)
+            const opts = [['', "This item's own page (default)"]].concat(SECTION_DESTS, destPages.map(p => [p.v, p.t]));
+            $('dest').innerHTML = opts.map(([v, t]) => `<option value="${esc(v)}">${esc(t)}</option>`).join('');
             // keep a saved destination even if its page is no longer in the list
             if (selected && ![...$('dest').options].some(o => o.value === selected)) {
                 $('dest').insertAdjacentHTML('beforeend', `<option value="${esc(selected)}">${esc(selected)}</option>`);
             }
             $('dest').value = selected || '';
+            renderDestPicker(true);
         }
+
+        // Folded groups (Sections, Games, Apps, Descriptions, Home) like "Manage uploads"
+        function renderDestPicker(openSelected) {
+            const cur = $('dest').value;
+            const openNow = new Set([...document.querySelectorAll('#dest-picker details[open]')].map(d => d.dataset.k));
+            const label = (([...$('dest').options].find(o => o.value === cur)) || {}).text || "This item's own page (default)";
+            $('dest-current').innerHTML = '<small>Opens</small>' + esc(label);
+            const opt = (v, t) => `<div class="dest-opt${v === cur ? ' on' : ''}" data-v="${esc(v)}" role="radio" aria-checked="${v === cur}" tabindex="0"><span>${esc(t)}</span><span class="dot"></span></div>`;
+            const CATS = [['GAMES', 'Games'], ['APPS', 'Apps'], ['LINK', 'Descriptions'], ['HOME', 'Home']];
+            const groups = [['sections', 'Sections', SECTION_DESTS.map(([v, t]) => [v, t])]];
+            for (const [key, name] of CATS) groups.push([key, name, destPages.filter(p => p.cat === key).map(p => [p.v, p.t])]);
+            const other = destPages.filter(p => !CATS.some(c => c[0] === p.cat));
+            if (other.length) groups.push(['OTHER', 'Other', other.map(p => [p.v, p.t])]);
+            const custom = cur && ![...SECTION_DESTS.map(x => x[0]), ...destPages.map(p => p.v)].includes(cur) ? opt(cur, cur) : '';
+            let html = `<div class="dest-top${cur === '' ? ' on' : ''}" data-v="" role="radio" aria-checked="${cur === ''}" tabindex="0"><span>This item's own page (default)</span><span class="dot"></span></div>`;
+            html += custom;
+            for (const [k, name, list] of groups) {
+                if (!list.length) continue;
+                const has = list.some(([v]) => v === cur);
+                const open = openNow.has(k) || (openSelected && has);
+                html += `<details class="group" data-k="${esc(k)}"${open ? ' open' : ''}><summary>${esc(name)} <span class="count">${list.length}</span></summary>${list.map(([v, t]) => opt(v, t)).join('')}</details>`;
+            }
+            $('dest-picker').innerHTML = html;
+        }
+        function pickDest(el) {
+            const row = el.closest('[data-v]');
+            if (!row) return;
+            $('dest').value = row.getAttribute('data-v');
+            renderDestPicker(false);
+        }
+        $('dest-picker').addEventListener('click', (e) => pickDest(e.target));
+        $('dest-picker').addEventListener('keydown', (e) => { if (e.key === 'Enter' || e.key === ' ') { if (e.target.closest('[data-v]')) { e.preventDefault(); pickDest(e.target); } } });
 
         function toggleHomeDest() {
             $('home-dest').classList.toggle('hidden', $('category').value !== 'HOME');
@@ -518,7 +560,7 @@
             const wasOpen = new Set([...document.querySelectorAll('#list details[open]')].map(d => d.dataset.cat));
 
             const SECTIONS = [
-                ['GAMES', 'Games'], ['APPS', 'Apps'], ['LINK', 'Links'], ['HOME', 'Home']
+                ['GAMES', 'Games'], ['APPS', 'Apps'], ['LINK', 'Descriptions'], ['HOME', 'Home']
             ];
             const known = SECTIONS.map(s => s[0]);
             const other = items.filter(i => !known.includes(i.category));
