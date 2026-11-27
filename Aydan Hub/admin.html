@@ -340,7 +340,9 @@
 
         let destPages = [];   // pages you can pick: { v: address, t: title, cat: category }
         function buildDestOptions(selected) {
+            // newest upload first (object keys come back sorted by id, so sort again by date)
             destPages = Object.values(itemsById)
+                .sort((x, y) => String(y.created_at || '').localeCompare(String(x.created_at || '')) || (Number(y.id) - Number(x.id)) || 0)
                 .filter(i => i.slug && String(i.id) !== String(editingId))
                 .map(i => ({ v: '/app/' + i.slug, t: i.title, cat: i.category || 'OTHER' }));
             // the hidden <select> still holds the chosen value (the rest of this page reads it)
