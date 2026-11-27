@@ -253,6 +253,16 @@ body{background:var(--wall) fixed; background-color:var(--wall-base); color:var(
         const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
         let items = [];
 
+        // Visit counter: adds 1 to a daily page-view count. Nothing personal is stored.
+        // Skipped for the admin's own browser and for automated browsers; counted once per page per visit.
+        (function () {
+            try { if (localStorage.getItem('notrack') || navigator.webdriver) return; } catch (e) {}
+            var p = location.pathname.replace(/\/+$/, '') || '/';
+            if (p === '/index.html') p = '/';
+            try { if (sessionStorage.getItem('v:' + p)) return; sessionStorage.setItem('v:' + p, '1'); } catch (e) {}
+            supabaseClient.rpc('track_visit', { p_path: p }).then(function () {}, function () {});
+        })();
+
         // Dark / light mode switch (remembered in this browser)
         document.getElementById('theme-btn').addEventListener('click', function () {
             const next = document.documentElement.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
