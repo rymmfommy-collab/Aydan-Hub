@@ -125,6 +125,21 @@
         html:not([data-theme="dark"]) .dest-top { background: #fff; border-color: rgba(125,95,255,0.25); }
         html:not([data-theme="dark"]) #dest-picker .group { background: #faf8ff; }
         html:not([data-theme="dark"]) .dest-current { background: rgba(125,95,255,0.10); }
+        /* Visits tile */
+        #visits { margin-bottom: 20px; background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.12); border-radius: 16px; padding: 14px 16px; }
+        #visits .vhd { display: flex; align-items: center; justify-content: space-between; font-weight: 900; letter-spacing: 1px; text-transform: uppercase; font-size: 0.95rem; }
+        #visits .vref { width: auto; margin: 0; padding: 5px 12px; font-size: 0.68rem; letter-spacing: 0.06em; background: none; box-shadow: none; border: 1px solid rgba(125,95,255,0.5); color: #cfc4ff; border-radius: 999px; }
+        #visits .v3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-top: 12px; }
+        #visits .st { border: 1px solid rgba(255,255,255,0.12); border-radius: 12px; padding: 10px 4px; text-align: center; }
+        #visits .st b { display: block; font-size: 1.5rem; line-height: 1.1; }
+        #visits .st span { font-size: 0.66rem; opacity: 0.7; text-transform: uppercase; letter-spacing: 0.08em; }
+        #visits .ch { display: block; font-size: 0.7rem; font-weight: 800; min-height: 1em; margin-top: 2px; }
+        #visits .up { color: #2ee59d; } #visits .down { color: #ff7a8a; } #visits .flat { opacity: 0.6; }
+        #visits .vmsg { font-size: 0.75rem; opacity: 0.7; margin: 8px 0 0; }
+        html:not([data-theme="dark"]) #visits { background: #fff; border-color: rgba(125,95,255,0.25); box-shadow: 0 6px 18px rgba(125,95,255,0.10); }
+        html:not([data-theme="dark"]) #visits .st { border-color: rgba(125,95,255,0.25); }
+        html:not([data-theme="dark"]) #visits .vref { color: #5a3fe0; }
+        html:not([data-theme="dark"]) #visits .up { color: #11925e; }
     </style>
 </head>
 <body>
@@ -146,6 +161,15 @@
 
         <!-- UPLOAD -->
         <div id="admin-view" class="hidden">
+            <div id="visits">
+                <div class="vhd"><span>Visits</span><button type="button" class="vref" id="visits-refresh">Refresh</button></div>
+                <div class="v3">
+                    <div class="st"><b id="v-today">-</b><span>Today</span><span class="ch" id="v-today-ch"></span></div>
+                    <div class="st"><b id="v-7">-</b><span>7 days</span><span class="ch" id="v-7-ch"></span></div>
+                    <div class="st"><b id="v-all">-</b><span>All time</span><span class="ch"></span></div>
+                </div>
+                <p class="vmsg" id="v-msg"></p>
+            </div>
             <div class="card">
                 <h2 id="form-title">UPLOAD</h2>
                 <div class="edit-banner hidden" id="edit-banner">Editing an existing item. Leave the photo empty to keep the current one.</div>
@@ -294,7 +318,7 @@
         function showView(loggedIn) {
             $('login-view').classList.toggle('hidden', loggedIn);
             $('admin-view').classList.toggle('hidden', !loggedIn);
-            if (loggedIn) { loadList(); loadComments(); loadQuestions(); }
+            if (loggedIn) { try { localStorage.setItem('notrack', '1'); } catch (e) {} loadList(); loadComments(); loadQuestions(); loadVisits(); }
         }
 
         async function login() {
@@ -520,6 +544,30 @@
             if (error) { alert('Failed: ' + error.message); btn.disabled = false; return; }
             loadComments();
         });
+
+        // ---------- Visits tile (page views counted on the public site) ----------
+        function fmtN(n) { n = Number(n) || 0; return n >= 10000 ? (n / 1000).toFixed(0) + 'K' : n >= 1000 ? (n / 1000).toFixed(1).replace('.0', '') + 'K' : String(n); }
+        function setChange(id, now, before) {
+            const el = $(id);
+            if (before > 0) {
+                const p = Math.round((now - before) / before * 100);
+                el.textContent = (p > 0 ? '\u25B2 ' : p < 0 ? '\u25BC ' : '') + Math.abs(p) + '%';
+                el.className = 'ch ' + (p > 0 ? 'up' : p < 0 ? 'down' : 'flat');
+            } else if (now > 0) { el.textContent = 'new'; el.className = 'ch up'; }
+            else { el.textContent = ''; el.className = 'ch'; }
+        }
+        async function loadVisits() {
+            $('v-msg').textContent = '';
+            const { data, error } = await supabaseClient.rpc('admin_visit_stats');
+            if (error || !data) { $('v-msg').textContent = 'Could not load visits.'; return; }
+            $('v-today').textContent = fmtN(data.today);
+            $('v-7').textContent = fmtN(data.d7);
+            $('v-all').textContent = fmtN(data.total);
+            setChange('v-today-ch', data.today, data.yesterday);
+            setChange('v-7-ch', data.d7, data.prev7);
+            $('v-msg').textContent = 'Page views. Your own visits are not counted. Percent compares with yesterday and with the 7 days before.';
+        }
+        $('visits-refresh').addEventListener('click', loadVisits);
 
         // ---------- Ask box messages (from the home page bottom bar) ----------
         async function loadQuestions() {
