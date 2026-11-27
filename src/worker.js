@@ -288,6 +288,10 @@ document.addEventListener('keydown',function(e){if(e.key==='Enter'){var t=e.targ
 ['contextmenu','dragstart','selectstart'].forEach(function(n){document.addEventListener(n,function(e){if(e.target.closest&&e.target.closest('[data-u]'))e.preventDefault()})});
 })();</script>`;
 
+// Visit counter for item pages: adds 1 to a daily page-view count. Nothing personal is stored.
+const VISIT_SCRIPT = `<script>(function(){try{if(localStorage.getItem('notrack')||navigator.webdriver)return;var k='v:'+location.pathname;if(sessionStorage.getItem(k))return;sessionStorage.setItem(k,'1')}catch(e){}
+fetch('${SUPABASE_URL}/rest/v1/rpc/track_visit',{method:'POST',headers:{apikey:'${SUPABASE_KEY}','Content-Type':'application/json'},body:JSON.stringify({p_path:location.pathname.replace(/\\/+$/,'')})}).catch(function(){})})();</script>`;
+
 function renderAppPage(item, origin, comments) {
   const canonical = `${origin}/app/${item.slug}`;
   const label = CATEGORY_LABELS[item.category] || 'Item';
@@ -343,7 +347,8 @@ ${links.length ? `<h2>Links</h2><ul class="links">${links.map((l) => `<li><a cla
 ${rows.length ? `<h2>Details</h2><dl>${rows.map(([k, v]) => `<dt>${esc(k)}</dt><dd>${esc(v)}</dd>`).join('')}</dl>` : ''}
 <p class="note">${SITE_NAME} links to the official source where possible. Check the permissions, license and terms of any app before you install it.</p>
 ${renderComments(item, comments)}
-${DL_SCRIPT}`;
+${DL_SCRIPT}
+${VISIT_SCRIPT}`;
 
   // A front-page tile that just points to another page of the site has no content of its own
   const robots = String(item.url || '').startsWith('/') ? 'noindex' : undefined;
